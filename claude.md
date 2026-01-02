@@ -128,11 +128,18 @@ A multi-user ComfyUI platform for a video generation workshop with 20 participan
 
 ### Repository
 - **Platform:** GitHub
-- **URL:** TBD (creating in this session)
+- **URL:** https://github.com/ahelme/comfy-multi
 - **Branch Strategy:**
   - `main` - production-ready code
   - `dev` - active development
   - Feature branches as needed
+
+### Git Configuration (IMPORTANT)
+**GitHub noreply email (keeps email private):**
+```bash
+git config user.email "ahelme@users.noreply.github.com"
+git config user.name "ahelme"
+```
 
 ### Commit Guidelines
 ```bash
