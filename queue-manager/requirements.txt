@@ -1,0 +1,26 @@
+# Queue Manager Dependencies
+# All using latest stable versions
+
+# Web framework
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+python-multipart==0.0.17
+
+# Redis client
+redis==5.2.0
+hiredis==3.0.0
+
+# Data validation
+pydantic==2.10.3
+pydantic-settings==2.6.1
+
+# WebSocket support
+websockets==14.1
+
+# HTTP client (for worker communication)
+httpx==0.28.1
+aiohttp==3.11.10
+
+# Utilities
+python-dotenv==1.0.1
+python-json-logger==3.2.1
