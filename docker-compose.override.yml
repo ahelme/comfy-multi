@@ -1,0 +1,349 @@
+# Docker Compose Override for User Frontends
+# This file generates services for all 20 user frontends
+# Usage: docker-compose up (automatically includes this file)
+
+version: '3.8'
+
+services:
+  # Generate user frontend services
+  # user001 through user020
+
+  user001:
+    build:
+      context: ./comfyui-frontend
+      dockerfile: Dockerfile
+    container_name: comfy-user001
+    environment:
+      - USER_ID=user001
+      - QUEUE_MANAGER_URL=http://queue-manager:3000
+    volumes:
+      - ${OUTPUTS_PATH}:/outputs
+      - ${INPUTS_PATH}:/inputs
+      - ${WORKFLOWS_PATH}:/workflows:ro
+      - ${MODELS_PATH}:/models:ro
+    networks:
+      - comfy-network
+    restart: unless-stopped
+
+  user002:
+    build:
+      context: ./comfyui-frontend
+      dockerfile: Dockerfile
+    container_name: comfy-user002
+    environment:
+      - USER_ID=user002
+      - QUEUE_MANAGER_URL=http://queue-manager:3000
+    volumes:
+      - ${OUTPUTS_PATH}:/outputs
+      - ${INPUTS_PATH}:/inputs
+      - ${WORKFLOWS_PATH}:/workflows:ro
+      - ${MODELS_PATH}:/models:ro
+    networks:
+      - comfy-network
+    restart: unless-stopped
+
+  user003:
+    build:
+      context: ./comfyui-frontend
+      dockerfile: Dockerfile
+    container_name: comfy-user003
+    environment:
+      - USER_ID=user003
+      - QUEUE_MANAGER_URL=http://queue-manager:3000
+    volumes:
+      - ${OUTPUTS_PATH}:/outputs
+      - ${INPUTS_PATH}:/inputs
+      - ${WORKFLOWS_PATH}:/workflows:ro
+      - ${MODELS_PATH}:/models:ro
+    networks:
+      - comfy-network
+    restart: unless-stopped
+
+  user004:
+    build:
+      context: ./comfyui-frontend
+      dockerfile: Dockerfile
+    container_name: comfy-user004
+    environment:
+      - USER_ID=user004
+      - QUEUE_MANAGER_URL=http://queue-manager:3000
+    volumes:
+      - ${OUTPUTS_PATH}:/outputs
+      - ${INPUTS_PATH}:/inputs
+      - ${WORKFLOWS_PATH}:/workflows:ro
+      - ${MODELS_PATH}:/models:ro
+    networks:
+      - comfy-network
+    restart: unless-stopped
+
+  user005:
+    build:
+      context: ./comfyui-frontend
+      dockerfile: Dockerfile
+    container_name: comfy-user005
+    environment:
+      - USER_ID=user005
+      - QUEUE_MANAGER_URL=http://queue-manager:3000
+    volumes:
+      - ${OUTPUTS_PATH}:/outputs
+      - ${INPUTS_PATH}:/inputs
+      - ${WORKFLOWS_PATH}:/workflows:ro
+      - ${MODELS_PATH}:/models:ro
+    networks:
+      - comfy-network
+    restart: unless-stopped
+
+  user006:
+    build:
+      context: ./comfyui-frontend
+      dockerfile: Dockerfile
+    container_name: comfy-user006
+    environment:
+      - USER_ID=user006
+      - QUEUE_MANAGER_URL=http://queue-manager:3000
+    volumes:
+      - ${OUTPUTS_PATH}:/outputs
+      - ${INPUTS_PATH}:/inputs
+      - ${WORKFLOWS_PATH}:/workflows:ro
+      - ${MODELS_PATH}:/models:ro
+    networks:
+      - comfy-network
+    restart: unless-stopped
+
+  user007:
+    build:
+      context: ./comfyui-frontend
+      dockerfile: Dockerfile
+    container_name: comfy-user007
+    environment:
+      - USER_ID=user007
+      - QUEUE_MANAGER_URL=http://queue-manager:3000
+    volumes:
+      - ${OUTPUTS_PATH}:/outputs
+      - ${INPUTS_PATH}:/inputs
+      - ${WORKFLOWS_PATH}:/workflows:ro
+      - ${MODELS_PATH}:/models:ro
+    networks:
+      - comfy-network
+    restart: unless-stopped
+
+  user008:
+    build:
+      context: ./comfyui-frontend
+      dockerfile: Dockerfile
+    container_name: comfy-user008
+    environment:
+      - USER_ID=user008
+      - QUEUE_MANAGER_URL=http://queue-manager:3000
+    volumes:
+      - ${OUTPUTS_PATH}:/outputs
+      - ${INPUTS_PATH}:/inputs
+      - ${WORKFLOWS_PATH}:/workflows:ro
+      - ${MODELS_PATH}:/models:ro
+    networks:
+      - comfy-network
+    restart: unless-stopped
+
+  user009:
+    build:
+      context: ./comfyui-frontend
+      dockerfile: Dockerfile
+    container_name: comfy-user009
+    environment:
+      - USER_ID=user009
+      - QUEUE_MANAGER_URL=http://queue-manager:3000
+    volumes:
+      - ${OUTPUTS_PATH}:/outputs
+      - ${INPUTS_PATH}:/inputs
+      - ${WORKFLOWS_PATH}:/workflows:ro
+      - ${MODELS_PATH}:/models:ro
+    networks:
+      - comfy-network
+    restart: unless-stopped
+
+  user010:
+    build:
+      context: ./comfyui-frontend
+      dockerfile: Dockerfile
+    container_name: comfy-user010
+    environment:
+      - USER_ID=user010
+      - QUEUE_MANAGER_URL=http://queue-manager:3000
+    volumes:
+      - ${OUTPUTS_PATH}:/outputs
+      - ${INPUTS_PATH}:/inputs
+      - ${WORKFLOWS_PATH}:/workflows:ro
+      - ${MODELS_PATH}:/models:ro
+    networks:
+      - comfy-network
+    restart: unless-stopped
+
+  user011:
+    build:
+      context: ./comfyui-frontend
+      dockerfile: Dockerfile
+    container_name: comfy-user011
+    environment:
+      - USER_ID=user011
+      - QUEUE_MANAGER_URL=http://queue-manager:3000
+    volumes:
+      - ${OUTPUTS_PATH}:/outputs
+      - ${INPUTS_PATH}:/inputs
+      - ${WORKFLOWS_PATH}:/workflows:ro
+      - ${MODELS_PATH}:/models:ro
+    networks:
+      - comfy-network
+    restart: unless-stopped
+
+  user012:
+    build:
+      context: ./comfyui-frontend
+      dockerfile: Dockerfile
+    container_name: comfy-user012
+    environment:
+      - USER_ID=user012
+      - QUEUE_MANAGER_URL=http://queue-manager:3000
+    volumes:
+      - ${OUTPUTS_PATH}:/outputs
+      - ${INPUTS_PATH}:/inputs
+      - ${WORKFLOWS_PATH}:/workflows:ro
+      - ${MODELS_PATH}:/models:ro
+    networks:
+      - comfy-network
+    restart: unless-stopped
+
+  user013:
+    build:
+      context: ./comfyui-frontend
+      dockerfile: Dockerfile
+    container_name: comfy-user013
+    environment:
+      - USER_ID=user013
+      - QUEUE_MANAGER_URL=http://queue-manager:3000
+    volumes:
+      - ${OUTPUTS_PATH}:/outputs
+      - ${INPUTS_PATH}:/inputs
+      - ${WORKFLOWS_PATH}:/workflows:ro
+      - ${MODELS_PATH}:/models:ro
+    networks:
+      - comfy-network
+    restart: unless-stopped
+
+  user014:
+    build:
+      context: ./comfyui-frontend
+      dockerfile: Dockerfile
+    container_name: comfy-user014
+    environment:
+      - USER_ID=user014
+      - QUEUE_MANAGER_URL=http://queue-manager:3000
+    volumes:
+      - ${OUTPUTS_PATH}:/outputs
+      - ${INPUTS_PATH}:/inputs
+      - ${WORKFLOWS_PATH}:/workflows:ro
+      - ${MODELS_PATH}:/models:ro
+    networks:
+      - comfy-network
+    restart: unless-stopped
+
+  user015:
+    build:
+      context: ./comfyui-frontend
+      dockerfile: Dockerfile
+    container_name: comfy-user015
+    environment:
+      - USER_ID=user015
+      - QUEUE_MANAGER_URL=http://queue-manager:3000
+    volumes:
+      - ${OUTPUTS_PATH}:/outputs
+      - ${INPUTS_PATH}:/inputs
+      - ${WORKFLOWS_PATH}:/workflows:ro
+      - ${MODELS_PATH}:/models:ro
+    networks:
+      - comfy-network
+    restart: unless-stopped
+
+  user016:
+    build:
+      context: ./comfyui-frontend
+      dockerfile: Dockerfile
+    container_name: comfy-user016
+    environment:
+      - USER_ID=user016
+      - QUEUE_MANAGER_URL=http://queue-manager:3000
+    volumes:
+      - ${OUTPUTS_PATH}:/outputs
+      - ${INPUTS_PATH}:/inputs
+      - ${WORKFLOWS_PATH}:/workflows:ro
+      - ${MODELS_PATH}:/models:ro
+    networks:
+      - comfy-network
+    restart: unless-stopped
+
+  user017:
+    build:
+      context: ./comfyui-frontend
+      dockerfile: Dockerfile
+    container_name: comfy-user017
+    environment:
+      - USER_ID=user017
+      - QUEUE_MANAGER_URL=http://queue-manager:3000
+    volumes:
+      - ${OUTPUTS_PATH}:/outputs
+      - ${INPUTS_PATH}:/inputs
+      - ${WORKFLOWS_PATH}:/workflows:ro
+      - ${MODELS_PATH}:/models:ro
+    networks:
+      - comfy-network
+    restart: unless-stopped
+
+  user018:
+    build:
+      context: ./comfyui-frontend
+      dockerfile: Dockerfile
+    container_name: comfy-user018
+    environment:
+      - USER_ID=user018
+      - QUEUE_MANAGER_URL=http://queue-manager:3000
+    volumes:
+      - ${OUTPUTS_PATH}:/outputs
+      - ${INPUTS_PATH}:/inputs
+      - ${WORKFLOWS_PATH}:/workflows:ro
+      - ${MODELS_PATH}:/models:ro
+    networks:
+      - comfy-network
+    restart: unless-stopped
+
+  user019:
+    build:
+      context: ./comfyui-frontend
+      dockerfile: Dockerfile
+    container_name: comfy-user019
+    environment:
+      - USER_ID=user019
+      - QUEUE_MANAGER_URL=http://queue-manager:3000
+    volumes:
+      - ${OUTPUTS_PATH}:/outputs
+      - ${INPUTS_PATH}:/inputs
+      - ${WORKFLOWS_PATH}:/workflows:ro
+      - ${MODELS_PATH}:/models:ro
+    networks:
+      - comfy-network
+    restart: unless-stopped
+
+  user020:
+    build:
+      context: ./comfyui-frontend
+      dockerfile: Dockerfile
+    container_name: comfy-user020
+    environment:
+      - USER_ID=user020
+      - QUEUE_MANAGER_URL=http://queue-manager:3000
+    volumes:
+      - ${OUTPUTS_PATH}:/outputs
+      - ${INPUTS_PATH}:/inputs
+      - ${WORKFLOWS_PATH}:/workflows:ro
+      - ${MODELS_PATH}:/models:ro
+    networks:
+      - comfy-network
+    restart: unless-stopped
