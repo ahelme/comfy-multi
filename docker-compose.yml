@@ -1,0 +1,165 @@
+version: '3.8'
+
+services:
+  # ============================================================================
+  # NGINX REVERSE PROXY (SSL Termination & Routing)
+  # ============================================================================
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: comfy-nginx
+    ports:
+      - "${NGINX_HTTP_PORT:-80}:80"
+      - "${NGINX_HTTPS_PORT:-443}:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/templates:/etc/nginx/templates:ro
+      - ${SSL_CERT_PATH}:/etc/nginx/ssl/cert.pem:ro
+      - ${SSL_KEY_PATH}:/etc/nginx/ssl/key.pem:ro
+      - ${OUTPUTS_PATH}:/var/www/outputs:ro
+    environment:
+      - DOMAIN=${DOMAIN}
+      - NUM_USERS=${NUM_USERS:-20}
+    depends_on:
+      - queue-manager
+      - admin
+    networks:
+      - comfy-network
+    restart: unless-stopped
+
+  # ============================================================================
+  # REDIS (Job Queue & Pub/Sub)
+  # ============================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: comfy-redis
+    command: redis-server --requirepass ${REDIS_PASSWORD} --appendonly ${REDIS_PERSISTENCE:-yes}
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    networks:
+      - comfy-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # ============================================================================
+  # QUEUE MANAGER (FastAPI Service)
+  # ============================================================================
+  queue-manager:
+    build:
+      context: ./queue-manager
+      dockerfile: Dockerfile
+    container_name: comfy-queue-manager
+    ports:
+      - "${QUEUE_MANAGER_PORT:-3000}:3000"
+    environment:
+      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - QUEUE_MODE=${QUEUE_MODE:-fifo}
+      - ENABLE_PRIORITY=${ENABLE_PRIORITY:-true}
+      - JOB_TIMEOUT=${JOB_TIMEOUT:-3600}
+      - MAX_QUEUE_DEPTH=${MAX_QUEUE_DEPTH:-100}
+      - LOG_LEVEL=${QUEUE_MANAGER_LOG_LEVEL:-INFO}
+      - INFERENCE_PROVIDER=${INFERENCE_PROVIDER:-local}
+      - NUM_WORKERS=${NUM_WORKERS:-1}
+    volumes:
+      - ${OUTPUTS_PATH}:/outputs
+      - ${INPUTS_PATH}:/inputs
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - comfy-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ============================================================================
+  # COMFYUI WORKERS (GPU Processing)
+  # ============================================================================
+  worker-1:
+    build:
+      context: ./comfyui-worker
+      dockerfile: Dockerfile
+    container_name: comfy-worker-1
+    environment:
+      - WORKER_ID=worker-1
+      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - QUEUE_MANAGER_URL=http://queue-manager:3000
+      - COMFYUI_PORT=${COMFYUI_PORT:-8188}
+      - INFERENCE_PROVIDER=${INFERENCE_PROVIDER:-local}
+      - GPU_DEVICE=${LOCAL_GPU_DEVICE:-0}
+    volumes:
+      - ${MODELS_PATH}/shared:/models:ro
+      - ${OUTPUTS_PATH}:/outputs
+      - ${INPUTS_PATH}:/inputs:ro
+      - ${WORKFLOWS_PATH}:/workflows:ro
+    depends_on:
+      - queue-manager
+    networks:
+      - comfy-network
+    restart: ${WORKER_RESTART_POLICY:-unless-stopped}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+        limits:
+          memory: ${WORKER_GPU_MEMORY_LIMIT:-70G}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8188/system_stats"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+
+  # ============================================================================
+  # ADMIN DASHBOARD
+  # ============================================================================
+  admin:
+    build:
+      context: ./admin
+      dockerfile: Dockerfile
+    container_name: comfy-admin
+    ports:
+      - "${ADMIN_PORT:-8080}:8080"
+    environment:
+      - QUEUE_MANAGER_URL=http://queue-manager:3000
+      - REDIS_HOST=${REDIS_HOST:-redis}
+      - REDIS_PORT=${REDIS_PORT:-6379}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+    depends_on:
+      - queue-manager
+    networks:
+      - comfy-network
+    restart: unless-stopped
+
+# ============================================================================
+# NETWORKS
+# ============================================================================
+networks:
+  comfy-network:
+    driver: bridge
+
+# ============================================================================
+# VOLUMES
+# ============================================================================
+volumes:
+  redis-data:
+    driver: local

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ComfyUI Workshop Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 48px;
+            max-width: 800px;
+            width: 100%;
+        }
+        h1 {
+            color: #2d3748;
+            margin-bottom: 16px;
+            font-size: 32px;
+        }
+        p {
+            color: #4a5568;
+            line-height: 1.6;
+            margin-bottom: 32px;
+        }
+        .links {
+            display: grid;
+            gap: 12px;
+        }
+        a {
+            display: block;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            padding: 16px 24px;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        a:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        .admin-link {
+            background: #48bb78;
+        }
+        .admin-link:hover {
+            background: #38a169;
+        }
+        .footer {
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid #e2e8f0;
+            color: #718096;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 ComfyUI Workshop Platform</h1>
+        <p>Welcome to the multi-user ComfyUI workshop platform. Select your workspace below to get started with AI-powered video generation.</p>
+
+        <div class="links" id="user-links">
+            <!-- User links will be generated here -->
+        </div>
+
+        <div class="footer">
+            <strong>Instructor Access:</strong><br>
+            <a href="/admin" class="admin-link">📊 Admin Dashboard</a>
+        </div>
+
+        <div class="footer">
+            <p><strong>Need help?</strong> Contact your workshop instructor.</p>
+            <p><small>Powered by ComfyUI • Built for creative AI workshops</small></p>
+        </div>
+    </div>
+
+    <script>
+        // Generate user links (default 20, can be configured)
+        const numUsers = 20;
+        const linksContainer = document.getElementById('user-links');
+
+        for (let i = 1; i <= numUsers; i++) {
+            const userId = `user${String(i).padStart(3, '0')}`;
+            const link = document.createElement('a');
+            link.href = `/${userId}/`;
+            link.textContent = `👤 ${userId.toUpperCase()} - Workspace ${i}`;
+            linksContainer.appendChild(link);
+        }
+    </script>
+</body>
+</html>
