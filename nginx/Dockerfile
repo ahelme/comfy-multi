@@ -1,4 +1,4 @@
-FROM nginx:1.25-alpine
+FROM nginx:1.28.1-alpine
 
 # Install envsubst for template processing
 RUN apk add --no-cache gettext

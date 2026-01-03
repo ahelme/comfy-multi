@@ -1,10 +1,12 @@
 """
 Data models for the Queue Manager
 """
+import re
+import json
 from datetime import datetime
 from enum import Enum
 from typing import Optional, Dict, Any, List
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator, ValidationError
 from uuid import uuid4
 
 
@@ -69,10 +71,59 @@ class Job(BaseModel):
 
 class JobSubmitRequest(BaseModel):
     """Request model for job submission"""
-    user_id: str = Field(..., description="User submitting the job")
+    user_id: str = Field(..., description="User submitting the job", min_length=1, max_length=100)
     workflow: Dict[str, Any] = Field(..., description="ComfyUI workflow JSON")
     priority: JobPriority = Field(default=JobPriority.NORMAL)
     metadata: Dict[str, Any] = Field(default_factory=dict)
+
+    @field_validator('user_id')
+    @classmethod
+    def validate_user_id(cls, v: str) -> str:
+        """Validate user_id format to prevent path traversal and command injection"""
+        # Only allow alphanumeric, underscore, and hyphen (no dots, slashes, etc.)
+        if not re.match(r'^[a-zA-Z0-9_-]{1,100}$', v):
+            raise ValueError(
+                "user_id must contain only alphanumeric characters, underscores, and hyphens (1-100 chars)"
+            )
+        # Prevent path traversal
+        if '..' in v or '/' in v or '\\' in v:
+            raise ValueError("user_id cannot contain path traversal sequences")
+        return v
+
+    @field_validator('workflow')
+    @classmethod
+    def validate_workflow(cls, v: Dict[str, Any]) -> Dict[str, Any]:
+        """Validate workflow size and structure"""
+        # Check workflow is not empty
+        if not v or not isinstance(v, dict):
+            raise ValueError("workflow must be a non-empty dictionary")
+
+        # Check workflow size (prevent DoS via large payloads)
+        workflow_json = json.dumps(v)
+        workflow_size = len(workflow_json)
+        max_size = 10 * 1024 * 1024  # 10MB limit
+
+        if workflow_size > max_size:
+            raise ValueError(f"workflow size ({workflow_size} bytes) exceeds maximum ({max_size} bytes)")
+
+        return v
+
+    @field_validator('metadata')
+    @classmethod
+    def validate_metadata(cls, v: Dict[str, Any]) -> Dict[str, Any]:
+        """Validate metadata size"""
+        if not v:
+            return v
+
+        # Limit metadata size to prevent abuse
+        metadata_json = json.dumps(v)
+        metadata_size = len(metadata_json)
+        max_size = 1024 * 1024  # 1MB limit
+
+        if metadata_size > max_size:
+            raise ValueError(f"metadata size ({metadata_size} bytes) exceeds maximum ({max_size} bytes)")
+
+        return v
 
 
 class JobResponse(BaseModel):

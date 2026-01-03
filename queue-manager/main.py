@@ -61,13 +61,17 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS middleware
+# CORS middleware - Security: Only allow specific origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=[
+        "https://comfy.ahelme.net",
+        "https://www.comfy.ahelme.net",
+        "http://localhost:8080",  # For local admin dashboard testing
+    ],
+    allow_credentials=False,  # Disabled for security - no cookies needed
+    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization"],
 )
 
 

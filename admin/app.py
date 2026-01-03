@@ -3,8 +3,10 @@ Admin Dashboard - Web UI for ComfyUI Queue Management
 Simple FastAPI app serving static HTML dashboard
 """
 import logging
+import secrets
 from datetime import datetime
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Depends, HTTPException, status
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -20,19 +22,38 @@ logger = logging.getLogger(__name__)
 
 # Configuration
 QUEUE_MANAGER_URL = os.getenv("QUEUE_MANAGER_URL", "http://queue-manager:3000")
+ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "admin")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "change_me_secure_password")
 
 app = FastAPI(
     title="ComfyUI Admin Dashboard",
     version="0.1.0"
 )
 
+# HTTP Basic Auth
+security = HTTPBasic()
+
+def verify_admin(credentials: HTTPBasicCredentials = Depends(security)):
+    """Verify admin credentials using HTTP Basic Auth"""
+    correct_username = secrets.compare_digest(credentials.username, ADMIN_USERNAME)
+    correct_password = secrets.compare_digest(credentials.password, ADMIN_PASSWORD)
+
+    if not (correct_username and correct_password):
+        logger.warning(f"Failed login attempt for user: {credentials.username}")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+    return credentials.username
+
 # HTTP client for queue manager
 http_client = httpx.AsyncClient(timeout=10.0)
 
 
 @app.get("/", response_class=HTMLResponse)
-async def dashboard(request: Request):
-    """Serve the main dashboard page"""
+async def dashboard(request: Request, username: str = Depends(verify_admin)):
+    """Serve the main dashboard page - Admin only"""
     html_content = """
 <!DOCTYPE html>
 <html lang="en">
@@ -541,8 +562,8 @@ async def dashboard(request: Request):
 
 
 @app.get("/api/proxy/queue/status")
-async def proxy_queue_status():
-    """Proxy endpoint for queue status"""
+async def proxy_queue_status(username: str = Depends(verify_admin)):
+    """Proxy endpoint for queue status - Admin only"""
     try:
         response = await http_client.get(f"{QUEUE_MANAGER_URL}/api/queue/status")
         return response.json()
