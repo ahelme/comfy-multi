@@ -409,6 +409,17 @@ async def dashboard(request: Request, username: str = Depends(verify_admin)):
         const QUEUE_MANAGER_URL = window.location.origin.replace(':8080', ':3000');
         let ws = null;
 
+        // Security: HTML escape function to prevent XSS attacks
+        function escapeHtml(unsafe) {
+            if (unsafe === null || unsafe === undefined) return '';
+            return String(unsafe)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
         async function fetchQueueStatus() {
             try {
                 const response = await fetch(`${QUEUE_MANAGER_URL}/api/queue/status`);
@@ -442,23 +453,24 @@ async def dashboard(request: Request, username: str = Depends(verify_admin)):
                     return;
                 }
 
+                // Security: Use escapeHtml to prevent XSS attacks
                 jobList.innerHTML = jobs.map(job => `
-                    <div class="job-item ${job.status}">
+                    <div class="job-item ${escapeHtml(job.status)}">
                         <div class="job-header">
-                            <div class="job-id">Job ${job.id.substring(0, 8)}</div>
-                            <div class="job-status ${job.status}">${job.status}</div>
+                            <div class="job-id">Job ${escapeHtml(job.id.substring(0, 8))}</div>
+                            <div class="job-status ${escapeHtml(job.status)}">${escapeHtml(job.status)}</div>
                         </div>
                         <div class="job-info">
-                            <span>👤 ${job.user_id}</span>
+                            <span>👤 ${escapeHtml(job.user_id)}</span>
                             <span>🕐 ${new Date(job.created_at).toLocaleTimeString()}</span>
-                            ${job.position_in_queue !== null ? `<span>📍 Position: ${job.position_in_queue + 1}</span>` : ''}
-                            ${job.worker_id ? `<span>🖥️ ${job.worker_id}</span>` : ''}
+                            ${job.position_in_queue !== null ? `<span>📍 Position: ${escapeHtml(job.position_in_queue + 1)}</span>` : ''}
+                            ${job.worker_id ? `<span>🖥️ ${escapeHtml(job.worker_id)}</span>` : ''}
                         </div>
-                        ${job.error ? `<div class="job-info" style="color: #dc3545; margin-top: 8px;">❌ ${job.error}</div>` : ''}
+                        ${job.error ? `<div class="job-info" style="color: #dc3545; margin-top: 8px;">❌ ${escapeHtml(job.error)}</div>` : ''}
                         ${job.status === 'pending' || job.status === 'running' ? `
                             <div class="job-actions">
-                                ${job.status === 'pending' ? `<button class="btn btn-priority" onclick="updatePriority('${job.id}')">⚡ Prioritize</button>` : ''}
-                                <button class="btn btn-cancel" onclick="cancelJob('${job.id}')">✕ Cancel</button>
+                                ${job.status === 'pending' ? `<button class="btn btn-priority" onclick="updatePriority('${escapeHtml(job.id)}')">⚡ Prioritize</button>` : ''}
+                                <button class="btn btn-cancel" onclick="cancelJob('${escapeHtml(job.id)}')">✕ Cancel</button>
                             </div>
                         ` : ''}
                     </div>
