@@ -1,15 +1,17 @@
 # Claude Project Guide
 
 **Project:** ComfyUI Multi-User Workshop Platform
-**Repository:** TBD (creating now)
+**Repository:** github.com/ahelme/comfy-multi
 **Last Updated:** 2026-01-02
 
 ---
 
-## ⚠️ TOP PRIORITIES
+## ⚠️ CRITICAL INSTRUCTIONS - YOU MUST:
 
-1. **USE LATEST STABLE LIBRARIES** - All dependencies must use latest stable versions (not beta/alpha)
+1. **USE LATEST STABLE LIBRARIES AS OF 02 JAN 2026** - All dependencies must use latest stable versions (not beta/alpha)
 2. **MODULAR INFERENCE PROVIDERS** - Include config file to easily switch inference providers (Verda, RunPod, Modal, local, etc.)
+3. **ALWAYS CHECK IF CODE HAS BEEN CREATED FIRST** - NEVER EVER REWRITE CODE IF IT HAS ALREADY BEEN WRITTEN AND WORK  WELL - always check!!!!!!! 
+    
 
 ## 🎯 Project Quick Reference
 
@@ -31,6 +33,11 @@ A multi-user ComfyUI platform for a video generation workshop with 20 participan
 - **Buffer:** 9 days
 
 ---
+## CURRENT ISSUES
+
+Priority 1 was not followed - outdated libraries were installed - we must create a Haiku Code Quality Expert subagent to review all files in codebase systematically for changes that must be made due to migration (and any other issues).
+
+YOU MUST RESPECT PRIORITY ONE!!!!
 
 ## 📁 Project Structure
 
