@@ -74,11 +74,22 @@ REDIS_PASSWORD=your_secure_password
 
 ## 📖 Documentation
 
-- [Product Requirements](./prd.md) - Full requirements and user stories
-- [Implementation Plan](./implementation.md) - Architecture and success criteria
-- [User Guide](./docs/user-guide.md) - For workshop participants
-- [Admin Guide](./docs/admin-guide.md) - For instructors
-- [Claude Guide](./claude.md) - Development context and standards
+### For Participants
+- **[Quick Start Guide](./docs/quick-start.md)** - Get creating in 5 minutes! 🚀
+- **[How-To Guides](./docs/how-to-guides.md)** - Step-by-step task guides
+- **[FAQ](./docs/faq.md)** - Common questions answered
+- [Complete User Guide](./docs/user-guide.md) - Full reference manual
+
+### For Instructors
+- **[Deployment Guide](./DEPLOYMENT.md)** - Deploy to comfy.ahelme.net
+- [Admin Guide](./docs/admin-guide.md) - Workshop management
+- [Workshop Runbook](./docs/workshop-runbook.md) - Day-of execution
+- [Troubleshooting Guide](./docs/troubleshooting.md) - Fix common issues
+
+### For Developers
+- [Implementation Plan](./implementation.md) - Architecture & success criteria
+- [Product Requirements](./prd.md) - Full requirements
+- [Claude Guide](./claude.md) - Development context
 
 ## 🛠️ Management Commands
 
