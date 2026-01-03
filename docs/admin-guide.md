@@ -4,8 +4,9 @@ This guide is for workshop instructors and administrators managing the ComfyUI M
 
 ## 🎯 Quick Reference
 
-**Admin Dashboard**: `https://your-domain/admin`
-**API Endpoint**: `https://your-domain/api/`
+**Health Check**: `https://comfy.ahelme.net/health` *(Real-time system status)*
+**Admin Dashboard**: `https://comfy.ahelme.net/admin`
+**API Endpoint**: `https://comfy.ahelme.net/api/`
 **SSH Access**: `ssh user@your-verda-instance`
 
 ## 🚀 Pre-Workshop Setup
@@ -97,7 +98,11 @@ cp /path/to/your/workflows/*.json .
 **System health check:**
 
 ```bash
+# Script-based check
 ./scripts/status.sh
+
+# Web-based check (beautiful dashboard!)
+# Open: https://comfy.ahelme.net/health
 ```
 
 **Test workflow:**

@@ -2,7 +2,9 @@
 
 **Project:** ComfyUI Multi-User Workshop Platform
 **Repository:** github.com/ahelme/comfy-multi
-**Last Updated:** 2026-01-02
+**Domain:** comfy.ahelme.net
+**Health Check:** https://comfy.ahelme.net/health
+**Last Updated:** 2026-01-03
 
 ---
 
@@ -25,6 +27,13 @@ A multi-user ComfyUI platform for a video generation workshop with 20 participan
 - HTTPS with existing ahelme.net SSL cert
 - Persistent user storage
 - Admin dashboard for instructor
+- Real-time health monitoring
+
+### Quick Links
+- **Production:** https://comfy.ahelme.net/
+- **Health Check:** https://comfy.ahelme.net/health
+- **Admin Dashboard:** https://comfy.ahelme.net/admin
+- **API:** https://comfy.ahelme.net/api/queue/status
 
 ### Timeline
 - **Start Date:** 2026-01-02

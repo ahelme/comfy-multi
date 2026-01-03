@@ -633,10 +633,11 @@ docker-compose restart nginx
 ## 📋 Quick Reference
 
 ### URLs
-- Landing: `https://workshop.ahelme.net/`
-- Admin: `https://workshop.ahelme.net/admin`
-- User workspaces: `https://workshop.ahelme.net/user001/` - `/user020/`
-- API: `https://workshop.ahelme.net/api/`
+- Landing: `https://comfy.ahelme.net/`
+- **Health Check**: `https://comfy.ahelme.net/health` ⬅️ **Check this first!**
+- Admin: `https://comfy.ahelme.net/admin`
+- User workspaces: `https://comfy.ahelme.net/user001/` - `/user020/`
+- API: `https://comfy.ahelme.net/api/`
 
 ### Key Commands
 ```bash

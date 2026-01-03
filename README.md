@@ -69,6 +69,7 @@ REDIS_PASSWORD=your_secure_password
 ### 4. Access
 
 - **Landing Page**: `https://your-domain/`
+- **Health Check**: `https://your-domain/health` *(Check system status)*
 - **Admin Dashboard**: `https://your-domain/admin`
 - **User Workspaces**: `https://your-domain/user001/` through `/user020/`
 
@@ -180,13 +181,19 @@ NUM_WORKERS=1  # Start with 1, scale to 2-3 based on usage
 
 ### Health Checks
 
+**Web Dashboard:**
+- Visit: `https://your-domain/health` (beautiful real-time dashboard)
+
+**Command Line:**
 ```bash
 # Check all services
 ./scripts/status.sh
 
-# Check specific endpoint
-curl https://your-domain/health
-curl http://localhost:3000/health
+# Simple ping
+curl https://your-domain/health/ping
+
+# API status JSON
+curl https://your-domain/api/queue/status
 ```
 
 ### Logs

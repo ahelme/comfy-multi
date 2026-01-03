@@ -162,11 +162,12 @@ Logs: docker-compose logs -f
 ./scripts/test.sh
 
 # Check specific endpoints
-curl https://comfy.ahelme.net/health
+curl https://comfy.ahelme.net/health/ping
 curl https://comfy.ahelme.net/api/queue/status
 ```
 
 **Open in browser:**
+- **Health Dashboard:** https://comfy.ahelme.net/health ✨ (check system status)
 - Landing page: https://comfy.ahelme.net/
 - Admin dashboard: https://comfy.ahelme.net/admin
 

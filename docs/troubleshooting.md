@@ -6,6 +6,13 @@ Common issues and solutions for the ComfyUI Multi-User Platform.
 
 ### Check System Status
 
+**Web Dashboard (Recommended):**
+```
+Visit: https://comfy.ahelme.net/health
+```
+Beautiful real-time dashboard with color-coded status!
+
+**Command Line:**
 ```bash
 ./scripts/status.sh
 ```
@@ -610,7 +617,17 @@ docker-compose logs -f --timestamps
 
 ### System Health
 
+**Web Dashboard (Best!):**
+```
+https://comfy.ahelme.net/health
+```
+Shows all services with real-time status updates!
+
+**Command Line:**
 ```bash
+# Quick ping
+curl https://comfy.ahelme.net/health/ping
+
 # Docker health
 docker-compose ps
 

@@ -95,6 +95,14 @@ else
     fail_test "Queue Manager health check" "Got HTTP $QUEUE_HEALTH"
 fi
 
+# Health dashboard
+HEALTH_PAGE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/health 2>/dev/null || echo "000")
+if [ "$HEALTH_PAGE" = "200" ]; then
+    pass_test "Health dashboard endpoint"
+else
+    warn "Health dashboard endpoint (Got HTTP $HEALTH_PAGE)"
+fi
+
 # Admin Dashboard health
 ADMIN_HEALTH=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:${ADMIN_PORT:-8080}/health)
 if [ "$ADMIN_HEALTH" = "200" ]; then
