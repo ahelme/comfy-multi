@@ -13,8 +13,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from models import (
-    Job, JobSubmitRequest, JobResponse, QueueStatus,
-    HealthCheck, JobStatus, QueueMode, JobPriority
+    Job, JobSubmitRequest, JobCompletionRequest, JobFailureRequest,
+    JobResponse, QueueStatus, HealthCheck, JobStatus, QueueMode, JobPriority
 )
 from config import settings
 from redis_client import RedisClient
@@ -223,13 +223,15 @@ async def list_jobs(
         if status:
             jobs = [j for j in jobs if j.status == status]
 
+        # Performance: Cache position lookup to avoid O(n²) - fetch once, not per job
+        pending_jobs = redis_client.get_pending_jobs()
+        job_positions = {j.id: i for i, j in enumerate(pending_jobs)}
+
         # Convert to response models
         responses = []
         for job in jobs[:limit]:
-            position = None
-            if job.status == JobStatus.PENDING:
-                pending_jobs = redis_client.get_pending_jobs()
-                position = next((i for i, j in enumerate(pending_jobs) if j.id == job.id), None)
+            # O(1) lookup instead of O(n) search
+            position = job_positions.get(job.id) if job.status == JobStatus.PENDING else None
 
             responses.append(JobResponse(
                 id=job.id,
@@ -355,34 +357,44 @@ async def get_next_job(worker_id: str):
 
 
 @app.post("/api/workers/complete-job")
-async def complete_job(job_id: str, result: dict):
-    """Mark job as completed"""
+async def complete_job(job_id: str, request: JobCompletionRequest):
+    """Mark job as completed - with validated result payload"""
     try:
-        if not redis_client.move_job_to_completed(job_id, result):
+        # Validation happens automatically via Pydantic model
+        if not redis_client.move_job_to_completed(job_id, request.result):
             raise HTTPException(status_code=404, detail="Job not found")
 
-        logger.info(f"Job {job_id} completed")
-        return {"status": "success"}
+        logger.info(f"Job {job_id} completed successfully")
+        return {"status": "success", "job_id": job_id}
 
     except HTTPException:
         raise
+    except ValueError as e:
+        # Pydantic validation error
+        logger.warning(f"Invalid result payload for job {job_id}: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         logger.error(f"Failed to complete job {job_id}: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post("/api/workers/fail-job")
-async def fail_job(job_id: str, error: str):
-    """Mark job as failed"""
+async def fail_job(job_id: str, request: JobFailureRequest):
+    """Mark job as failed - with validated error message"""
     try:
-        if not redis_client.move_job_to_failed(job_id, error):
+        # Validation happens automatically via Pydantic model
+        if not redis_client.move_job_to_failed(job_id, request.error):
             raise HTTPException(status_code=404, detail="Job not found")
 
-        logger.error(f"Job {job_id} failed: {error}")
-        return {"status": "success"}
+        logger.error(f"Job {job_id} failed: {request.error}")
+        return {"status": "success", "job_id": job_id}
 
     except HTTPException:
         raise
+    except ValueError as e:
+        # Pydantic validation error
+        logger.warning(f"Invalid error message for job {job_id}: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         logger.error(f"Failed to mark job {job_id} as failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -427,7 +439,24 @@ async def cleanup_task():
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request, exc):
-    logger.error(f"Unhandled exception: {exc}", exc_info=True)
+    # Log full traceback with request context for debugging
+    logger.exception(
+        f"Unhandled exception in {request.method} {request.url.path}: {exc}"
+    )
+
+    # Show detailed error in development mode for faster debugging
+    if settings.debug:
+        return JSONResponse(
+            status_code=500,
+            content={
+                "detail": str(exc),
+                "error_type": type(exc).__name__,
+                "path": request.url.path,
+                "method": request.method
+            }
+        )
+
+    # Generic response in production (security best practice)
     return JSONResponse(
         status_code=500,
         content={"detail": "Internal server error"}

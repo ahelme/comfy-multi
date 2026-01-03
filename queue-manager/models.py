@@ -126,6 +126,42 @@ class JobSubmitRequest(BaseModel):
         return v
 
 
+class JobCompletionRequest(BaseModel):
+    """Request model for job completion (worker endpoint)"""
+    result: Dict[str, Any] = Field(..., description="Execution result payload")
+
+    @field_validator('result')
+    @classmethod
+    def validate_result_size(cls, v: Dict[str, Any]) -> Dict[str, Any]:
+        """Limit result payload size to prevent Redis memory exhaustion"""
+        if not isinstance(v, dict):
+            raise ValueError("result must be a dictionary")
+
+        result_json = json.dumps(v)
+        result_size = len(result_json)
+        max_size = 50 * 1024 * 1024  # 50MB limit for output images/videos
+
+        if result_size > max_size:
+            raise ValueError(
+                f"result payload too large ({result_size} bytes) - exceeds {max_size} bytes"
+            )
+
+        return v
+
+
+class JobFailureRequest(BaseModel):
+    """Request model for job failure (worker endpoint)"""
+    error: str = Field(..., min_length=1, max_length=10000, description="Error message")
+
+    @field_validator('error')
+    @classmethod
+    def validate_error_message(cls, v: str) -> str:
+        """Ensure error message is reasonable"""
+        if not v or not v.strip():
+            raise ValueError("error message cannot be empty")
+        return v.strip()
+
+
 class JobResponse(BaseModel):
     """Response model for job queries"""
     id: str
