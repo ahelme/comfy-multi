@@ -1,16 +1,16 @@
 # ComfyUI Worker Dependencies
-# All using latest stable versions as of January 2, 2026
+# All using latest stable versions as of January 4, 2026
 
 # Redis client
 redis==7.1.0
-hiredis==3.0.0
+hiredis==3.3.0  # Updated Oct 14, 2025
 
 # HTTP client
 httpx==0.28.1
 requests==2.32.5
 
 # Environment
-python-dotenv==1.0.1
+python-dotenv==1.2.1  # Updated Oct 26, 2025
 
 # Logging
-python-json-logger==3.2.1
+python-json-logger==4.0.0  # Updated Oct 6, 2025
