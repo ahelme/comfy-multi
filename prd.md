@@ -1,9 +1,10 @@
-# Product Requirements Document: ComfyUI Workshop Infrastructure
+# Product Requirements Document: ComfyUI Workshop Multi-User Web App 
 
 ## Project Overview
 
 **Project Name:** ComfyUI Multi-User Workshop Platform
-**Created:** 2026-01-02
+**Doc Created:** 2026-01-02
+**Doc Updated:** 2026-01-03
 **Target Deployment:** Verda H100 Instance
 **Workshop Date:** ~2 weeks from now (mid-January 2026)
 
@@ -87,6 +88,7 @@ Running a video generation workshop with 20 participants requires isolated Comfy
 - Minimal cold-start time (<30s for worker)
 
 #### NFR3: Scalability
+- Split web app server and inference server
 - Support 20 concurrent users
 - Easy to scale workers (1→3 instances)
 - Configurable user count (10-30 users)
@@ -103,14 +105,14 @@ Running a video generation workshop with 20 participants requires isolated Comfy
 - Logs accessible for debugging
 
 #### NFR6: Deployment
-- Single command deployment to Verda
+- Single command deployment to Hetzner + Verda
 - Works on local dev environment (for testing)
 - Uses existing SSL cert (no Let's Encrypt needed)
 
 ## Technical Constraints
 
 ### Infrastructure
-- **Deployment Platform:** Verda H100 (80GB VRAM)
+- **Deployment Platform:** Hetzner VPS (THIS SERVER) + Verda H100 (80GB VRAM)
 - **Domain:** ahelme.net (existing SSL cert)
 - **GPU:** Single H100 shared across workers
 - **Container Platform:** Docker + Docker Compose
@@ -225,17 +227,9 @@ Running a video generation workshop with 20 participants requires isolated Comfy
 - Mobile app
 - Email notifications
 
-## Timeline
+## Implementation Phases
 
-**Total Duration:** 5 days
-**Buffer:** 9 days before workshop
-**Testing Window:** 3-4 days before workshop
-
-**Phase 1 (Day 1):** Core infrastructure (docker-compose, nginx, Redis)
-**Phase 2 (Day 2):** Queue manager + worker implementation
-**Phase 3 (Day 3):** User frontends + queue redirect
-**Phase 4 (Day 4):** Admin dashboard + management scripts
-**Phase 5 (Day 5):** Testing + Verda deployment + documentation
+MUST READ: implementation.md
 
 ## Risks & Mitigations
 
@@ -251,6 +245,7 @@ Running a video generation workshop with 20 participants requires isolated Comfy
 ## Dependencies
 
 **External Services:**
+- Hetzner VPS to serve web app and comfyui
 - Verda account with H100 access
 - GitHub for code hosting
 - Docker Hub for image hosting (optional)

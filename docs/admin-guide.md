@@ -1,5 +1,29 @@
 # ComfyUI Workshop - Admin Guide
 
+==THIS DOC IS WRONG! PLEASE CORRECT AS PER THE ACTUAL ARCHITECTURE:==
+
+  Correct Architecture:
+  ┌─────────────────────────────────────────┐
+  │ Hetzner VPS (comfy.ahelme.net)          │
+  │  - Nginx (HTTPS, SSL)                   │
+  │  - Redis (job queue)                    │
+  │  - Queue Manager (FastAPI)              │
+  │  - Admin Dashboard                      │
+  │  - User Frontends x20 (CPU only)        │
+  └──────────────┬──────────────────────────┘
+                 │ Network
+                 │ (Redis connection)
+  ┌──────────────▼──────────────────────────┐
+  │ Verda H100 (Remote GPU)                 │
+  │  - Worker 1 (ComfyUI + GPU)             │
+  │  - Worker 2 (ComfyUI + GPU) [optional]  │
+  │  - Worker 3 (ComfyUI + GPU) [optional]  │
+  │                                         │
+  │  REDIS_HOST=comfy.ahelme.net            │
+  └─────────────────────────────────────────┘
+
+==FIX FROM PRE-WORKSHOP SETUP ONWARDS==
+
 This guide is for workshop instructors and administrators managing the ComfyUI Multi-User Platform.
 
 ## 🎯 Quick Reference
@@ -7,7 +31,8 @@ This guide is for workshop instructors and administrators managing the ComfyUI M
 **Health Check**: `https://comfy.ahelme.net/health` *(Real-time system status)*
 **Admin Dashboard**: `https://comfy.ahelme.net/admin`
 **API Endpoint**: `https://comfy.ahelme.net/api/`
-**SSH Access**: `ssh user@your-verda-instance`
+**SSH Access - Verda GPU Cloud**: `ssh user@your-verda-instance`
+**SSH Access - Hetzner VPS App Server**: `ssh desk`
 
 ## 🚀 Pre-Workshop Setup
 

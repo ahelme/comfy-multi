@@ -1,10 +1,11 @@
 # Claude Project Guide
 
-**Project:** ComfyUI Multi-User Workshop Platform
+**Project:** ComfyUI Multi-User Workshop Platform - App on VPS, Inference via GPU Cloud
 **Repository:** github.com/ahelme/comfy-multi
 **Domain:** comfy.ahelme.net
 **Health Check:** https://comfy.ahelme.net/health
-**Last Updated:** 2026-01-04
+**Doc Created:** 2026-01-02
+**Doc Updated:** 2026-01-03
 
 ---
 
@@ -17,9 +18,10 @@
 ## 🎯 Project Quick Reference
 
 ### What are we building?
-A multi-user ComfyUI platform for a video generation workshop with 20 participants sharing a single Verda H100 GPU.
+A multi-user ComfyUI platform for a video generation workshop with 20 participants - app hosted separately on Hetzner VPS, with inference via a GPU Cloud provider e.g. on Verda sharing a single H100 GPU.
 
 ### Key Requirements
+- split architecture - two servers one for CPU, one for GPU
 - 20 isolated ComfyUI web interfaces ✅
 - Central job queue (FIFO/round-robin/priority) ✅
 - 1-3 GPU workers on H100 ✅
@@ -59,10 +61,10 @@ A multi-user ComfyUI platform for a video generation workshop with 20 participan
 
 ```
 /home/dev/projects/comfyui/
-├── prd.md                    # Product Requirements Document
-├── implementation.md         # Implementation plan + success criteria
+├── prd.md                   # Product Requirements Document
+├── implementation.md        # Implementation plan + success criteria
 ├── progress.md              # Session logs + metrics (UPDATE EACH RESPONSE)
-├── claude.md                # This file - project guide
+├── CLAUDE.md                # This file - project guide
 ├── README.md                # Public project documentation
 ├── .env                     # Local configuration (gitignored)
 ├── .env.example             # Template configuration
@@ -83,13 +85,15 @@ A multi-user ComfyUI platform for a video generation workshop with 20 participan
 ## 📚 Document Links
 
 ### Core Documents
-- **[PRD](./prd.md)** - Requirements, user stories, success criteria
-- **[Implementation Plan](./implementation.md)** - Architecture, phases, tasks
-- **[Progress Log](./progress.md)** - Session logs, metrics, standup notes
-- **[Plan File](../.claude/plans/merry-bouncing-candy.md)** - Original planning artifact
+- [README.md](./README.md) - Public code project overview and dev quickstart
+- [Progress Log](./progress.md) - Session logs, metrics, standup notes
+- [Implementation Plan](./implementation.md) - Architecture & success criteria
+- [Product Requirements](./prd.md) - Full requirements
+- [Claude Guide](./claude.md) - Development context
+- [Test Report](./TEST_REPORT.md) - Comprehensive test suite analysis
+- [Code Review](./CODE_REVIEW.md) - Quality review findings
 
-### Documentation (To Be Created)
-- **README.md** - Public project overview
+### User Documentation 
 - **docs/user-guide.md** - For workshop participants
 - **docs/admin-guide.md** - For instructor
 - **docs/troubleshooting.md** - Common issues
@@ -119,6 +123,7 @@ A multi-user ComfyUI platform for a video generation workshop with 20 participan
 ```
 
 ### Keep these metrics current in `progress.md`:
+- Commits List (inc. description)
 - Lines of Code
 - Files Created
 - Sprint Status (🔨 In Progress / ✅ Complete / ⏳ Not Started)
@@ -129,6 +134,28 @@ A multi-user ComfyUI platform for a video generation workshop with 20 participan
 ## 🏗️ Architecture Overview
 
 ```
+  Split Server Architecture:
+  ┌─────────────────────────────────────────┐
+  │ Hetzner VPS (comfy.ahelme.net)          │
+  │  - Nginx (HTTPS, SSL)                   │
+  │  - Redis (job queue)                    │
+  │  - Queue Manager (FastAPI)              │
+  │  - Admin Dashboard                      │
+  │  - User Frontends x20 (CPU only)        │
+  └──────────────┬──────────────────────────┘
+                 │ Network
+                 │ (Redis connection)
+  ┌──────────────▼──────────────────────────┐
+  │ Verda H100 (Remote GPU)                 │
+  │  - Worker 1 (ComfyUI + GPU)             │
+  │  - Worker 2 (ComfyUI + GPU) [optional]  │
+  │  - Worker 3 (ComfyUI + GPU) [optional]  │
+  │                                         │
+  │  REDIS_HOST=comfy.ahelme.net            │
+  └─────────────────────────────────────────┘
+
+Code Architecture:
+
 [User Browser]
     ↓ HTTPS
 [Nginx :443] → SSL termination, routing
@@ -197,7 +224,7 @@ test: add integration tests for worker
 
 ### Deployment
 - **Development:** Docker Compose locally
-- **Production:** Verda H100 instance
+- **Production:** Hetzner VPS + Verda H100 instance
 - **GPU:** NVIDIA H100 80GB (shared)
 
 ---
@@ -234,40 +261,11 @@ REDIS_PASSWORD=changeme
 
 ## 📋 Implementation Phases
 
-### Phase 1: Core Infrastructure (Day 1) - 🔨 IN PROGRESS
-- [x] Project structure
-- [x] Documentation setup
-- [ ] docker-compose.yml
-- [ ] Nginx configuration
-- [ ] Redis setup
-- [ ] Start/stop scripts
-
-### Phase 2: Queue Manager & Workers (Day 2)
-- [ ] FastAPI queue manager
-- [ ] Job scheduler (FIFO/round-robin/priority)
-- [ ] ComfyUI worker implementation
-- [ ] WebSocket broadcasting
-
-### Phase 3: User Frontends (Day 3)
-- [ ] Frontend containers (x20)
-- [ ] Queue redirect custom node
-- [ ] Pre-loaded workflows
-- [ ] User workspace isolation
-
-### Phase 4: Admin Dashboard & Scripts (Day 4)
-- [ ] Admin dashboard UI
-- [ ] Management scripts (setup, add-user, etc.)
-- [ ] Documentation (user guide, admin guide)
-
-### Phase 5: Deployment & Testing (Day 5)
-- [ ] Local end-to-end testing
-- [ ] Verda deployment script
-- [ ] Load testing (20 concurrent users)
-- [ ] Workshop runbook
-
----
+==MUST READ: implementation.md==
 
 ## ✅ Success Criteria
+
+==MUST READ: prd.md==
 
 ### MVP Requirements (Must Have)
 - ✅ 20 isolated user interfaces accessible
@@ -276,20 +274,6 @@ REDIS_PASSWORD=changeme
 - ✅ Outputs persist after restart
 - ✅ Admin can monitor queue
 - ✅ System stable for 8-hour workshop
-
-### Nice to Have (v1.1)
-- Round-robin scheduling
-- User model uploads
-- Queue position ETA
-- Resource usage metrics
-
-### Workshop Ready Definition
-1. All 20 URLs accessible and working
-2. Video generation workflow completes successfully
-3. Queue handles concurrent submissions
-4. Instructor can override priorities
-5. Documentation complete
-6. Tested on Verda H100
 
 ---
 
@@ -337,7 +321,7 @@ None yet.
 
 ### User Preferences
 - Appreciates thoroughness and detail
-- Values documentation
+- Values comprehensive and accurate documentation
 - Wants progress tracking (hence progress.md)
 - Likes structured approaches
 
@@ -349,6 +333,8 @@ Before each session ends:
 - [ ] Update progress.md with session log
 - [ ] Update implementation.md task checkboxes
 - [ ] Commit code changes to git
+- [ ] Update development docs with key changes made (IMPORTANT!) - CLAUDE.md, README.md, linked dev / project docs
+- [ ] Consider any changes made that are relevant to users - if any then scour docs for any details that need changing
 - [ ] Update metrics (files created, LOC, etc.)
 - [ ] Note any blockers or decisions
 - [ ] Clear next session goals

@@ -1,0 +1,77 @@
+ImportError while loading conftest '/home/dev/projects/comfyui/tests/conftest.py'.
+tests/conftest.py:20: in <module>
+    from config import Settings
+queue-manager/config.py:51: in <module>
+    settings = Settings()
+test_venv/lib/python3.12/site-packages/pydantic_settings/main.py:194: in __init__
+    super().__init__(
+E   pydantic_core._pydantic_core.ValidationError: 23 validation errors for Settings
+E   domain
+E     Extra inputs are not permitted [type=extra_forbidden, input_value='comfy.ahelme.net', input_type=str]
+E       For further information visit https://errors.pydantic.dev/2.12/v/extra_forbidden
+E   ssl_cert_path
+E     Extra inputs are not permitted [type=extra_forbidden, input_value='/etc/letsencrypt/live/ahelme.net/fullchain.pem', input_type=str]
+E       For further information visit https://errors.pydantic.dev/2.12/v/extra_forbidden
+E   ssl_key_path
+E     Extra inputs are not permitted [type=extra_forbidden, input_value='/etc/letsencrypt/live/ahelme.net/privkey.pem', input_type=str]
+E       For further information visit https://errors.pydantic.dev/2.12/v/extra_forbidden
+E   verda_instance_type
+E     Extra inputs are not permitted [type=extra_forbidden, input_value='h100-sxm5', input_type=str]
+E       For further information visit https://errors.pydantic.dev/2.12/v/extra_forbidden
+E   verda_region
+E     Extra inputs are not permitted [type=extra_forbidden, input_value='eu-central', input_type=str]
+E       For further information visit https://errors.pydantic.dev/2.12/v/extra_forbidden
+E   num_users
+E     Extra inputs are not permitted [type=extra_forbidden, input_value='20', input_type=str]
+E       For further information visit https://errors.pydantic.dev/2.12/v/extra_forbidden
+E   user_id_prefix
+E     Extra inputs are not permitted [type=extra_forbidden, input_value='user', input_type=str]
+E       For further information visit https://errors.pydantic.dev/2.12/v/extra_forbidden
+E   worker_gpu_memory_limit
+E     Extra inputs are not permitted [type=extra_forbidden, input_value='70G', input_type=str]
+E       For further information visit https://errors.pydantic.dev/2.12/v/extra_forbidden
+E   worker_restart_policy
+E     Extra inputs are not permitted [type=extra_forbidden, input_value='unless-stopped', input_type=str]
+E       For further information visit https://errors.pydantic.dev/2.12/v/extra_forbidden
+E   redis_persistence
+E     Extra inputs are not permitted [type=extra_forbidden, input_value='yes', input_type=str]
+E       For further information visit https://errors.pydantic.dev/2.12/v/extra_forbidden
+E   queue_manager_host
+E     Extra inputs are not permitted [type=extra_forbidden, input_value='queue-manager', input_type=str]
+E       For further information visit https://errors.pydantic.dev/2.12/v/extra_forbidden
+E   queue_manager_port
+E     Extra inputs are not permitted [type=extra_forbidden, input_value='3000', input_type=str]
+E       For further information visit https://errors.pydantic.dev/2.12/v/extra_forbidden
+E   queue_manager_log_level
+E     Extra inputs are not permitted [type=extra_forbidden, input_value='INFO', input_type=str]
+E       For further information visit https://errors.pydantic.dev/2.12/v/extra_forbidden
+E   admin_port
+E     Extra inputs are not permitted [type=extra_forbidden, input_value='8080', input_type=str]
+E       For further information visit https://errors.pydantic.dev/2.12/v/extra_forbidden
+E   admin_username
+E     Extra inputs are not permitted [type=extra_forbidden, input_value='admin', input_type=str]
+E       For further information visit https://errors.pydantic.dev/2.12/v/extra_forbidden
+E   admin_password
+E     Extra inputs are not permitted [type=extra_forbidden, input_value='change_me_secure_password', input_type=str]
+E       For further information visit https://errors.pydantic.dev/2.12/v/extra_forbidden
+E   nginx_http_port
+E     Extra inputs are not permitted [type=extra_forbidden, input_value='80', input_type=str]
+E       For further information visit https://errors.pydantic.dev/2.12/v/extra_forbidden
+E   nginx_https_port
+E     Extra inputs are not permitted [type=extra_forbidden, input_value='443', input_type=str]
+E       For further information visit https://errors.pydantic.dev/2.12/v/extra_forbidden
+E   models_path
+E     Extra inputs are not permitted [type=extra_forbidden, input_value='./data/models', input_type=str]
+E       For further information visit https://errors.pydantic.dev/2.12/v/extra_forbidden
+E   workflows_path
+E     Extra inputs are not permitted [type=extra_forbidden, input_value='./data/workflows', input_type=str]
+E       For further information visit https://errors.pydantic.dev/2.12/v/extra_forbidden
+E   comfyui_port
+E     Extra inputs are not permitted [type=extra_forbidden, input_value='8188', input_type=str]
+E       For further information visit https://errors.pydantic.dev/2.12/v/extra_forbidden
+E   comfyui_version
+E     Extra inputs are not permitted [type=extra_forbidden, input_value='latest', input_type=str]
+E       For further information visit https://errors.pydantic.dev/2.12/v/extra_forbidden
+E   verbose_logs
+E     Extra inputs are not permitted [type=extra_forbidden, input_value='false', input_type=str]
+E       For further information visit https://errors.pydantic.dev/2.12/v/extra_forbidden

@@ -1,14 +1,14 @@
 # ComfyUI Multi-User Workshop Platform
+**Doc Created:** 2026-01-02
+**Doc Updated:** 2026-01-03
 
-**Status:** ✅ Production Ready | 🚀 All 6 Sprints Complete | 🔒 Security Hardened | ⚡ Performance Optimized
+**Project Status:** Docs Fixing then Test Deployment Stage
 
-A scalable, multi-user ComfyUI platform designed for AI workshops with shared GPU resources. Supports 20 isolated user workspaces with centralized job queue management.
-
-**Quality Stats:** 36 issues reviewed across 2 comprehensive cycles | 25 resolved (69%) | All 10 HIGH priority fixed (100%)
+A scalable, multi-user ComfyUI platform with split app-server/inference-provider architecture, designed for AI workshops with shared GPU resources. Supports 20 isolated user workspaces with centralized job queue management.
 
 ## 🎯 Features
 
-- **20 Isolated User Workspaces** - Each participant gets their own ComfyUI interface
+- **Isolated User Workspaces** - Each participant gets their own ComfyUI interface
 - **Intelligent Queue System** - FIFO, round-robin, and priority-based job scheduling
 - **Shared GPU Workers** - Efficient resource sharing across multiple users
 - **HTTPS Enabled** - Secure access with SSL/TLS
@@ -20,17 +20,26 @@ A scalable, multi-user ComfyUI platform designed for AI workshops with shared GP
 ## 🏗️ Architecture
 
 ```
-[User Browsers] → [Nginx Reverse Proxy]
-                       ↓
-        ┌──────────────┼──────────────┐
-        ↓              ↓              ↓
-   [Queue Manager] [Admin] [User Frontends x20]
-        ↓
-   [Redis Queue]
-        ↓
-   [ComfyUI Workers (GPU)]
-        ↓
-   [Shared Storage]
+  Split Server Architecture:
+  ┌─────────────────────────────────────────┐
+  │ Web App                                 │
+  │  - Nginx (HTTPS, SSL)                   │
+  │  - Redis (job queue)                    │
+  │  - Queue Manager (FastAPI)              │
+  │  - Admin Dashboard                      │
+  │  - User Frontends x20 (CPU only)        │
+  └──────────────┬──────────────────────────┘
+                 │ Network
+                 │ (Redis connection)
+  ┌──────────────▼──────────────────────────┐
+  │ Remote GPU                              │
+  │  - Worker 1 (ComfyUI + GPU)             │
+  │  - Worker 2 (ComfyUI + GPU) [optional]  │
+  │  - Worker 3 (ComfyUI + GPU) [optional]  │
+  │                                         │
+  │  REDIS_HOST=comfy.xxxxxx.net            │
+  └─────────────────────────────────────────┘
+
 ```
 
 ## 📋 Prerequisites
@@ -92,6 +101,8 @@ REDIS_PASSWORD=your_secure_password
 - [Troubleshooting Guide](./docs/troubleshooting.md) - Fix common issues
 
 ### For Developers
+- [README.md](./README.md) - Public code project overview and dev quickstart
+- [Progress Log](./progress.md) - Session logs, metrics, standup notes
 - [Implementation Plan](./implementation.md) - Architecture & success criteria
 - [Product Requirements](./prd.md) - Full requirements
 - [Claude Guide](./claude.md) - Development context
