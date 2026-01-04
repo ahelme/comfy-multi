@@ -1,7 +1,7 @@
 """
 Configuration management for Queue Manager
 """
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import Optional
 
 
@@ -42,9 +42,11 @@ class Settings(BaseSettings):
     app_name: str = "ComfyUI Queue Manager"
     app_version: str = "0.1.0"
 
-    class Config:
-        env_file = ".env"
-        case_sensitive = False
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        case_sensitive=False,
+        extra="ignore"  # Allow extra fields in .env without validation errors
+    )
 
 
 # Singleton instance

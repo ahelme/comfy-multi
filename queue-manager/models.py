@@ -6,7 +6,7 @@ import json
 from datetime import datetime, timezone
 from enum import Enum
 from typing import Optional, Dict, Any, List
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 from uuid import uuid4
 
 
@@ -62,10 +62,18 @@ class Job(BaseModel):
     # Metadata
     metadata: Dict[str, Any] = Field(default_factory=dict)
 
-    class Config:
-        json_encoders = {
-            datetime: lambda v: v.isoformat()
+    # Pydantic 2.0: datetime fields automatically serialize to ISO format
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "id": "550e8400-e29b-41d4-a716-446655440000",
+                "user_id": "user001",
+                "workflow": {"nodes": []},
+                "status": "pending",
+                "priority": 2
+            }
         }
+    )
 
 
 class JobSubmitRequest(BaseModel):
