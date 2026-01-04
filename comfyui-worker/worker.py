@@ -14,11 +14,35 @@ import httpx
 from redis import Redis
 from redis.exceptions import RedisError
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+# Configure structured logging with JSON support
+LOG_FORMAT = os.getenv("LOG_FORMAT", "text")  # "text" or "json"
+
+if LOG_FORMAT == "json":
+    try:
+        from pythonjsonlogger import jsonlogger
+
+        logHandler = logging.StreamHandler()
+        formatter = jsonlogger.JsonFormatter(
+            '%(asctime)s %(name)s %(levelname)s %(message)s',
+            timestamp=True
+        )
+        logHandler.setFormatter(formatter)
+        logging.basicConfig(
+            level=logging.INFO,
+            handlers=[logHandler]
+        )
+    except ImportError:
+        # Fall back to text format if pythonjsonlogger not installed
+        logging.basicConfig(
+            level=logging.INFO,
+            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        )
+else:
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+
 logger = logging.getLogger(__name__)
 
 # Configuration from environment
@@ -30,6 +54,10 @@ QUEUE_MANAGER_URL = os.getenv("QUEUE_MANAGER_URL", "http://queue-manager:3000")
 COMFYUI_URL = os.getenv("COMFYUI_URL", "http://localhost:8188")
 POLL_INTERVAL = int(os.getenv("WORKER_POLL_INTERVAL", "2"))
 OUTPUTS_PATH = os.getenv("OUTPUTS_PATH", "/outputs")
+
+# Timeout configurations (configurable via environment)
+COMFYUI_TIMEOUT = int(os.getenv("COMFYUI_TIMEOUT", "300"))  # 5 minutes for ComfyUI requests
+HTTP_CLIENT_TIMEOUT = int(os.getenv("HTTP_CLIENT_TIMEOUT", "30"))  # 30 seconds for queue manager
 
 # Graceful shutdown flag
 shutdown_requested = False
@@ -47,8 +75,8 @@ class ComfyUIClient:
 
     def __init__(self, base_url: str = COMFYUI_URL):
         self.base_url = base_url.rstrip('/')
-        self.client = httpx.Client(timeout=300.0)  # 5 minute timeout
-        logger.info(f"ComfyUI client initialized for {base_url}")
+        self.client = httpx.Client(timeout=float(COMFYUI_TIMEOUT))
+        logger.info(f"ComfyUI client initialized for {base_url} (timeout={COMFYUI_TIMEOUT}s)")
 
     def queue_prompt(self, workflow: Dict[str, Any]) -> Optional[str]:
         """Submit workflow to ComfyUI"""
@@ -119,12 +147,12 @@ class Worker:
         self.worker_id = WORKER_ID
         self.queue_manager_url = QUEUE_MANAGER_URL
         self.comfyui = ComfyUIClient()
-        self.http_client = httpx.Client(timeout=30.0)
+        self.http_client = httpx.Client(timeout=float(HTTP_CLIENT_TIMEOUT))
         self.jobs_completed = 0
         self.jobs_failed = 0
         self.start_time = datetime.now(timezone.utc)
 
-        logger.info(f"Worker {self.worker_id} initialized")
+        logger.info(f"Worker {self.worker_id} initialized (http_timeout={HTTP_CLIENT_TIMEOUT}s)")
 
     def get_next_job(self) -> Optional[Dict[str, Any]]:
         """Get next job from queue manager"""

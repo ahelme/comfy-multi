@@ -64,38 +64,48 @@ class WebSocketManager:
         retry_count = 0
         base_delay = 2  # seconds
 
-        while retry_count < max_retries:
-            try:
-                self.pubsub = self.redis_client.subscribe_to_updates()
-                logger.info("Started Redis pub/sub listener")
-                retry_count = 0  # Reset on successful connection
+        try:
+            while retry_count < max_retries:
+                try:
+                    self.pubsub = self.redis_client.subscribe_to_updates()
+                    logger.info("Started Redis pub/sub listener")
+                    retry_count = 0  # Reset on successful connection
 
-                for message in self.pubsub.listen():
-                    if message['type'] == 'message':
-                        try:
-                            data = json.loads(message['data'])
-                            await self.broadcast(data)
-                        except json.JSONDecodeError as e:
-                            logger.error(f"Failed to decode Redis message: {e}")
+                    for message in self.pubsub.listen():
+                        if message['type'] == 'message':
+                            try:
+                                data = json.loads(message['data'])
+                                await self.broadcast(data)
+                            except json.JSONDecodeError as e:
+                                logger.error(f"Failed to decode Redis message: {e}")
 
-            except Exception as e:
-                retry_count += 1
-                delay = base_delay ** retry_count  # Exponential backoff: 2s, 4s, 8s, 16s, 32s
+                except Exception as e:
+                    retry_count += 1
+                    delay = base_delay ** retry_count  # Exponential backoff: 2s, 4s, 8s, 16s, 32s
 
-                if retry_count >= max_retries:
-                    logger.error(
-                        f"Redis listener failed after {max_retries} attempts. "
-                        f"Real-time updates disabled. Error: {e}"
+                    if retry_count >= max_retries:
+                        logger.error(
+                            f"Redis listener failed after {max_retries} attempts. "
+                            f"Real-time updates disabled. Error: {e}"
+                        )
+                        self.listener_task = None
+                        break
+
+                    logger.warning(
+                        f"Redis listener error (attempt {retry_count}/{max_retries}): {e}. "
+                        f"Retrying in {delay}s..."
                     )
-                    self.listener_task = None
-                    break
+                    await asyncio.sleep(delay)
 
-                logger.warning(
-                    f"Redis listener error (attempt {retry_count}/{max_retries}): {e}. "
-                    f"Retrying in {delay}s..."
-                )
-                await asyncio.sleep(delay)
+            # If we exit the loop, listener has failed
+            if retry_count >= max_retries:
+                logger.critical("WebSocket real-time updates permanently disabled due to Redis connection failure")
 
-        # If we exit the loop, listener has failed
-        if retry_count >= max_retries:
-            logger.critical("WebSocket real-time updates permanently disabled due to Redis connection failure")
+        finally:
+            # Resource cleanup: Close pubsub connection
+            if self.pubsub:
+                try:
+                    self.pubsub.close()
+                    logger.info("Redis pub/sub connection closed")
+                except Exception as e:
+                    logger.error(f"Error closing pubsub connection: {e}")

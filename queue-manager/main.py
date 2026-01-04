@@ -168,8 +168,8 @@ async def submit_job(request: JobSubmitRequest):
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Failed to submit job: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Failed to submit job: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @app.get("/api/jobs/{job_id}", response_model=JobResponse)
@@ -203,8 +203,8 @@ async def get_job(job_id: str):
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Failed to get job {job_id}: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Failed to get job {job_id}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @app.get("/api/jobs", response_model=List[JobResponse])
@@ -253,8 +253,8 @@ async def list_jobs(
         return responses
 
     except Exception as e:
-        logger.error(f"Failed to list jobs: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Failed to list jobs: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @app.delete("/api/jobs/{job_id}", status_code=204)
@@ -285,8 +285,8 @@ async def cancel_job(job_id: str):
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Failed to cancel job {job_id}: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Failed to cancel job {job_id}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @app.patch("/api/jobs/{job_id}/priority")
@@ -318,8 +318,8 @@ async def update_job_priority(job_id: str, priority: JobPriority):
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Failed to update job {job_id} priority: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Failed to update job {job_id} priority: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 # ============================================================================
@@ -355,8 +355,8 @@ async def get_next_job(worker_id: str):
         }
 
     except Exception as e:
-        logger.error(f"Failed to get next job for worker {worker_id}: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Failed to get next job for worker {worker_id}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @app.post("/api/workers/complete-job")
@@ -377,8 +377,8 @@ async def complete_job(job_id: str, request: JobCompletionRequest):
         logger.warning(f"Invalid result payload for job {job_id}: {e}")
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        logger.error(f"Failed to complete job {job_id}: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Failed to complete job {job_id}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @app.post("/api/workers/fail-job")
@@ -399,8 +399,8 @@ async def fail_job(job_id: str, request: JobFailureRequest):
         logger.warning(f"Invalid error message for job {job_id}: {e}")
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        logger.error(f"Failed to mark job {job_id} as failed: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Failed to mark job {job_id} as failed: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 # ============================================================================
