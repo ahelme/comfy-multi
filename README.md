@@ -95,6 +95,33 @@ REDIS_PASSWORD=your_secure_password
 - [Implementation Plan](./implementation.md) - Architecture & success criteria
 - [Product Requirements](./prd.md) - Full requirements
 - [Claude Guide](./claude.md) - Development context
+- [Test Report](./TEST_REPORT.md) - Comprehensive test suite analysis
+- [Code Review](./CODE_REVIEW.md) - Quality review findings
+
+## 🧪 Testing
+
+The platform includes a comprehensive test suite with 161 tests:
+
+```bash
+# Install test dependencies
+pip install -r tests/requirements.txt
+
+# Run all tests
+pytest tests/ -v
+
+# Run with coverage
+pytest tests/ --cov=queue-manager --cov=comfyui-worker --cov-report=term-missing
+
+# Run specific test module
+pytest tests/test_models.py -v
+```
+
+**Test Coverage:**
+- 42 model validation tests (security, size limits, path traversal)
+- 32 worker functionality tests (job lifecycle, error handling)
+- 31 API endpoint tests (FastAPI routes, error responses)
+- 33 Redis operation tests (CRUD, queues, atomic operations)
+- 23 WebSocket tests (connections, broadcasting, reconnection)
 
 ## 🛠️ Management Commands
 
