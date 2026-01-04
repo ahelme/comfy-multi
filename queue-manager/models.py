@@ -6,8 +6,15 @@ import json
 from datetime import datetime
 from enum import Enum
 from typing import Optional, Dict, Any, List
-from pydantic import BaseModel, Field, field_validator, ValidationError
+from pydantic import BaseModel, Field, field_validator
 from uuid import uuid4
+
+
+# Constants for payload size limits
+MAX_WORKFLOW_SIZE_BYTES = 10 * 1024 * 1024  # 10MB
+MAX_METADATA_SIZE_BYTES = 1 * 1024 * 1024   # 1MB
+MAX_RESULT_SIZE_BYTES = 50 * 1024 * 1024     # 50MB
+MAX_ERROR_MESSAGE_LENGTH = 10000
 
 
 class JobStatus(str, Enum):
@@ -24,14 +31,6 @@ class QueueMode(str, Enum):
     FIFO = "fifo"  # First In, First Out
     ROUND_ROBIN = "round_robin"  # Fair distribution per user
     PRIORITY = "priority"  # Priority-based (with fallback to FIFO)
-
-
-class InferenceProvider(str, Enum):
-    """Supported inference providers"""
-    LOCAL = "local"
-    VERDA = "verda"
-    RUNPOD = "runpod"
-    MODAL = "modal"
 
 
 class JobPriority(int, Enum):
@@ -101,10 +100,11 @@ class JobSubmitRequest(BaseModel):
         # Check workflow size (prevent DoS via large payloads)
         workflow_json = json.dumps(v)
         workflow_size = len(workflow_json)
-        max_size = 10 * 1024 * 1024  # 10MB limit
 
-        if workflow_size > max_size:
-            raise ValueError(f"workflow size ({workflow_size} bytes) exceeds maximum ({max_size} bytes)")
+        if workflow_size > MAX_WORKFLOW_SIZE_BYTES:
+            raise ValueError(
+                f"workflow size ({workflow_size} bytes) exceeds maximum ({MAX_WORKFLOW_SIZE_BYTES} bytes)"
+            )
 
         return v
 
@@ -118,10 +118,11 @@ class JobSubmitRequest(BaseModel):
         # Limit metadata size to prevent abuse
         metadata_json = json.dumps(v)
         metadata_size = len(metadata_json)
-        max_size = 1024 * 1024  # 1MB limit
 
-        if metadata_size > max_size:
-            raise ValueError(f"metadata size ({metadata_size} bytes) exceeds maximum ({max_size} bytes)")
+        if metadata_size > MAX_METADATA_SIZE_BYTES:
+            raise ValueError(
+                f"metadata size ({metadata_size} bytes) exceeds maximum ({MAX_METADATA_SIZE_BYTES} bytes)"
+            )
 
         return v
 
@@ -139,11 +140,10 @@ class JobCompletionRequest(BaseModel):
 
         result_json = json.dumps(v)
         result_size = len(result_json)
-        max_size = 50 * 1024 * 1024  # 50MB limit for output images/videos
 
-        if result_size > max_size:
+        if result_size > MAX_RESULT_SIZE_BYTES:
             raise ValueError(
-                f"result payload too large ({result_size} bytes) - exceeds {max_size} bytes"
+                f"result payload too large ({result_size} bytes) - exceeds {MAX_RESULT_SIZE_BYTES} bytes"
             )
 
         return v
@@ -151,7 +151,12 @@ class JobCompletionRequest(BaseModel):
 
 class JobFailureRequest(BaseModel):
     """Request model for job failure (worker endpoint)"""
-    error: str = Field(..., min_length=1, max_length=10000, description="Error message")
+    error: str = Field(
+        ...,
+        min_length=1,
+        max_length=MAX_ERROR_MESSAGE_LENGTH,
+        description="Error message"
+    )
 
     @field_validator('error')
     @classmethod

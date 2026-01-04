@@ -96,17 +96,20 @@ async def health_check():
 
 @app.get("/api/queue/status", response_model=QueueStatus)
 async def get_queue_status():
-    """Get overall queue status"""
+    """Get overall queue status - optimized with batched Redis calls"""
     try:
+        # Performance: Get all queue stats in single pipeline call (4→1 Redis commands)
+        stats = redis_client.get_all_queue_stats()
+
         return QueueStatus(
             mode=QueueMode(settings.queue_mode),
-            pending_jobs=redis_client.get_queue_depth(redis_client.QUEUE_PENDING),
-            running_jobs=redis_client.get_queue_depth(redis_client.QUEUE_RUNNING),
-            completed_jobs=redis_client.get_queue_depth(redis_client.QUEUE_COMPLETED),
-            failed_jobs=redis_client.get_queue_depth(redis_client.QUEUE_FAILED),
+            pending_jobs=stats["pending"],
+            running_jobs=stats["running"],
+            completed_jobs=stats["completed"],
+            failed_jobs=stats["failed"],
             total_workers=settings.num_workers,
             active_workers=0,  # TODO: Implement worker tracking
-            queue_depth=redis_client.get_queue_depth(redis_client.QUEUE_PENDING)
+            queue_depth=stats["pending"]
         )
     except Exception as e:
         logger.error(f"Failed to get queue status: {e}")

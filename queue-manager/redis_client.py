@@ -29,18 +29,23 @@ class RedisClient:
     PUBSUB_CHANNEL = "queue:updates"
 
     def __init__(self):
-        """Initialize Redis connection"""
+        """Initialize Redis connection with timeouts and connection pooling"""
         self.redis = Redis(
             host=settings.redis_host,
             port=settings.redis_port,
             password=settings.redis_password,
             db=settings.redis_db,
             decode_responses=True,
-            socket_connect_timeout=5,
+            socket_connect_timeout=5,  # 5s to establish connection
+            socket_read_timeout=10,  # 10s max for any Redis command
             socket_keepalive=True,
-            health_check_interval=30
+            health_check_interval=30,
+            max_connections=50  # Connection pool limit
         )
-        logger.info(f"Connected to Redis at {settings.redis_host}:{settings.redis_port}")
+        logger.info(
+            f"Connected to Redis at {settings.redis_host}:{settings.redis_port} "
+            f"(read_timeout=10s, max_connections=50)"
+        )
 
     def ping(self) -> bool:
         """Check Redis connection"""
@@ -289,6 +294,29 @@ class RedisClient:
         except RedisError as e:
             logger.error(f"Failed to get queue depth: {e}")
             return 0
+
+    def get_all_queue_stats(self) -> Dict[str, int]:
+        """
+        Get all queue statistics in a single Redis pipeline call.
+        Performance: 4 commands → 1 round-trip (75% reduction in network overhead)
+        """
+        try:
+            pipe = self.redis.pipeline()
+            pipe.zcard(self.QUEUE_PENDING)
+            pipe.zcard(self.QUEUE_RUNNING)
+            pipe.zcard(self.QUEUE_COMPLETED)
+            pipe.zcard(self.QUEUE_FAILED)
+            results = pipe.execute()
+
+            return {
+                "pending": results[0],
+                "running": results[1],
+                "completed": results[2],
+                "failed": results[3],
+            }
+        except RedisError as e:
+            logger.error(f"Failed to get queue stats: {e}")
+            return {"pending": 0, "running": 0, "completed": 0, "failed": 0}
 
     def get_pending_jobs(self, limit: int = 100) -> List[Job]:
         """Get list of pending jobs"""
