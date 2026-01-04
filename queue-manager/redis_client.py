@@ -6,7 +6,7 @@ import logging
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 from redis import Redis
-from redis.exceptions import RedisError
+from redis.exceptions import RedisError, WatchError
 from models import Job, JobStatus, QueueMode
 from config import settings
 
@@ -148,21 +148,55 @@ class RedisClient:
     # ========================================================================
 
     def get_next_job(self, queue_mode: QueueMode = QueueMode.FIFO) -> Optional[Job]:
-        """Get next job from queue based on mode"""
+        """
+        Get next job from queue based on mode.
+        Uses atomic operations to prevent race conditions between workers.
+        """
         try:
             if queue_mode == QueueMode.FIFO or queue_mode == QueueMode.PRIORITY:
-                # Get job with lowest score (highest priority / earliest)
+                # Atomic pop - zpopmin is atomic by design
                 result = self.redis.zpopmin(self.QUEUE_PENDING)
                 if result:
                     job_id = result[0][0]
                     return self.get_job(job_id)
 
             elif queue_mode == QueueMode.ROUND_ROBIN:
-                # Get user with fewest completed jobs
-                job_id = self._get_round_robin_job()
-                if job_id:
-                    self.redis.zrem(self.QUEUE_PENDING, job_id)
-                    return self.get_job(job_id)
+                # Use optimistic locking to prevent race conditions
+                max_attempts = 5
+                for attempt in range(max_attempts):
+                    try:
+                        # Get candidate job ID
+                        job_id = self._get_round_robin_job()
+                        if not job_id:
+                            return None
+
+                        # Use WATCH/MULTI/EXEC for atomic removal
+                        pipe = self.redis.pipeline()
+                        pipe.watch(self.QUEUE_PENDING)
+
+                        # Check if job still exists in queue
+                        score = pipe.zscore(self.QUEUE_PENDING, job_id)
+                        if score is None:
+                            # Job was already taken by another worker, retry
+                            pipe.unwatch()
+                            continue
+
+                        # Atomic removal
+                        pipe.multi()
+                        pipe.zrem(self.QUEUE_PENDING, job_id)
+                        pipe.execute()
+
+                        # Successfully removed, return the job
+                        return self.get_job(job_id)
+
+                    except WatchError:
+                        # Another worker modified the queue, retry
+                        logger.debug(f"Round-robin race detected (attempt {attempt + 1}/{max_attempts}), retrying...")
+                        continue
+
+                # Max attempts reached
+                logger.warning(f"Failed to get round-robin job after {max_attempts} attempts (high contention)")
+                return None
 
             return None
 
