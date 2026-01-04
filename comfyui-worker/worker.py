@@ -9,7 +9,7 @@ import json
 import logging
 import signal
 from typing import Optional, Dict, Any
-from datetime import datetime
+from datetime import datetime, timezone
 import httpx
 from redis import Redis
 from redis.exceptions import RedisError
@@ -122,7 +122,7 @@ class Worker:
         self.http_client = httpx.Client(timeout=30.0)
         self.jobs_completed = 0
         self.jobs_failed = 0
-        self.start_time = datetime.utcnow()
+        self.start_time = datetime.now(timezone.utc)
 
         logger.info(f"Worker {self.worker_id} initialized")
 
@@ -194,7 +194,7 @@ class Worker:
             os.makedirs(user_output_dir, exist_ok=True)
 
             result["output_path"] = user_output_dir
-            result["timestamp"] = datetime.utcnow().isoformat()
+            result["timestamp"] = datetime.now(timezone.utc).isoformat()
 
             # Mark job as completed
             self.complete_job(job_id, result)
@@ -253,7 +253,7 @@ class Worker:
         logger.info(f"Total jobs completed: {self.jobs_completed}")
         logger.info(f"Total jobs failed: {self.jobs_failed}")
 
-        uptime = (datetime.utcnow() - self.start_time).total_seconds()
+        uptime = (datetime.now(timezone.utc) - self.start_time).total_seconds()
         logger.info(f"Uptime: {uptime:.0f}s")
 
         self.comfyui.close()

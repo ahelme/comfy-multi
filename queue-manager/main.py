@@ -4,7 +4,7 @@ Main entrypoint for the job queue management service
 """
 import logging
 import asyncio
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Optional
 from contextlib import asynccontextmanager
 
@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 # Global instances
 redis_client: Optional[RedisClient] = None
 ws_manager: Optional[WebSocketManager] = None
-app_start_time: datetime = datetime.utcnow()
+app_start_time: datetime = datetime.now(timezone.utc)
 
 
 @asynccontextmanager
@@ -82,7 +82,7 @@ app.add_middleware(
 @app.get("/health", response_model=HealthCheck)
 async def health_check():
     """Health check endpoint"""
-    uptime = (datetime.utcnow() - app_start_time).total_seconds()
+    uptime = (datetime.now(timezone.utc) - app_start_time).total_seconds()
 
     return HealthCheck(
         status="healthy" if redis_client.ping() else "unhealthy",

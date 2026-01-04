@@ -4,7 +4,7 @@ Redis client for job queue management
 import json
 import logging
 from typing import Optional, List, Dict, Any
-from datetime import datetime
+from datetime import datetime, timezone
 from redis import Redis
 from redis.exceptions import RedisError, WatchError
 from models import Job, JobStatus, QueueMode
@@ -217,13 +217,13 @@ class RedisClient:
                 return False
 
             job.status = JobStatus.RUNNING
-            job.started_at = datetime.utcnow()
+            job.started_at = datetime.now(timezone.utc)
             job.worker_id = worker_id
 
             self.update_job(job)
 
             # Move between queues
-            score = datetime.utcnow().timestamp()
+            score = datetime.now(timezone.utc).timestamp()
             self.redis.zadd(self.QUEUE_RUNNING, {job_id: score})
 
             logger.info(f"Job {job_id} started by worker {worker_id}")
@@ -241,14 +241,14 @@ class RedisClient:
                 return False
 
             job.status = JobStatus.COMPLETED
-            job.completed_at = datetime.utcnow()
+            job.completed_at = datetime.now(timezone.utc)
             job.result = result
 
             self.update_job(job)
 
             # Move between queues
             self.redis.zrem(self.QUEUE_RUNNING, job_id)
-            score = datetime.utcnow().timestamp()
+            score = datetime.now(timezone.utc).timestamp()
             self.redis.zadd(self.QUEUE_COMPLETED, {job_id: score})
 
             # Increment user completed count
@@ -270,14 +270,14 @@ class RedisClient:
                 return False
 
             job.status = JobStatus.FAILED
-            job.completed_at = datetime.utcnow()
+            job.completed_at = datetime.now(timezone.utc)
             job.error = error
 
             self.update_job(job)
 
             # Move between queues
             self.redis.zrem(self.QUEUE_RUNNING, job_id)
-            score = datetime.utcnow().timestamp()
+            score = datetime.now(timezone.utc).timestamp()
             self.redis.zadd(self.QUEUE_FAILED, {job_id: score})
 
             logger.error(f"Job {job_id} failed: {error}")
@@ -355,7 +355,7 @@ class RedisClient:
         """Update worker heartbeat timestamp"""
         try:
             key = self.WORKER_HEARTBEAT.format(worker_id=worker_id)
-            self.redis.setex(key, settings.worker_heartbeat_timeout, datetime.utcnow().isoformat())
+            self.redis.setex(key, settings.worker_heartbeat_timeout, datetime.now(timezone.utc).isoformat())
             return True
         except RedisError as e:
             logger.error(f"Failed to update worker heartbeat for {worker_id}: {e}")
@@ -380,7 +380,7 @@ class RedisClient:
             message = {
                 "type": event_type,
                 "data": data,
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
             self.redis.publish(self.PUBSUB_CHANNEL, json.dumps(message))
         except RedisError as e:
@@ -445,7 +445,7 @@ class RedisClient:
     def cleanup_stale_jobs(self, timeout_seconds: int = 3600) -> int:
         """Cleanup jobs that have been running too long"""
         try:
-            cutoff = datetime.utcnow().timestamp() - timeout_seconds
+            cutoff = datetime.now(timezone.utc).timestamp() - timeout_seconds
             stale_job_ids = self.redis.zrangebyscore(self.QUEUE_RUNNING, 0, cutoff)
 
             count = 0

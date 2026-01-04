@@ -1,8 +1,7 @@
 # Docker Compose Override for User Frontends
 # This file generates services for all 20 user frontends
 # Usage: docker-compose up (automatically includes this file)
-
-version: '3.8'
+# Note: version field removed (deprecated in Compose V2, Jan 2026 best practices)
 
 services:
   # Generate user frontend services

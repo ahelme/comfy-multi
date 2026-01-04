@@ -293,4 +293,214 @@
 
 ---
 
-**Last Updated:** 2026-01-03 (Cycle 1 Complete - 9/18 issues fixed)
+## Cycle 2: Comprehensive Second Pass Review
+**Status:** 🔨 IN PROGRESS
+**Reviewer:** Claude Sonnet 4.5 (Code Quality Expert)
+**Start Time:** 2026-01-04
+**Scope:** ALL codebase files - thorough second pass
+
+**Objectives:**
+- Review ALL Python, Docker, Nginx, shell script files
+- Focus on code quality, best practices, maintainability, performance
+- Find issues missed in Cycle 1
+- Ensure latest stable libraries (Priority 1 requirement)
+- Fix ALL issues autonomously
+
+**Files Reviewed:** 15+ files, ~3000+ lines of code
+- queue-manager/*.py (5 files)
+- admin/app.py
+- comfyui-worker/worker.py
+- comfyui-frontend/__init__.py
+- All Dockerfiles (5 files)
+- docker-compose.yml + override
+- nginx configs
+- shell scripts
+- requirements.txt files
+
+### HIGH Priority Issues (Fix Immediately)
+
+#### Issue #C2-1: Missing InferenceProvider Import in models.py
+- **File:** queue-manager/models.py
+- **Line:** 206
+- **Severity:** 🔴 HIGH (Code won't run - NameError at runtime)
+- **Issue:** WorkerStatus references undefined `InferenceProvider` type
+- **Impact:** Runtime crash when trying to serialize WorkerStatus
+- **Fix:** Remove InferenceProvider reference or define the enum
+- **Status:** ⏳ PENDING
+
+#### Issue #C2-2: docker-compose.override.yml Uses Deprecated Version Field
+- **File:** docker-compose.override.yml
+- **Line:** 5
+- **Severity:** 🔴 HIGH (Priority 1 violation - not using latest standards)
+- **Issue:** Contains `version: '3.8'` which is deprecated in Compose V2
+- **Impact:** Warning messages, not following 2026 best practices
+- **Fix:** Remove version field entirely (main compose file already correct)
+- **Status:** ⏳ PENDING
+
+#### Issue #C2-3: Inconsistent datetime Usage (utcnow deprecated)
+- **File:** queue-manager/main.py, redis_client.py, worker.py, models.py
+- **Multiple Lines:** Throughout codebase
+- **Severity:** 🔴 HIGH (Priority 1 - using deprecated API)
+- **Issue:** Using `datetime.utcnow()` which is deprecated in Python 3.12+
+- **Impact:** DeprecationWarnings, not future-proof for Python 3.13+
+- **Fix:** Replace with `datetime.now(timezone.utc)` everywhere
+- **Status:** ⏳ PENDING
+
+#### Issue #C2-4: Dockerfile Health Checks Missing Curl/Requests
+- **File:** queue-manager/Dockerfile, admin/Dockerfile
+- **Lines:** 28-29, 20-21
+- **Severity:** 🔴 HIGH (Health checks will fail)
+- **Issue:** HEALTHCHECK uses requests/httpx but not in requirements.txt for healthcheck context
+- **Impact:** Container health checks always fail in production
+- **Fix:** Install curl in Dockerfile or use Python -c with proper imports
+- **Status:** ⏳ PENDING
+
+#### Issue #C2-5: Nginx Dockerfile Uses Outdated Version Pinning
+- **File:** nginx/Dockerfile
+- **Line:** 1
+- **Severity:** 🔴 HIGH (Priority 1 violation)
+- **Issue:** Uses `nginx:1.28.1-alpine` - should use latest stable (1.27.3 is current stable)
+- **Impact:** Missing latest security patches and features
+- **Fix:** Update to `nginx:1.27-alpine` (tracks latest stable)
+- **Status:** ⏳ PENDING
+
+### MEDIUM Priority Issues (Fix Next)
+
+#### Issue #C2-6: No Logging Configuration in worker.py
+- **File:** comfyui-worker/worker.py
+- **Lines:** 18-22
+- **Severity:** 🟡 MEDIUM
+- **Issue:** Basic logging config doesn't support structured logging despite having python-json-logger
+- **Impact:** Harder to parse logs in production
+- **Fix:** Add JSON formatter configuration
+- **Status:** ⏳ PENDING
+
+#### Issue #C2-7: Missing Error Context in Exception Handlers
+- **File:** queue-manager/main.py
+- **Lines:** Various exception blocks
+- **Severity:** 🟡 MEDIUM
+- **Issue:** Exception handlers re-raise HTTPException without preserving original error context
+- **Impact:** Lost stack traces make debugging harder
+- **Fix:** Use `from e` or log original exception
+- **Status:** ⏳ PENDING
+
+#### Issue #C2-8: Hardcoded Timeout Values
+- **File:** comfyui-worker/worker.py
+- **Lines:** 50, 122
+- **Severity:** 🟡 MEDIUM
+- **Issue:** Hardcoded 300s and 30s timeouts instead of env vars
+- **Impact:** Can't adjust timeouts without code changes
+- **Fix:** Move to environment variables
+- **Status:** ⏳ PENDING
+
+#### Issue #C2-9: No Resource Cleanup in WebSocketManager
+- **File:** queue-manager/websocket_manager.py
+- **Lines:** 58-102
+- **Severity:** 🟡 MEDIUM
+- **Issue:** No cleanup of pubsub connection if listener task fails permanently
+- **Impact:** Redis connection leak
+- **Fix:** Add finally block to close pubsub
+- **Status:** ⏳ PENDING
+
+#### Issue #C2-10: Shell Scripts Missing Error Handling
+- **File:** scripts/start.sh
+- **Lines:** Throughout
+- **Severity:** 🟡 MEDIUM
+- **Issue:** `set -e` exits on any error, but some commands could fail gracefully
+- **Impact:** Script fails unnecessarily (e.g., if dir already exists)
+- **Fix:** Use `set -e` selectively or add `|| true` where appropriate
+- **Status:** ⏳ PENDING
+
+#### Issue #C2-11: Missing Type Hints in admin/app.py
+- **File:** admin/app.py
+- **Lines:** Functions missing return type hints
+- **Severity:** 🟡 MEDIUM
+- **Issue:** No type hints on route handlers
+- **Impact:** Reduced IDE support and type safety
+- **Fix:** Add type annotations for all functions
+- **Status:** ⏳ PENDING
+
+#### Issue #C2-12: Docker Compose Missing Security Labels
+- **File:** docker-compose.yml
+- **Lines:** Throughout services
+- **Severity:** 🟡 MEDIUM
+- **Issue:** No security labels or read-only root filesystem configs
+- **Impact:** Containers not hardened
+- **Fix:** Add security_opt and read_only where appropriate
+- **Status:** ⏳ PENDING
+
+### LOW Priority Issues (Polish)
+
+#### Issue #C2-13: Inconsistent Quotes in Shell Scripts
+- **File:** nginx/docker-entrypoint.sh, scripts/start.sh
+- **Lines:** Various
+- **Severity:** 🟢 LOW
+- **Issue:** Mix of single and double quotes without clear pattern
+- **Impact:** Readability
+- **Fix:** Standardize on double quotes for variables, single for literals
+- **Status:** ⏳ PENDING
+
+#### Issue #C2-14: Missing Docstrings on Public Functions
+- **File:** queue-manager/main.py, redis_client.py
+- **Lines:** Various route handlers
+- **Severity:** 🟢 LOW
+- **Issue:** Some public API endpoints lack detailed docstrings
+- **Impact:** API documentation incomplete
+- **Fix:** Add comprehensive docstrings with param descriptions
+- **Status:** ⏳ PENDING
+
+#### Issue #C2-15: Empty Custom Node Implementation
+- **File:** comfyui-frontend/custom_nodes/queue_redirect/__init__.py
+- **Lines:** 1-11
+- **Severity:** 🟢 LOW
+- **Issue:** Stub implementation with no actual functionality
+- **Impact:** Custom node doesn't do anything yet
+- **Fix:** Either implement or add TODO comment explaining future implementation
+- **Status:** ⏳ PENDING
+
+#### Issue #C2-16: Magic Numbers in Docker Compose
+- **File:** docker-compose.yml, docker-compose.override.yml
+- **Lines:** Port mappings
+- **Severity:** 🟢 LOW
+- **Issue:** Port 8188 hardcoded in multiple places
+- **Impact:** Harder to change if needed
+- **Fix:** Use variable for ComfyUI port
+- **Status:** ⏳ PENDING
+
+#### Issue #C2-17: No Log Rotation Configuration
+- **File:** nginx/nginx.conf
+- **Lines:** 3, 19
+- **Severity:** 🟢 LOW
+- **Issue:** No logrotate configuration for nginx logs
+- **Impact:** Disk space can fill up over time
+- **Fix:** Add log rotation config or use stdout/stderr
+- **Status:** ⏳ PENDING
+
+#### Issue #C2-18: Inconsistent String Formatting
+- **File:** queue-manager/main.py, worker.py
+- **Lines:** Various
+- **Severity:** 🟢 LOW
+- **Issue:** Mix of f-strings and .format()
+- **Impact:** Code consistency
+- **Fix:** Standardize on f-strings (modern Python best practice)
+- **Status:** ⏳ PENDING
+
+### Summary Statistics
+
+| Priority | Total | Fixed | Remaining |
+|----------|-------|-------|-----------|
+| 🔴 HIGH | 5 | 0 | 5 |
+| 🟡 MEDIUM | 7 | 0 | 7 |
+| 🟢 LOW | 6 | 0 | 6 |
+| **TOTAL** | **18** | **0** | **18** |
+
+**Next Steps:**
+1. Fix all HIGH priority issues (runtime errors, deprecated APIs)
+2. Fix all MEDIUM priority issues (code quality, maintainability)
+3. Fix all LOW priority issues (polish, consistency)
+4. Create atomic commits for each category
+5. Update this document with completion status
+
+---
+
+**Last Updated:** 2026-01-04 (Cycle 2 Analysis Complete - Fixes In Progress)

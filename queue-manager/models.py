@@ -3,7 +3,7 @@ Data models for the Queue Manager
 """
 import re
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Optional, Dict, Any, List
 from pydantic import BaseModel, Field, field_validator
@@ -50,7 +50,7 @@ class Job(BaseModel):
     priority: JobPriority = Field(default=JobPriority.NORMAL)
 
     # Timestamps
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     started_at: Optional[datetime] = None
     completed_at: Optional[datetime] = None
 
@@ -202,7 +202,7 @@ class WorkerStatus(BaseModel):
     current_job_id: Optional[str] = None
     jobs_completed: int
     last_heartbeat: datetime
-    provider: InferenceProvider
+    provider: str  # Inference provider name (e.g., "local", "verda", "runpod")
     gpu_memory_used: Optional[int] = None  # MB
     gpu_memory_total: Optional[int] = None  # MB
 
@@ -211,7 +211,7 @@ class WebSocketMessage(BaseModel):
     """WebSocket message format for real-time updates"""
     type: str  # job_status, queue_status, worker_status
     data: Dict[str, Any]
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class HealthCheck(BaseModel):
