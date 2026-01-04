@@ -5,6 +5,7 @@ Simple FastAPI app serving static HTML dashboard
 import logging
 import secrets
 from datetime import datetime
+from typing import Dict, Any
 from fastapi import FastAPI, Request, Depends, HTTPException, status
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.responses import HTMLResponse, JSONResponse
@@ -33,7 +34,7 @@ app = FastAPI(
 # HTTP Basic Auth
 security = HTTPBasic()
 
-def verify_admin(credentials: HTTPBasicCredentials = Depends(security)):
+def verify_admin(credentials: HTTPBasicCredentials = Depends(security)) -> str:
     """Verify admin credentials using HTTP Basic Auth"""
     correct_username = secrets.compare_digest(credentials.username, ADMIN_USERNAME)
     correct_password = secrets.compare_digest(credentials.password, ADMIN_PASSWORD)
@@ -52,7 +53,7 @@ http_client = httpx.AsyncClient(timeout=10.0)
 
 
 @app.get("/", response_class=HTMLResponse)
-async def dashboard(request: Request, username: str = Depends(verify_admin)):
+async def dashboard(request: Request, username: str = Depends(verify_admin)) -> HTMLResponse:
     """Serve the main dashboard page - Admin only"""
     html_content = """
 <!DOCTYPE html>
@@ -574,7 +575,7 @@ async def dashboard(request: Request, username: str = Depends(verify_admin)):
 
 
 @app.get("/api/proxy/queue/status")
-async def proxy_queue_status(username: str = Depends(verify_admin)):
+async def proxy_queue_status(username: str = Depends(verify_admin)) -> Dict[str, Any]:
     """Proxy endpoint for queue status - Admin only"""
     try:
         response = await http_client.get(f"{QUEUE_MANAGER_URL}/api/queue/status")
@@ -588,7 +589,7 @@ async def proxy_queue_status(username: str = Depends(verify_admin)):
 
 
 @app.get("/health")
-async def health_check():
+async def health_check() -> Dict[str, str]:
     """Health check endpoint"""
     return {"status": "healthy", "service": "admin-dashboard"}
 
