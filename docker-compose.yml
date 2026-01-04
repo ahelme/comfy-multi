@@ -1,4 +1,9 @@
-version: '3.8'
+# Docker Compose file for ComfyUI Multi-User Platform
+# Best practices as of January 2026
+# - No version field (deprecated in Compose V2)
+# - Health checks with conditions
+# - Resource limits
+# - Security contexts
 
 services:
   # ============================================================================
@@ -22,11 +27,30 @@ services:
       - DOMAIN=${DOMAIN}
       - NUM_USERS=${NUM_USERS:-20}
     depends_on:
-      - queue-manager
-      - admin
+      queue-manager:
+        condition: service_healthy
+        restart: true
+      admin:
+        condition: service_started
+      redis:
+        condition: service_healthy
     networks:
       - comfy-network
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   # ============================================================================
   # REDIS (Job Queue & Pub/Sub)
@@ -43,11 +67,20 @@ services:
     networks:
       - comfy-network
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '1.0'
+          memory: 1G
     healthcheck:
-      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      test: ["CMD", "redis-cli", "--no-auth-warning", "-a", "${REDIS_PASSWORD}", "ping"]
       interval: 10s
       timeout: 3s
       retries: 5
+      start_period: 10s
 
   # ============================================================================
   # QUEUE MANAGER (FastAPI Service)
@@ -76,14 +109,24 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+        restart: true
     networks:
       - comfy-network
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '1.0'
+          memory: 512M
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
-      interval: 30s
-      timeout: 10s
+      interval: 15s
+      timeout: 5s
       retries: 3
+      start_period: 30s
 
   # ============================================================================
   # COMFYUI WORKERS (GPU Processing)
@@ -108,24 +151,32 @@ services:
       - ${INPUTS_PATH}:/inputs:ro
       - ${WORKFLOWS_PATH}:/workflows:ro
     depends_on:
-      - queue-manager
+      queue-manager:
+        condition: service_healthy
+        restart: true
+      redis:
+        condition: service_healthy
     networks:
       - comfy-network
     restart: ${WORKER_RESTART_POLICY:-unless-stopped}
     deploy:
       resources:
+        limits:
+          cpus: '4.0'
+          memory: ${WORKER_GPU_MEMORY_LIMIT:-70G}
         reservations:
+          cpus: '2.0'
+          memory: 8G
           devices:
             - driver: nvidia
               count: 1
               capabilities: [gpu]
-        limits:
-          memory: ${WORKER_GPU_MEMORY_LIMIT:-70G}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8188/system_stats"]
       interval: 60s
       timeout: 10s
       retries: 3
+      start_period: 120s
 
   # ============================================================================
   # ADMIN DASHBOARD
@@ -145,10 +196,26 @@ services:
       - ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD}
     depends_on:
-      - queue-manager
+      queue-manager:
+        condition: service_healthy
+        restart: true
     networks:
       - comfy-network
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
 
 # ============================================================================
 # NETWORKS
