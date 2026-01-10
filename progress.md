@@ -20,7 +20,9 @@
 
 ---
 
-# Progress Reports 
+# Progress Reports
+
+**Note:** Progress Reports 7+ have been moved to [progress-2.md](./progress-2.md) to keep this file manageable.
 
 ---
 --- remember to update [COMMIT.log](./COMMIT.log) EVERY time you update this file!!!
@@ -459,4 +461,10 @@ LOW Priority (Quick Win - 1/6):
 | Timeline slippage | 🟢 Low Risk | 9-day buffer built in |
 | Verda deployment issues | 🟢 Low Risk | Test deployment Day 5 |
 | Code quality issues | 🟢 Resolved | 2 comprehensive reviews, all HIGH priority fixed |
+
+---
+
+**Navigation:**
+- [Continue to Progress Report 7+ (progress-2.md) →](./progress-2.md)
+- [View Commit Log](./COMMIT.log)
 
