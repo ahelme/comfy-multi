@@ -200,11 +200,14 @@ Choose a guide based on what you need to do:
 **When:** When something isn't working right
 
 **Contents:**
-- Quick diagnosis procedures
-- 10+ common issues with step-by-step solutions
-- Log locations and how to read them
-- Network connectivity troubleshooting
-- Docker/container issues
+- Quick diagnosis procedures and index of problem-specific guides
+- Links to detailed troubleshooting for specific issues:
+  - [Queue Stopped](./admin-troubleshooting-queue-stopped.md)
+  - [Out of Memory](./admin-troubleshooting-out-of-memory.md)
+  - [Worker Not Connecting](./admin-troubleshooting-worker-not-connecting.md)
+  - [SSL Certificate Issues](./admin-troubleshooting-ssl-cert-issues.md)
+  - [Redis Connection](./admin-troubleshooting-redis-connection.md)
+  - [Docker Issues](./admin-troubleshooting-docker-issues.md)
 - Performance metrics and tuning
 - Emergency procedures
 
@@ -216,13 +219,12 @@ Choose a guide based on what you need to do:
 **When:** Before and during your workshop
 
 **Contents:**
-- T-1 Week checklist (planning and preparation)
-- T-1 Day checklist (final verification)
-- T-1 Hour checklist (go/no-go decisions)
-- During workshop monitoring procedures
-- Common participant issues and solutions
-- Post-workshop cleanup and reporting
-- Quick reference commands
+- Quick reference index linking to phase-specific checklists:
+  - [Pre-Workshop Checklist](./admin-checklist-pre-workshop.md) - T-1 Week, T-1 Day, T-1 Hour
+  - [During Workshop Checklist](./admin-checklist-during-workshop.md) - Monitoring, tasks, emergencies
+  - [Post-Workshop Checklist](./admin-checklist-post-workshop.md) - Cleanup, metrics, reporting
+- Essential commands and quick reference
+- Tips for success
 
 **Use this for:** Preparing for workshop day, final checks, during-workshop monitoring, post-workshop procedures.
 
@@ -254,13 +256,13 @@ Choose a guide based on what you need to do:
 3. Review **[Admin Security Guide](./admin-security.md)** to lock down the system
 
 ### Before Workshop Day?
-1. Review **[Admin Workshop Checklist](./admin-workshop-checklist.md)** (all sections)
+1. Review **[Pre-Workshop Checklist](./admin-checklist-pre-workshop.md)** (all sections)
 2. Have **[Admin Dashboard Guide](./admin-dashboard.md)** open nearby
-3. Familiarize yourself with **[Admin Troubleshooting Guide](./admin-troubleshooting.md)**
+3. Familiarize yourself with **[Admin Troubleshooting Guide](./admin-troubleshooting.md)** and specific problem guides
 
 ### During Workshop?
 1. Monitor using **[Admin Dashboard](./admin-dashboard.md)**
-2. Keep **[Admin Workshop Checklist](./admin-workshop-checklist.md)** (During Workshop section) visible
+2. Keep **[During Workshop Checklist](./admin-checklist-during-workshop.md)** visible
 3. Refer to **[Admin Troubleshooting Guide](./admin-troubleshooting.md)** as needed
 
 ### Something's Broken?
@@ -287,11 +289,11 @@ During the workshop, keep these metrics in mind:
 
 ## ⏰ Typical Workshop Timeline
 
-- **T-1 Week:** Complete [Admin Setup Guide](./admin-setup-guide.md) checklist
-- **T-1 Day:** Run through [Admin Workshop Checklist](./admin-workshop-checklist.md) (T-1 Day section)
-- **T-1 Hour:** Final verification with [Admin Workshop Checklist](./admin-workshop-checklist.md) (T-1 Hour section)
-- **During Workshop:** Monitor with [Admin Dashboard Guide](./admin-dashboard.md), follow [Admin Workshop Checklist](./admin-workshop-checklist.md) (During Workshop section)
-- **After Workshop:** Complete [Admin Workshop Checklist](./admin-workshop-checklist.md) (Post-Workshop section)
+- **T-1 Week:** Complete [Pre-Workshop Checklist](./admin-checklist-pre-workshop.md) (T-1 Week section)
+- **T-1 Day:** Run through [Pre-Workshop Checklist](./admin-checklist-pre-workshop.md) (T-1 Day section)
+- **T-1 Hour:** Final verification with [Pre-Workshop Checklist](./admin-checklist-pre-workshop.md) (T-1 Hour section)
+- **During Workshop:** Monitor with [Admin Dashboard Guide](./admin-dashboard.md), follow [During Workshop Checklist](./admin-checklist-during-workshop.md)
+- **After Workshop:** Complete [Post-Workshop Checklist](./admin-checklist-post-workshop.md)
 
 ---
 
@@ -307,7 +309,7 @@ During the workshop, keep these metrics in mind:
 → See [Admin Troubleshooting Guide](./admin-troubleshooting.md)
 
 **For workshop day preparation:**
-→ See [Admin Workshop Checklist](./admin-workshop-checklist.md)
+→ See [Pre-Workshop Checklist](./admin-checklist-pre-workshop.md), [During Workshop Checklist](./admin-checklist-during-workshop.md), [Post-Workshop Checklist](./admin-checklist-post-workshop.md)
 
 **For security concerns:**
 → See [Admin Security Guide](./admin-security.md)

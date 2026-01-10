@@ -30,28 +30,35 @@
   - Admin: All 6 admin files already had headers from previous session
 - **Updated implementation.md status** from "DOC NEEDS FIXING" to "✅ Production Ready"
 
-## Remaining Tasks (Optional)
+## Additional Completed (2026-01-10)
 
-### 2. Further Split Troubleshooting (Optional - Problem-Specific)
+### Further Split Troubleshooting ✅
+Created 6 problem-specific troubleshooting guides:
+- admin-troubleshooting-queue-stopped.md (195 lines)
+- admin-troubleshooting-out-of-memory.md (251 lines)
+- admin-troubleshooting-worker-not-connecting.md (323 lines)
+- admin-troubleshooting-ssl-cert-issues.md (329 lines)
+- admin-troubleshooting-redis-connection.md (428 lines)
+- admin-troubleshooting-docker-issues.md (571 lines)
 
-Create separate files for each common issue:
-- admin-troubleshooting-queue-stopped.md
-- admin-troubleshooting-out-of-memory.md  
-- admin-troubleshooting-worker-not-connecting.md
-- admin-troubleshooting-ssl-cert-issues.md
-- admin-troubleshooting-redis-connection.md
-- admin-troubleshooting-docker-issues.md
+**Main troubleshooting.md reduced from 660 → 145 lines** (78% reduction)
+Now serves as quick reference index linking to all problem-specific guides.
 
-### 3. Further Split Workshop Checklists (Optional - Phase-Specific)
+### Further Split Workshop Checklists ✅
+Created 3 phase-specific workshop checklists:
+- admin-checklist-pre-workshop.md (449 lines) - T-1 Week, T-1 Day, T-1 Hour
+- admin-checklist-during-workshop.md (480 lines) - Monitoring, tasks, emergencies
+- admin-checklist-post-workshop.md (445 lines) - Cleanup, metrics, reporting
 
-If admin-workshop-checklist.md is too long, split into:
-- admin-checklist-pre-workshop.md (T-1 week through T-0)
-- admin-checklist-during-workshop.md (hour-by-hour procedures)
-- admin-checklist-post-workshop.md (cleanup, reporting)
+**Main workshop-checklist.md reduced from 454 → 167 lines** (63% reduction)
+Now serves as quick reference index linking to all phase-specific checklists.
 
-### 4. Update Cross-References
-
-After splitting, update all docs to link to the new granular files.
+### Updated Cross-References ✅
+Updated admin-guide.md with:
+- Links to all 6 problem-specific troubleshooting guides
+- Links to all 3 phase-specific workshop checklists
+- Updated timeline section to reference granular files
+- Updated "Getting Started" section with specific guide links
 
 ## Notes
 - All new files need standard headers with correct dates
