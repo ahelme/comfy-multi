@@ -5,7 +5,7 @@
 **Project Name:** ComfyUI Multi-User Workshop Platform
 **Doc Created:** 2026-01-02
 **Doc Updated:** 2026-01-03
-**Target Deployment:** Verda H100 Instance
+**Deployment Architecture:** Split - Application Layer on Hetzner VPS, GPU Inference on Verda H100
 **Workshop Date:** ~2 weeks from now (mid-January 2026)
 
 ## Problem Statement
@@ -112,10 +112,12 @@ Running a video generation workshop with 20 participants requires isolated Comfy
 ## Technical Constraints
 
 ### Infrastructure
-- **Deployment Platform:** Hetzner VPS (THIS SERVER) + Verda H100 (80GB VRAM)
-- **Domain:** ahelme.net (existing SSL cert)
-- **GPU:** Single H100 shared across workers
-- **Container Platform:** Docker + Docker Compose
+- **Application Layer:** Hetzner VPS (comfy.ahelme.net) - Handles app, web UI, queue management
+- **GPU Inference Layer:** Remote GPU (e.g. Verda) H100 (80GB VRAM) - GPU workers only
+- **Domain:** ahelme.net (registered on Namecheap, SSL cert installed on Hetzner VPS)
+- **GPU:** Single H100 shared across workers on remote GPU provider
+- **Container Platform:** Docker + Docker Compose on both tiers
+- **Network:** VPS and remote GPU connected via Redis protocol over internet
 
 ### Technology Stack (Proposed)
 - **Reverse Proxy:** Nginx (SSL termination, routing)

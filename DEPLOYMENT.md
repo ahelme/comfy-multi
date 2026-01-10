@@ -35,6 +35,11 @@ ADMIN_PASSWORD=your_secure_admin_password_here
 
 **Verify SSL cert paths:**
 ```bash
+# SSL certificates should be installed on your Hetzner VPS
+# Common locations:
+# - Let's Encrypt: /etc/letsencrypt/live/ahelme.net/
+# - Custom certs: /etc/ssl/certs/ahelme.net/
+
 # Check if certs exist
 ls -la /etc/letsencrypt/live/ahelme.net/fullchain.pem
 ls -la /etc/letsencrypt/live/ahelme.net/privkey.pem
@@ -44,9 +49,10 @@ ls -la /etc/letsencrypt/live/ahelme.net/privkey.pem
 
 ### Step 2: DNS Configuration
 
-Add DNS record for comfy.ahelme.net:
+**Domain:** ahelme.net is registered on Namecheap
+**DNS:** Add A record for comfy subdomain pointing to Hetzner VPS
 
-**If using Cloudflare/DNS provider:**
+**In Namecheap DNS panel:**
 ```
 Type: A
 Name: comfy

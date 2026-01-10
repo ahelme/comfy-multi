@@ -1,16 +1,20 @@
 # Implementation Plan: ComfyUI Workshop Infrastructure
 
 **Project:** Multi-User ComfyUI Workshop Platform
-**Started:** 2026-01-02
-**Status:** 🔨 In Progress
+**Doc Created:** 2026-01-02
+**Doc Updated:** 2026-01-03
+**Project Status:** 🔨 DOC NEEDS FIXING! INACCURATE ARCHECTURE! WHAT ELSE IS WRONG????
 
 ---
 
 ## Architecture Overview
 
+**Split Deployment: Two-Tier Architecture**
+
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                        Verda H100 Instance                          │
+│           TIER 1: Hetzner VPS (comfy.ahelme.net)                    │
+│                    Application Layer (CPU Only)                     │
 │                                                                      │
 │  ┌─────────────────────────────────────────────────────────────┐    │
 │  │                    Docker Compose Stack                      │    │
@@ -20,6 +24,7 @@
 │  │  │  :443   │  │  - Job queue with priority support      │   │    │
 │  │  │  SSL    │  │  - User session tracking                │   │    │
 │  │  └────┬────┘  │  - Result pub/sub                       │   │    │
+│  │       │       │  - Network port: 6379                    │   │    │
 │  │       │       └─────────────────────────────────────────┘   │    │
 │  │       │                         ▲                            │    │
 │  │       ▼                         │                            │    │
@@ -29,12 +34,35 @@
 │  │  │  - FIFO / Round-robin / Priority scheduling          │   │    │
 │  │  │  - Instructor override API                           │   │    │
 │  │  └──────────────────────────────────────────────────────┘   │    │
-│  │                              │                               │    │
-│  │       ┌──────────────────────┼──────────────────────┐       │    │
-│  │       ▼                      ▼                      ▼       │    │
+│  │                                                              │    │
+│  │  ┌──────────────────────────────────────────────────────┐   │    │
+│  │  │      User Frontend Containers (x20)                  │   │    │
+│  │  │  - ComfyUI UI with queue redirect extension         │   │    │
+│  │  │  - Routes: /user001 → /user020 (CPU only, no GPU)   │   │    │
+│  │  └──────────────────────────────────────────────────────┘   │    │
+│  │                                                              │    │
+│  │  ┌──────────────────────────────────────────────────────┐   │    │
+│  │  │           Admin Dashboard                            │   │    │
+│  │  │  - Real-time queue monitoring                        │   │    │
+│  │  │  - Job management UI                                 │   │    │
+│  │  └──────────────────────────────────────────────────────┘   │    │
+│  └──────────────────────────────────────────────────────────────┘    │
+└──────────────────────────────┬───────────────────────────────────────┘
+                               │
+                               │ Network: Redis Protocol
+                               │ REDIS_HOST=comfy.ahelme.net
+                               │
+┌──────────────────────────────▼───────────────────────────────────────┐
+│      TIER 2: Remote GPU (e.g. Verda) H100 Instance                  │
+│                    GPU Inference Layer Only                          │
+│                                                                      │
+│  ┌─────────────────────────────────────────────────────────────┐    │
+│  │              ComfyUI GPU Workers (1-3)                       │    │
+│  │                                                              │    │
 │  │  ┌─────────┐           ┌─────────┐           ┌─────────┐   │    │
-│  │  │ComfyUI 1│           │ComfyUI 2│           │ComfyUI N│   │    │
+│  │  │ComfyUI 1│           │ComfyUI 2│           │ComfyUI 3│   │    │
 │  │  │ Worker  │           │ Worker  │           │ Worker  │   │    │
+│  │  │ + GPU   │           │ + GPU   │           │ + GPU   │   │    │
 │  │  │ :8188   │           │ :8189   │           │ :8190   │   │    │
 │  │  └─────────┘           └─────────┘           └─────────┘   │    │
 │  │       │                      │                      │       │    │
@@ -47,14 +75,16 @@
 │  │                    │  - workflows/     │                    │    │
 │  │                    └───────────────────┘                    │    │
 │  │                                                              │    │
-│  │  ┌──────────────────────────────────────────────────────┐   │    │
-│  │  │      User Frontend Containers (x20)                  │   │    │
-│  │  │  - ComfyUI UI with queue redirect extension         │   │    │
-│  │  │  - Routes: /user/1 → /user/20                       │   │    │
-│  │  └──────────────────────────────────────────────────────┘   │    │
+│  │  ENV: REDIS_HOST=comfy.ahelme.net (connects to VPS)        │    │
 │  └──────────────────────────────────────────────────────────────┘    │
 └─────────────────────────────────────────────────────────────────────┘
 ```
+
+**Key Points:**
+- **Tier 1 (Hetzner VPS):** Runs all application components (no GPU needed)
+- **Tier 2 (Remote GPU):** Runs ONLY ComfyUI workers with GPU access
+- **Communication:** Workers connect to Redis on VPS via network
+- **Cost Efficiency:** VPS is cheap for app layer, GPU cloud only for inference
 
 ---
 
@@ -99,15 +129,33 @@
 - [x] `./scripts/add-user.sh` adds new user container
 - [x] Documentation complete (README + guides)
 
-### Phase 5: Deployment & Testing ✅
+### Phase 5: Production Readiness  ✅
 - [x] Integration test script created (`./scripts/test.sh`)
 - [x] Load test script created (`./scripts/load-test.sh`)
-- [x] Verda deployment script ready (`./scripts/deploy-verda.sh`)
+- [x] Remote GPU deployment script ready (`./scripts/deploy-verda.sh` - works with Verda, RunPod, etc.)
 - [x] Workshop runbook complete with timeline & procedures
 - [x] All test scripts executable and documented
 - [x] Pre-flight checklist prepared
 - [x] Emergency procedures documented
 - [x] Post-workshop procedures defined
+
+### Phase 6: Testing and Code Quality
+- [x] Comprehensive test suite
+- [x] 2x cycles of autonomous code review
+- [x] Fix security vulnerabilities
+
+### Phase 7: Documentation IMprovement + Test Deployment 
+- [ ] Add a git ignore file & remove tests and .env !!! IMPORTANT!!!
+- [ ] Improve ALL code project docs - COMPREHENSIVE BUT NO FLUFF! (BACKUP FIRST!)
+- [x] ✅ FIXED: Split architecture documentation (Hetzner VPS + Remote GPU) now consistent across all docs
+- [ ] Deploy to production (Hetzner + Verda) at comfy.ahelme.netTest with real workloads
+
+### Phase 8: UI Improvments
+- [ ] Test and improve UI with PD A Helme
+
+### Phase 9: Code Quality Polish
+- [ ] Address deferred code quality issues 
+- [ ] Comment code as per best practices
 
 ---
 
@@ -352,8 +400,8 @@ Job:
 - [ ] Reload nginx
 
 **scripts/deploy-verda.sh:**
-- [ ] Package for Verda deployment
-- [ ] SSH to Verda instance
+- [ ] Package for remote GPU deployment
+- [ ] SSH to GPU instance
 - [ ] Transfer files
 - [ ] Run setup and start
 

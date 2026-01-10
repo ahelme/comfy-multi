@@ -18,7 +18,7 @@
 ## 🎯 Project Quick Reference
 
 ### What are we building?
-A multi-user ComfyUI platform for a video generation workshop with 20 participants - app hosted separately on Hetzner VPS, with inference via a GPU Cloud provider e.g. on Verda sharing a single H100 GPU.
+A multi-user ComfyUI platform for a video generation workshop with 20 participants - app hosted separately on Hetzner VPS, with inference via a Remote GPU Cloud provider (e.g. Verda, RunPod, etc.) sharing a single H100 GPU.
 
 ### Key Requirements
 - split architecture - two servers one for CPU, one for GPU
@@ -146,7 +146,7 @@ A multi-user ComfyUI platform for a video generation workshop with 20 participan
                  │ Network
                  │ (Redis connection)
   ┌──────────────▼──────────────────────────┐
-  │ Verda H100 (Remote GPU)                 │
+  │ Remote GPU (e.g. Verda) H100            │
   │  - Worker 1 (ComfyUI + GPU)             │
   │  - Worker 2 (ComfyUI + GPU) [optional]  │
   │  - Worker 3 (ComfyUI + GPU) [optional]  │
@@ -224,7 +224,7 @@ test: add integration tests for worker
 
 ### Deployment
 - **Development:** Docker Compose locally
-- **Production:** Hetzner VPS + Verda H100 instance
+- **Production:** Hetzner VPS + Remote GPU (e.g. Verda) H100 instance
 - **GPU:** NVIDIA H100 80GB (shared)
 
 ---
@@ -307,12 +307,12 @@ None yet.
 ### User Background
 - Running AI/video generation workshop
 - Has Hetzner VPS with ahelme.net SSL cert
-- Wants to use Verda H100 for GPU compute
+- Wants to use Remote GPU provider (Verda, RunPod, etc.) H100 for GPU compute
 - 20 participants need isolated environments
 - Workshop in ~2 weeks
 
 ### Key Decisions Made
-1. **Custom build** chosen over managed services (cost, control, Verda usage)
+1. **Custom build** chosen over managed services (cost, control, flexibility for any GPU provider)
 2. **Existing SSL cert** will be mounted (not Let's Encrypt)
 3. **Queue modes:** FIFO + round-robin + instructor priority
 4. **Single H100** with 1-3 workers (test then scale)

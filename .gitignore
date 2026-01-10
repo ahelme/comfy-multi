@@ -1,10 +1,3 @@
-# Environment and secrets
-.env
-.env.local
-*.key
-*.pem
-*.crt
-
 # Python
 __pycache__/
 *.py[cod]
@@ -26,49 +19,48 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-MANIFEST
+.venv/
 venv/
 ENV/
 env/
 
-# Data and models
-data/models/*
-!data/models/.gitkeep
-data/outputs/*
-!data/outputs/.gitkeep
-data/inputs/*
-!data/inputs/.gitkeep
+# Environment & Secrets
+.env
+.env.local
+*.env
+*.secret
 
-# Docker volumes
-docker-volumes/
+# Testing
+tests/
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+*.cover
+TEST_REPORT.md
 
-# IDE
+# IDEs
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
+
+# OS
 .DS_Store
+Thumbs.db
 
-# Logs
+# Project-specific
+data/models/shared/*
+!data/models/shared/.gitkeep
+data/outputs/*
+!data/outputs/.gitkeep
+data/inputs/*
+!data/inputs/.gitkeep
 *.log
-logs/
-
-# Testing
-.pytest_cache/
-.coverage
-htmlcov/
-.tox/
-
-# Claude artifacts (keep plans but not temp)
-.claude/
-!.claude/plans/
-
-# Temporary files
-*.tmp
-*.bak
-temp/
 tmp/
+temp/
+docs-backup-*/
 
-# Node modules (if any JS tooling)
-node_modules/
+# Docker
+.docker/
