@@ -17,6 +17,13 @@
 - Added comprehensive workshop model lists to .env.example
 - Added inline comments for queue/GPU settings
 - Removed tests/, .env, TEST_REPORT.md from git tracking
+- **Split admin-guide.md into 6 files:**
+  - admin-guide.md (main overview - 346 lines)
+  - admin-setup-guide.md (deployment, configuration - 291 lines)
+  - admin-dashboard.md (dashboard usage - 302 lines)
+  - admin-security.md (security practices - 632 lines)
+  - admin-troubleshooting.md (troubleshooting - 659 lines)
+  - admin-workshop-checklist.md (workshop procedures - 453 lines)
 
 ## Remaining Tasks
 
@@ -34,27 +41,22 @@ Add to TOP of every .md file:
 ```
 
 Files needing headers:
-- README.md  
+- README.md
 - prd.md
 - implementation.md
 - CLAUDE.md
 - DEPLOYMENT.md
 - docs/user-guide.md
-- docs/admin-guide.md
+- docs/admin-guide.md (done ✅)
+- docs/admin-setup-guide.md (done ✅)
+- docs/admin-dashboard.md (done ✅)
+- docs/admin-security.md (done ✅)
+- docs/admin-troubleshooting.md (done ✅)
+- docs/admin-workshop-checklist.md (done ✅)
 - docs/troubleshooting.md
 - docs/workshop-runbook.md
 
-### 2. Split admin-guide.md
-
-**Keep as main overview:**
-- admin-guide.md (basics, monitoring, health checks, links to all other docs)
-
-**Create new files:**
-- admin-setup-guide.md (configuration checklist, deployment for both tiers)
-- admin-dashboard.md (dashboard features and usage)
-- admin-security.md (security best practices)
-
-### 3. Split Troubleshooting (Problem-Specific)
+### 2. Further Split Troubleshooting (Optional - Problem-Specific)
 
 Create separate files for each common issue:
 - admin-troubleshooting-queue-stopped.md
@@ -64,13 +66,14 @@ Create separate files for each common issue:
 - admin-troubleshooting-redis-connection.md
 - admin-troubleshooting-docker-issues.md
 
-### 4. Split Workshop Checklists (Phase-Specific)
+### 3. Further Split Workshop Checklists (Optional - Phase-Specific)
 
+If admin-workshop-checklist.md is too long, split into:
 - admin-checklist-pre-workshop.md (T-1 week through T-0)
 - admin-checklist-during-workshop.md (hour-by-hour procedures)
 - admin-checklist-post-workshop.md (cleanup, reporting)
 
-### 5. Update Cross-References
+### 4. Update Cross-References
 
 After splitting, update all docs to link to the new granular files.
 
