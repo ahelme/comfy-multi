@@ -1,6 +1,13 @@
-# ComfyUI Multi-User Workshop Platform
+**Project:** ComfyUI Multi-User Workshop Platform
+**Project Started:** 2026-01-02
+**Repository:** github.com/ahelme/comfy-multi
+**Domain:** comfy.ahelme.net
 **Doc Created:** 2026-01-02
-**Doc Updated:** 2026-01-03
+**Doc Updated:** 2026-01-10
+
+---
+
+# ComfyUI Multi-User Workshop Platform
 
 **Project Status:** Docs Fixing then Test Deployment Stage
 

@@ -1,3 +1,12 @@
+**Project:** ComfyUI Multi-User Workshop Platform
+**Project Started:** 2026-01-02
+**Repository:** github.com/ahelme/comfy-multi
+**Domain:** comfy.ahelme.net
+**Doc Created:** 2026-01-02
+**Doc Updated:** 2026-01-10
+
+---
+
 # Quick Start Guide - Your First 5 Minutes
 
 Welcome! This guide will get you creating AI images in under 5 minutes. 🚀

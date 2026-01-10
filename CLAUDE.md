@@ -1,11 +1,16 @@
-# Claude Project Guide
-
-**Project:** ComfyUI Multi-User Workshop Platform - App on VPS, Inference via GPU Cloud
+**Project:** ComfyUI Multi-User Workshop Platform
+**Project Started:** 2026-01-02
 **Repository:** github.com/ahelme/comfy-multi
 **Domain:** comfy.ahelme.net
-**Health Check:** https://comfy.ahelme.net/health
 **Doc Created:** 2026-01-02
-**Doc Updated:** 2026-01-03
+**Doc Updated:** 2026-01-10
+
+---
+
+# Claude Project Guide
+
+**Architecture:** App on VPS, Inference via GPU Cloud
+**Health Check:** https://comfy.ahelme.net/health
 
 ---
 
@@ -36,26 +41,7 @@ A multi-user ComfyUI platform for a video generation workshop with 20 participan
 - **Admin Dashboard:** https://comfy.ahelme.net/admin
 - **API:** https://comfy.ahelme.net/api/queue/status
 
-### Timeline
-- **Start Date:** 2026-01-02
-- **Workshop Date:** ~Mid-January 2026 (2 weeks)
-- **Development Complete:** 2026-01-04 (2 days!)
-- **Buffer:** 11 days for testing & deployment
-
 ---
-
-## ✅ CURRENT STATUS
-
-**ALL CRITICAL ISSUES RESOLVED!**
-
-- ✅ Priority 1 COMPLETE: All latest stable libraries (Python 3.12+, Docker Compose V2, Nginx 1.27)
-- ✅ Code Quality: 2 comprehensive review cycles complete
-  - Cycle 1 (Haiku): 18 issues, 9 fixed
-  - Cycle 2 (Sonnet): 18 issues, 16 resolved (89%)
-- ✅ Security: 10 vulnerabilities fixed including CVE-2024-53981
-- ✅ Performance: 10-100x improvements in critical paths
-- ✅ All HIGH priority issues: 10/10 fixed (100%)
-- ✅ Production ready with comprehensive documentation
 
 ## 📁 Project Structure
 
@@ -97,6 +83,22 @@ A multi-user ComfyUI platform for a video generation workshop with 20 participan
 - **docs/user-guide.md** - For workshop participants
 - **docs/admin-guide.md** - For instructor
 - **docs/troubleshooting.md** - Common issues
+
+### Documentation Format
+
+Ensure these details are listed the top of ALL .md documentation files:
+
+[example]
+
+**Project Name:** ComfyMulti 
+**Project Desc:** ComfyUI Multi-User Workshop Platform
+**Project Started:** 2026-01-02
+**Repository:** github.com/ahelme/comfy-multi
+**Domain:** comfy.ahelme.net
+**Doc Created:** 2026-01-02
+**Doc Updated:** 2026-01-03
+
+==IMPORTANT: Docs MUST be comprehensive yet NO FLUFF - NO extraneous / irrelevant info / value-statements / achievements boasting==
 
 ---
 

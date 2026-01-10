@@ -1,3 +1,12 @@
+**Project:** ComfyUI Multi-User Workshop Platform
+**Project Started:** 2026-01-02
+**Repository:** github.com/ahelme/comfy-multi
+**Domain:** comfy.ahelme.net
+**Doc Created:** 2026-01-02
+**Doc Updated:** 2026-01-10
+
+---
+
 # Deployment Guide for comfy.ahelme.net
 
 Quick deployment guide for setting up the ComfyUI Multi-User Platform on your VPS.

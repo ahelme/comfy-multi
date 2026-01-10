@@ -1,11 +1,18 @@
-# Product Requirements Document: ComfyUI Workshop Multi-User Web App 
+**Project:** ComfyUI Multi-User Workshop Platform
+**Project Started:** 2026-01-02
+**Repository:** github.com/ahelme/comfy-multi
+**Domain:** comfy.ahelme.net
+**Doc Created:** 2026-01-02
+**Doc Updated:** 2026-01-10
+
+---
+
+# Product Requirements Document: ComfyUI Workshop Multi-User Web App
 
 ## Project Overview
 
 **Project Name:** ComfyUI Multi-User Workshop Platform
-**Doc Created:** 2026-01-02
-**Doc Updated:** 2026-01-03
-**Deployment Architecture:** Split - Application Layer on Hetzner VPS, GPU Inference on Verda H100
+**Deployment Architecture:** Split - Application Layer on Hetzner VPS, GPU Inference on Remote GPU (e.g. Verda) H100
 **Workshop Date:** ~2 weeks from now (mid-January 2026)
 
 ## Problem Statement
