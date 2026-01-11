@@ -14,6 +14,10 @@ services:
       context: ./nginx
       dockerfile: Dockerfile
     container_name: comfy-nginx
+    # Only start when using container nginx (USE_HOST_NGINX=false)
+    # To use container nginx: docker-compose --profile container-nginx up
+    profiles:
+      - container-nginx
     ports:
       - "${NGINX_HTTP_PORT:-80}:80"
       - "${NGINX_HTTPS_PORT:-443}:443"
@@ -91,7 +95,9 @@ services:
       dockerfile: Dockerfile
     container_name: comfy-queue-manager
     ports:
-      - "${QUEUE_MANAGER_PORT:-3000}:3000"
+      # Bind to localhost only when using host nginx (USE_HOST_NGINX=true)
+      # For container nginx mode, this will bind to all interfaces
+      - "127.0.0.1:${QUEUE_MANAGER_PORT:-3000}:3000"
     environment:
       - REDIS_HOST=${REDIS_HOST:-redis}
       - REDIS_PORT=${REDIS_PORT:-6379}
@@ -187,7 +193,8 @@ services:
       dockerfile: Dockerfile
     container_name: comfy-admin
     ports:
-      - "${ADMIN_PORT:-8080}:8080"
+      # Bind to localhost only when using host nginx (USE_HOST_NGINX=true)
+      - "127.0.0.1:${ADMIN_PORT:-8080}:8080"
     environment:
       - QUEUE_MANAGER_URL=http://queue-manager:3000
       - REDIS_HOST=${REDIS_HOST:-redis}

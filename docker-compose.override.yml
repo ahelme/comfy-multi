@@ -12,6 +12,8 @@ services:
       context: ./comfyui-frontend
       dockerfile: Dockerfile
     container_name: comfy-user001
+    ports:
+      - "127.0.0.1:8188:8188"
     environment:
       - USER_ID=user001
       - QUEUE_MANAGER_URL=http://queue-manager:3000
@@ -29,6 +31,8 @@ services:
       context: ./comfyui-frontend
       dockerfile: Dockerfile
     container_name: comfy-user002
+    ports:
+      - "127.0.0.1:8189:8188"
     environment:
       - USER_ID=user002
       - QUEUE_MANAGER_URL=http://queue-manager:3000
@@ -46,6 +50,8 @@ services:
       context: ./comfyui-frontend
       dockerfile: Dockerfile
     container_name: comfy-user003
+    ports:
+      - "127.0.0.1:8190:8188"
     environment:
       - USER_ID=user003
       - QUEUE_MANAGER_URL=http://queue-manager:3000
@@ -63,6 +69,8 @@ services:
       context: ./comfyui-frontend
       dockerfile: Dockerfile
     container_name: comfy-user004
+    ports:
+      - "127.0.0.1:8191:8188"
     environment:
       - USER_ID=user004
       - QUEUE_MANAGER_URL=http://queue-manager:3000
@@ -80,6 +88,8 @@ services:
       context: ./comfyui-frontend
       dockerfile: Dockerfile
     container_name: comfy-user005
+    ports:
+      - "127.0.0.1:8192:8188"
     environment:
       - USER_ID=user005
       - QUEUE_MANAGER_URL=http://queue-manager:3000
@@ -97,6 +107,8 @@ services:
       context: ./comfyui-frontend
       dockerfile: Dockerfile
     container_name: comfy-user006
+    ports:
+      - "127.0.0.1:8193:8188"
     environment:
       - USER_ID=user006
       - QUEUE_MANAGER_URL=http://queue-manager:3000
@@ -114,6 +126,8 @@ services:
       context: ./comfyui-frontend
       dockerfile: Dockerfile
     container_name: comfy-user007
+    ports:
+      - "127.0.0.1:8194:8188"
     environment:
       - USER_ID=user007
       - QUEUE_MANAGER_URL=http://queue-manager:3000
@@ -131,6 +145,8 @@ services:
       context: ./comfyui-frontend
       dockerfile: Dockerfile
     container_name: comfy-user008
+    ports:
+      - "127.0.0.1:8195:8188"
     environment:
       - USER_ID=user008
       - QUEUE_MANAGER_URL=http://queue-manager:3000
@@ -148,6 +164,8 @@ services:
       context: ./comfyui-frontend
       dockerfile: Dockerfile
     container_name: comfy-user009
+    ports:
+      - "127.0.0.1:8196:8188"
     environment:
       - USER_ID=user009
       - QUEUE_MANAGER_URL=http://queue-manager:3000
@@ -165,6 +183,8 @@ services:
       context: ./comfyui-frontend
       dockerfile: Dockerfile
     container_name: comfy-user010
+    ports:
+      - "127.0.0.1:8197:8188"
     environment:
       - USER_ID=user010
       - QUEUE_MANAGER_URL=http://queue-manager:3000
@@ -182,6 +202,8 @@ services:
       context: ./comfyui-frontend
       dockerfile: Dockerfile
     container_name: comfy-user011
+    ports:
+      - "127.0.0.1:8198:8188"
     environment:
       - USER_ID=user011
       - QUEUE_MANAGER_URL=http://queue-manager:3000
@@ -199,6 +221,8 @@ services:
       context: ./comfyui-frontend
       dockerfile: Dockerfile
     container_name: comfy-user012
+    ports:
+      - "127.0.0.1:8199:8188"
     environment:
       - USER_ID=user012
       - QUEUE_MANAGER_URL=http://queue-manager:3000
@@ -216,6 +240,8 @@ services:
       context: ./comfyui-frontend
       dockerfile: Dockerfile
     container_name: comfy-user013
+    ports:
+      - "127.0.0.1:8200:8188"
     environment:
       - USER_ID=user013
       - QUEUE_MANAGER_URL=http://queue-manager:3000
@@ -233,6 +259,8 @@ services:
       context: ./comfyui-frontend
       dockerfile: Dockerfile
     container_name: comfy-user014
+    ports:
+      - "127.0.0.1:8201:8188"
     environment:
       - USER_ID=user014
       - QUEUE_MANAGER_URL=http://queue-manager:3000
@@ -250,6 +278,8 @@ services:
       context: ./comfyui-frontend
       dockerfile: Dockerfile
     container_name: comfy-user015
+    ports:
+      - "127.0.0.1:8202:8188"
     environment:
       - USER_ID=user015
       - QUEUE_MANAGER_URL=http://queue-manager:3000
@@ -267,6 +297,8 @@ services:
       context: ./comfyui-frontend
       dockerfile: Dockerfile
     container_name: comfy-user016
+    ports:
+      - "127.0.0.1:8203:8188"
     environment:
       - USER_ID=user016
       - QUEUE_MANAGER_URL=http://queue-manager:3000
@@ -284,6 +316,8 @@ services:
       context: ./comfyui-frontend
       dockerfile: Dockerfile
     container_name: comfy-user017
+    ports:
+      - "127.0.0.1:8204:8188"
     environment:
       - USER_ID=user017
       - QUEUE_MANAGER_URL=http://queue-manager:3000
@@ -301,6 +335,8 @@ services:
       context: ./comfyui-frontend
       dockerfile: Dockerfile
     container_name: comfy-user018
+    ports:
+      - "127.0.0.1:8205:8188"
     environment:
       - USER_ID=user018
       - QUEUE_MANAGER_URL=http://queue-manager:3000
@@ -318,6 +354,8 @@ services:
       context: ./comfyui-frontend
       dockerfile: Dockerfile
     container_name: comfy-user019
+    ports:
+      - "127.0.0.1:8206:8188"
     environment:
       - USER_ID=user019
       - QUEUE_MANAGER_URL=http://queue-manager:3000
@@ -335,6 +373,8 @@ services:
       context: ./comfyui-frontend
       dockerfile: Dockerfile
     container_name: comfy-user020
+    ports:
+      - "127.0.0.1:8207:8188"
     environment:
       - USER_ID=user020
       - QUEUE_MANAGER_URL=http://queue-manager:3000

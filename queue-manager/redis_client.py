@@ -37,14 +37,14 @@ class RedisClient:
             db=settings.redis_db,
             decode_responses=True,
             socket_connect_timeout=5,  # 5s to establish connection
-            socket_read_timeout=10,  # 10s max for any Redis command
+            socket_timeout=10,  # 10s max for any Redis command (redis-py 7.x compatible)
             socket_keepalive=True,
             health_check_interval=30,
             max_connections=50  # Connection pool limit
         )
         logger.info(
             f"Connected to Redis at {settings.redis_host}:{settings.redis_port} "
-            f"(read_timeout=10s, max_connections=50)"
+            f"(socket_timeout=10s, max_connections=50)"
         )
 
     def ping(self) -> bool:
