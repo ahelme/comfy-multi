@@ -67,7 +67,7 @@ services:
     # VPS services access Redis at redis:6379 internally
     # GPU workers access at comfy.ahelme.net:6379 externally
     ports:
-      - "6379:6379"
+      - "${REDIS_BIND_IP:-127.0.0.1}:6379:6379"
     volumes:
       - redis-data:/data
       - ./redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
