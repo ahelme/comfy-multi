@@ -3,7 +3,7 @@
 **Repository:** github.com/ahelme/comfy-multi
 **Domain:** comfy.ahelme.net
 **Doc Created:** 2026-01-10
-**Doc Updated:** 2026-01-10
+**Doc Updated:** 2026-01-11
 
 ---
 
@@ -41,6 +41,44 @@ This deployment supports **two nginx modes** for flexibility:
   - Certificate: `/etc/letsencrypt/live/comfy.ahelme.net/fullchain.pem`
   - Private Key: `/etc/letsencrypt/live/comfy.ahelme.net/privkey.pem`
   - Expiry: 2026-04-10 (89 days remaining)
+- **Tailscale VPN:**
+  - VPS Tailscale IP: 100.99.216.71
+  - Status: Active, connected to tailnet
+  - Purpose: Secure Redis access for GPU workers
+
+---
+
+## Security Architecture: Tailscale VPN
+
+**Why Tailscale?**
+This deployment uses Tailscale VPN to securely connect GPU workers to VPS Redis, instead of exposing Redis to the public internet.
+
+**Architecture:**
+```
+GPU Worker (Verda) → Tailscale VPN → VPS Redis
+  100.89.38.43           Encrypted       100.99.216.71:6379
+                        WireGuard
+                         Tunnel
+```
+
+**Benefits:**
+- ✅ Redis NOT exposed to internet (no public port 6379)
+- ✅ Encrypted WireGuard tunnel
+- ✅ No firewall complexity (no IP whitelisting needed)
+- ✅ Works with any GPU provider (Verda, RunPod, Modal, local)
+
+**Firewall Configuration:**
+```bash
+# Allowed ports (locked down)
+22/tcp      - SSH (rate limited)
+80/tcp      - HTTP (redirect to HTTPS)
+443/tcp     - HTTPS (nginx)
+21115-21119 - RustDesk remote desktop
+21116/udp   - RustDesk UDP
+
+# Redis port 6379 - NOT exposed to public internet
+# Only accessible via Tailscale VPN at 100.99.216.71:6379
+```
 
 ---
 
@@ -94,6 +132,11 @@ cd /home/dev/projects/comfyui
 
 # Update USE_HOST_NGINX
 sed -i 's/USE_HOST_NGINX=.*/USE_HOST_NGINX=true/' .env
+
+# Configure Redis to bind to Tailscale IP (VPN-only access)
+TAILSCALE_IP=$(tailscale ip -4)
+sed -i "s/REDIS_BIND_IP=.*/REDIS_BIND_IP=${TAILSCALE_IP}/" .env
+echo "✅ Redis will bind to Tailscale IP: $TAILSCALE_IP"
 
 # Generate and set secure Redis password
 REDIS_PASS=$(openssl rand -hex 32)
@@ -567,9 +610,16 @@ Open in browser:
 #### 8.5 Security Verification
 
 ```bash
-# Verify Redis is NOT exposed externally
+# Verify Redis is bound to Tailscale IP (VPN-only, NOT public)
 sudo netstat -tlnp | grep 6379
-# Should show: 127.0.0.1:6379 or Docker internal only (NOT 0.0.0.0:6379)
+# Should show: 100.99.216.71:6379 (Tailscale IP)
+# ✅ CORRECT: 100.99.216.71:6379 (VPN only)
+# ❌ WRONG: 0.0.0.0:6379 (exposed to entire internet)
+# ❌ WRONG: 157.180.76.189:6379 (public IP)
+
+# Verify Tailscale is running
+tailscale status | grep mello
+# Should show: 100.99.216.71  mello  ...
 
 # Verify SSL certificate
 echo | openssl s_client -connect comfy.ahelme.net:443 -servername comfy.ahelme.net 2>/dev/null | openssl x509 -noout -dates

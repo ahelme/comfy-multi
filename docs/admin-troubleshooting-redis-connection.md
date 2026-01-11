@@ -3,7 +3,7 @@
 **Repository:** github.com/ahelme/comfy-multi
 **Domain:** comfy.ahelme.net
 **Doc Created:** 2026-01-10
-**Doc Updated:** 2026-01-10
+**Doc Updated:** 2026-01-11
 
 ---
 
@@ -50,6 +50,98 @@ telnet localhost 6379
 # 8. Monitor Redis in real-time
 docker-compose exec redis redis-cli --stat
 ```
+
+---
+
+## Tailscale VPN Connection Issues (GPU Workers)
+
+**IMPORTANT:** This deployment uses **Tailscale VPN** for secure Redis access. GPU workers connect via Tailscale, NOT public internet.
+
+### Symptom: Worker Cannot Connect to Redis
+
+**Error messages:**
+```
+Connection refused to Redis at 100.99.216.71:6379
+Could not connect to Redis server
+redis.exceptions.ConnectionError: Error connecting to Redis
+```
+
+### Diagnosis:
+
+```bash
+# On GPU instance - check Tailscale status
+ssh dev@verda "tailscale status"
+# Should show:
+# 100.89.38.43   hazy-food-dances-fin-01  (self)
+# 100.99.216.71  mello                    (VPS)
+
+# If Tailscale is not running:
+ssh dev@verda "sudo tailscale up"
+
+# Test Tailscale connectivity
+ssh dev@verda "ping -c 3 100.99.216.71"
+# Should get replies
+
+# Test Redis connectivity via Tailscale
+ssh dev@verda "redis-cli -h 100.99.216.71 -p 6379 -a '<REDIS_PASSWORD>' ping"
+# Should return: PONG
+```
+
+### Common Tailscale Issues:
+
+**1. Tailscale not running on GPU instance:**
+```bash
+ssh dev@verda "sudo tailscale status || sudo tailscale up"
+```
+
+**2. Tailscale not running on VPS:**
+```bash
+tailscale status || sudo tailscale up
+```
+
+**3. Wrong REDIS_HOST in worker .env:**
+```bash
+ssh dev@verda "grep REDIS_HOST /home/dev/comfy-multi/.env"
+# Should show: REDIS_HOST=100.99.216.71
+# NOT: REDIS_HOST=comfy.ahelme.net
+# NOT: REDIS_HOST=localhost
+```
+
+**Fix:**
+```bash
+ssh dev@verda "sed -i 's/REDIS_HOST=.*/REDIS_HOST=100.99.216.71/' /home/dev/comfy-multi/.env"
+ssh dev@verda "cd /home/dev/comfy-multi && docker compose restart worker-1"
+```
+
+**4. Redis bound to wrong IP on VPS:**
+```bash
+# Check Redis binding
+sudo netstat -tlnp | grep 6379
+# Should show: 100.99.216.71:6379 (Tailscale IP)
+# NOT: 0.0.0.0:6379 (public)
+# NOT: 127.0.0.1:6379 (localhost only)
+```
+
+**Fix:**
+```bash
+# Update REDIS_BIND_IP in VPS .env
+TAILSCALE_IP=$(tailscale ip -4)
+sed -i "s/REDIS_BIND_IP=.*/REDIS_BIND_IP=${TAILSCALE_IP}/" .env
+docker-compose restart redis
+```
+
+**5. Tailscale IPs changed after reboot:**
+
+Tailscale IPs are usually stable, but can change. If they do:
+```bash
+# Get new IPs
+tailscale ip -4  # On VPS
+ssh dev@verda "tailscale ip -4"  # On GPU
+
+# Update configurations accordingly
+```
+
+---
 
 ## Solutions (Try in Order)
 

@@ -3,7 +3,7 @@
 **Repository:** github.com/ahelme/comfy-multi
 **Domain:** comfy.ahelme.net
 **Doc Created:** 2026-01-10
-**Doc Updated:** 2026-01-10
+**Doc Updated:** 2026-01-11
 
 ---
 
@@ -21,29 +21,33 @@
 ┌─────────────────────────────────────┐
 │  Tier 1: Hetzner VPS                │
 │  comfy.ahelme.net                   │
+│  Tailscale IP: 100.99.216.71        │
 │  - User Frontends (20x)             │
 │  - Queue Manager (FastAPI)          │
-│  - Redis (job queue)                │
+│  - Redis (VPN-only access)          │
 │  - Admin Dashboard                  │
 └──────────────┬──────────────────────┘
                │
-               │ Network: Redis Protocol
-               │ Port: 6379 (encrypted)
+               │ Tailscale VPN (WireGuard)
+               │ Encrypted tunnel
+               │ Port: 6379 (VPN only)
                │
 ┌──────────────▼──────────────────────┐
 │  Tier 2: Remote GPU Instance        │
 │  (Verda H100 / RunPod / Modal)      │
+│  Tailscale IP: 100.89.38.43         │
 │  - ComfyUI Worker 1 (+ GPU)         │
 │  - ComfyUI Worker 2 (+ GPU) [opt]   │
 │  - ComfyUI Worker 3 (+ GPU) [opt]   │
 │                                     │
-│  ENV: REDIS_HOST=comfy.ahelme.net  │
+│  ENV: REDIS_HOST=100.99.216.71     │
 └─────────────────────────────────────┘
 ```
 
 **Key Points:**
-- GPU workers connect TO VPS (not vice versa)
+- GPU workers connect TO VPS via **Tailscale VPN** (not public internet)
 - Workers poll Redis for jobs from VPS
+- Redis uses Tailscale IP (100.99.216.71), NOT public domain
 - No inbound ports needed on GPU instance (outbound only)
 - Can scale to 1-3 workers per H100 GPU
 
@@ -57,9 +61,11 @@ Before starting, verify:
   - Test: `curl https://comfy.ahelme.net/health` returns OK
   - Test: `curl https://comfy.ahelme.net/api/health` returns JSON
 
-- [ ] **VPS Redis is accessible**
+- [ ] **Tailscale VPN configured on both VPS and GPU instance**
+  - REQUIRED: Both servers must be on same Tailscale network
+  - VPS Tailscale IP: 100.99.216.71
+  - GPU Tailscale IP: (will get after installation)
   - Verify REDIS_PASSWORD from VPS `.env` file
-  - Note: Redis should be accessible on port 6379 from internet (or configure VPN)
 
 - [ ] **GPU instance provisioned**
   - Verda H100 instance, OR
@@ -198,7 +204,7 @@ nano .env
 # REDIS CONNECTION (Points to VPS)
 # ============================================================================
 # IMPORTANT: This must point to your VPS, NOT localhost!
-REDIS_HOST=comfy.ahelme.net
+REDIS_HOST=100.99.216.71
 REDIS_PORT=6379
 
 # IMPORTANT: Use SAME password as VPS Redis
@@ -397,16 +403,20 @@ docker run --rm --network host redis:7-alpine redis-cli -h comfy.ahelme.net -p 6
 ```
 
 **If connection fails:**
-- Check firewall on VPS allows port 6379 from internet
-- Verify REDIS_HOST in .env is correct (comfy.ahelme.net, NOT localhost)
+- Verify Tailscale is running on both VPS and GPU instance: `tailscale status`
+- Verify REDIS_HOST in .env uses Tailscale IP (100.99.216.71, NOT comfy.ahelme.net or localhost)
 - Verify REDIS_PASSWORD matches VPS
-- Check DNS resolves: `nslookup comfy.ahelme.net`
+- Test Tailscale connectivity: `ping -c 3 100.99.216.71`
 
-**Configure VPS firewall to allow Redis (if needed):**
+**Tailscale troubleshooting:**
 ```bash
-# On VPS (ssh to comfy.ahelme.net)
-sudo ufw allow 6379/tcp comment 'Redis for GPU workers'
-sudo ufw status
+# On GPU instance - verify Tailscale is running
+tailscale status
+# Should show VPS: 100.99.216.71  mello  ...
+
+# Test connectivity
+ping -c 3 100.99.216.71
+redis-cli -h 100.99.216.71 -p 6379 -a '<password>' ping
 ```
 
 **Security note:** Consider using Redis password authentication + SSL/TLS for production. For workshop, password authentication is sufficient.
@@ -429,7 +439,7 @@ docker-compose logs -f worker-1
 **Expected log output:**
 ```
 [INFO] Worker starting...
-[INFO] Connecting to Redis at comfy.ahelme.net:6379
+[INFO] Connecting to Redis at 100.99.216.71:6379
 [INFO] Redis connection successful
 [INFO] Loading models from /app/models
 [INFO] Model checkpoint loaded: sdxl_base_1.0.safetensors
@@ -603,8 +613,9 @@ sudo ufw status | grep 6379
 ```
 
 **Solutions:**
-- Open port 6379 on VPS firewall: `sudo ufw allow 6379/tcp`
-- Verify REDIS_HOST in .env (should be comfy.ahelme.net, not localhost)
+- Verify Tailscale running on both instances: `tailscale status`
+- Verify REDIS_HOST in .env uses Tailscale IP: `grep REDIS_HOST .env` (should be 100.99.216.71)
+- Test connectivity: `redis-cli -h 100.99.216.71 -p 6379 -a '<password>' ping`
 - Check REDIS_PASSWORD matches VPS
 
 ### Issue: Worker out of memory
