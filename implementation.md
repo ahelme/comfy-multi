@@ -150,17 +150,109 @@
 - [x] 2x cycles of autonomous code review
 - [x] Fix security vulnerabilities
 
-### Phase 7: Documentation IMprovement + Test Deployment 
-- [ ] Add a git ignore file & remove tests and .env !!! IMPORTANT!!!
-- [ ] Improve ALL code project docs - COMPREHENSIVE BUT NO FLUFF! (BACKUP FIRST!)
-- [x] ✅ FIXED: Split architecture documentation (Hetzner VPS + Remote GPU) now consistent across all docs
-- [ ] Deploy to production (Hetzner + Verda) at comfy.ahelme.netTest with real workloads
+### Phase 7: Documentation Improvement ✅
+- [x] ✅ Add .gitignore file & remove tests/, .env from git tracking
+- [x] ✅ Improve ALL code project docs - COMPREHENSIVE BUT NO FLUFF!
+- [x] ✅ Split architecture documentation (Hetzner VPS + Remote GPU) consistent across all docs
+- [x] ✅ Add standard headers to all .md files
+- [x] ✅ Split admin documentation into granular, problem-specific guides
+- [x] ✅ Update all cross-references between docs
+- [x] ✅ Update implementation.md status to "Production Ready"
 
-### Phase 8: UI Improvments
+### Phase 8: Production Deployment 🔨
+**Goal:** Deploy to production at comfy.ahelme.net (Hetzner VPS + Remote GPU)
+
+**Detailed Deployment Guides:**
+- **[VPS Deployment (Tier 1)](./implementation-deployment.md)** - Hetzner VPS application layer setup
+- **[GPU Deployment (Tier 2)](./implementation-deployment-verda.md)** - Remote GPU worker setup (Verda/RunPod/Modal)
+
+---
+
+#### 8.1 VPS Setup & Configuration
+- [ ] SSH access configured to Hetzner VPS (desk.ahelme.net)
+- [ ] Verify DNS A records (desk.ahelme.net → VPS IP, comfy.ahelme.net → VPS IP)
+- [ ] Review existing nginx configuration on VPS (if any)
+- [ ] Install required packages (Docker, Docker Compose, git)
+- [ ] Clone repository to VPS
+- [ ] Configure .env file with production settings
+
+#### 8.2 SSL Certificate Setup
+- [ ] Locate SSL certificate files for ahelme.net domain
+  - fullchain.pem (public certificate chain)
+  - privkey.pem (private key)
+- [ ] Copy SSL certificates to VPS at /etc/ssl/certs/ and /etc/ssl/private/
+- [ ] Update .env with SSL_CERT_PATH and SSL_KEY_PATH
+- [ ] Verify certificate validity and expiration date
+- [ ] Test HTTPS access to comfy.ahelme.net
+
+#### 8.3 Model Download & Storage
+- [ ] Create data/models/shared/ directory structure
+- [ ] Download required models (SDXL, ControlNet, etc.)
+- [ ] Verify model checksums and integrity
+- [ ] Configure model paths in extra_model_paths.yaml
+- [ ] Test model loading in ComfyUI
+
+#### 8.4 VPS Deployment (Tier 1: Application Layer)
+- [ ] Start VPS services: `docker-compose up -d nginx redis queue-manager admin`
+- [ ] Start 20 user frontends: `docker-compose up -d user-001 user-002 ... user-020`
+- [ ] Verify nginx routing: https://comfy.ahelme.net/user001/
+- [ ] Verify admin dashboard: https://comfy.ahelme.net/admin
+- [ ] Verify API endpoints: https://comfy.ahelme.net/api/health
+- [ ] Check logs for errors: `docker-compose logs`
+
+#### 8.5 Remote GPU Deployment (Tier 2: Inference Layer)
+- [ ] Provision Remote GPU instance (Verda H100 or similar)
+- [ ] SSH access to Remote GPU instance
+- [ ] Install Docker + nvidia-docker2
+- [ ] Clone repository to Remote GPU instance
+- [ ] Configure .env with REDIS_HOST=comfy.ahelme.net
+- [ ] Configure .env with REDIS_PASSWORD (same as VPS)
+- [ ] Start GPU worker(s): `docker-compose up -d worker-1`
+- [ ] Verify worker connects to VPS Redis
+- [ ] Test job execution end-to-end
+
+#### 8.6 Integration Testing
+- [ ] Run integration test suite: `./scripts/test.sh`
+- [ ] Submit test job from user frontend
+- [ ] Verify job appears in queue (admin dashboard)
+- [ ] Verify worker picks up job and executes
+- [ ] Verify output appears in user workspace
+- [ ] Test WebSocket real-time updates
+- [ ] Test job cancellation
+- [ ] Test job prioritization (instructor override)
+
+#### 8.7 Load Testing
+- [ ] Run load test: `./scripts/load-test.sh` (20 users, 2 jobs each)
+- [ ] Monitor queue depth and latency
+- [ ] Monitor GPU memory usage (nvidia-smi)
+- [ ] Monitor Redis memory usage
+- [ ] Monitor nginx request rate
+- [ ] Identify bottlenecks and optimize
+
+#### 8.8 Production Hardening
+- [ ] Verify firewall rules (VPS: 80, 443, 6379; GPU: outbound only)
+- [ ] Enable Redis password authentication
+- [ ] Review nginx security headers
+- [ ] Test SSL certificate auto-renewal (if using Let's Encrypt)
+- [ ] Configure log rotation for Docker containers
+- [ ] Set up monitoring/alerting (optional)
+- [ ] Document deployment commands in DEPLOYMENT.md
+
+#### 8.9 Workshop Preparation
+- [ ] Follow pre-workshop checklist: docs/admin-checklist-pre-workshop.md
+- [ ] Verify all 20 user workspaces accessible
+- [ ] Load workshop example workflows
+- [ ] Test instructor workspace (user001)
+- [ ] Prepare emergency fallback plan
+- [ ] Share participant URLs
+
+### Phase 9: UI Improvements
 - [ ] Test and improve UI with PD A Helme
+- [ ] Gather user feedback during workshop
+- [ ] Address UI/UX issues
 
-### Phase 9: Code Quality Polish
-- [ ] Address deferred code quality issues 
+### Phase 10: Code Quality Polish
+- [ ] Address deferred code quality issues
 - [ ] Comment code as per best practices
 
 ---
