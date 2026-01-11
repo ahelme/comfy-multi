@@ -9,7 +9,7 @@
 
 # ComfyUI Multi-User Workshop Platform
 
-**Project Status:** Docs Fixing then Test Deployment Stage
+**Project Status:** Test Deployment Stage
 
 A scalable, multi-user ComfyUI platform with split app-server/inference-provider architecture, designed for AI workshops with shared GPU resources. Supports 20 isolated user workspaces with centralized job queue management.
 
