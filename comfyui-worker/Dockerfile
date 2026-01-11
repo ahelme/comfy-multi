@@ -3,7 +3,7 @@ FROM nvidia/cuda:12.1.0-cudnn8-runtime-ubuntu22.04
 # Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONUNBUFFERED=1 \
-    COMFYUI_VERSION=latest
+    COMFYUI_VERSION=v0.8.2
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -18,8 +18,8 @@ RUN apt-get update && apt-get install -y \
 # Create working directory
 WORKDIR /workspace
 
-# Clone ComfyUI
-RUN git clone https://github.com/comfyanonymous/ComfyUI.git /workspace/ComfyUI
+# Clone ComfyUI v0.8.2
+RUN git clone --branch v0.8.2 --depth 1 https://github.com/comfyanonymous/ComfyUI.git /workspace/ComfyUI
 
 # Install ComfyUI dependencies
 WORKDIR /workspace/ComfyUI

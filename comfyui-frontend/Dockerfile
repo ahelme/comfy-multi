@@ -3,7 +3,7 @@ FROM node:20-slim AS frontend-builder
 # Build ComfyUI frontend
 WORKDIR /build
 RUN apt-get update && apt-get install -y git && \
-    git clone https://github.com/comfyanonymous/ComfyUI.git . && \
+    git clone --branch v0.8.2 --depth 1 https://github.com/comfyanonymous/ComfyUI.git . && \
     rm -rf .git
 
 # Install Python dependencies for running ComfyUI (CPU only)

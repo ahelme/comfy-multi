@@ -41,14 +41,9 @@ services:
     networks:
       - comfy-network
     restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: 512M
-        reservations:
-          cpus: '0.5'
-          memory: 256M
+    # Resource limits (Compose syntax, not Swarm)
+    cpus: 1.0
+    mem_limit: 512M
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/health/ping"]
       interval: 30s
@@ -74,14 +69,9 @@ services:
     networks:
       - comfy-network
     restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '2.0'
-          memory: 2G
-        reservations:
-          cpus: '1.0'
-          memory: 1G
+    # Resource limits (Compose syntax, not Swarm)
+    cpus: 2.0
+    mem_limit: 2G
     healthcheck:
       test: ["CMD", "redis-cli", "--no-auth-warning", "-a", "${REDIS_PASSWORD}", "ping"]
       interval: 10s
@@ -122,14 +112,9 @@ services:
     networks:
       - comfy-network
     restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '2.0'
-          memory: 2G
-        reservations:
-          cpus: '1.0'
-          memory: 512M
+    # Resource limits (Compose syntax, not Swarm)
+    cpus: 2.0
+    mem_limit: 2G
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
       interval: 15s
@@ -168,14 +153,13 @@ services:
     networks:
       - comfy-network
     restart: ${WORKER_RESTART_POLICY:-unless-stopped}
+    # Resource limits (Compose syntax, not Swarm)
+    cpus: 4.0
+    mem_limit: ${WORKER_GPU_MEMORY_LIMIT:-70G}
+    # GPU allocation (requires deploy.resources.reservations.devices for Compose)
     deploy:
       resources:
-        limits:
-          cpus: '4.0'
-          memory: ${WORKER_GPU_MEMORY_LIMIT:-70G}
         reservations:
-          cpus: '2.0'
-          memory: 8G
           devices:
             - driver: nvidia
               count: 1
@@ -212,14 +196,9 @@ services:
     networks:
       - comfy-network
     restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: 1G
-        reservations:
-          cpus: '0.5'
-          memory: 256M
+    # Resource limits (Compose syntax, not Swarm)
+    cpus: 1.0
+    mem_limit: 1G
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 30s

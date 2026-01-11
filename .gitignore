@@ -64,3 +64,5 @@ docs-backup-*/
 
 # Docker
 .docker/
+USER_CREDENTIALS.txt
+*.backup*

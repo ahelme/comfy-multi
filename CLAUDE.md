@@ -3,7 +3,7 @@
 **Repository:** github.com/ahelme/comfy-multi
 **Domain:** comfy.ahelme.net
 **Doc Created:** 2026-01-02
-**Doc Updated:** 2026-01-10
+**Doc Updated:** 2026-01-11
 
 ---
 
@@ -31,6 +31,8 @@ A multi-user ComfyUI platform for a video generation workshop with 20 participan
 - Central job queue (FIFO/round-robin/priority) ✅
 - 1-3 GPU workers on H100 ✅
 - HTTPS with existing ahelme.net SSL cert ✅
+- HTTP Basic Auth password protection ✅
+- Tailscale VPN for secure Redis connection ✅
 - Persistent user storage ✅
 - Admin dashboard for instructor ✅
 - Real-time health monitoring ✅
@@ -220,14 +222,33 @@ test: add integration tests for worker
 
 ### Services
 - **Queue Manager:** Python 3.11+ with FastAPI + WebSocket
-- **Workers:** ComfyUI (official) with GPU support
-- **Frontends:** ComfyUI web UI + custom queue redirect node
-- **Admin:** HTML/JS or Streamlit (TBD)
+- **Workers:** ComfyUI v0.8.2 with GPU support
+- **Frontends:** ComfyUI v0.8.2 web UI (CPU-only mode)
+- **Admin:** HTML/JS dashboard
 
 ### Deployment
 - **Development:** Docker Compose locally
 - **Production:** Hetzner VPS + Remote GPU (e.g. Verda) H100 instance
 - **GPU:** NVIDIA H100 80GB (shared)
+
+### Workshop Models
+
+**Primary Video Generation Model:**
+- **LTX-2** (19B parameters) - State-of-the-art open-source video generation
+  - Checkpoint: `ltx-2-19b-dev-fp8.safetensors` (checkpoints/)
+  - Text Encoder: `gemma_3_12B_it.safetensors` (text_encoders/)
+  - Upscaler: `ltx-2-spatial-upscaler-x2-1.0.safetensors` (latent_upscale_models/)
+  - LoRAs:
+    - `ltx-2-19b-distilled-lora-384.safetensors`
+    - `ltx-2-19b-lora-camera-control-dolly-left.safetensors`
+
+**Required ComfyUI Nodes:**
+- **Core v0.7.0+:** `LTXAVTextEncoderLoader`, `LTXVAudioVAEDecode`
+- **Core v0.3.68+:** `LTXVAudioVAELoader`, `LTXVEmptyLatentAudio`
+
+**Model Sources:**
+- HuggingFace: `Lightricks/LTX-2`
+- HuggingFace: `Comfy-Org/ltx-2`
 
 ---
 
@@ -276,6 +297,47 @@ REDIS_PASSWORD=changeme
 - ✅ Outputs persist after restart
 - ✅ Admin can monitor queue
 - ✅ System stable for 8-hour workshop
+
+---
+
+## 🔒 Security & Firewall Configuration
+
+### VPS Firewall (UFW)
+Current firewall rules lock down all ports except essential services:
+
+```bash
+sudo ufw status
+```
+
+**Allowed Ports:**
+- **22/tcp** - SSH (rate limited)
+- **80/tcp, 443/tcp** - HTTP/HTTPS (Nginx Full)
+- **21115-21119/tcp** - RustDesk remote desktop
+- **21116/udp** - RustDesk UDP
+
+**Redis Security:**
+- **Port 6379** - NOT exposed to public internet
+- **Access:** Only via Tailscale VPN (100.99.216.71:6379)
+- **Auth:** Password protected (REDIS_PASSWORD)
+
+### User Authentication
+- **Method:** HTTP Basic Auth (nginx)
+- **Users:** 20 users (user01-user20)
+- **Credentials File:** `/home/dev/projects/comfyui/USER_CREDENTIALS.txt`
+- **htpasswd File:** `/etc/nginx/comfyui-users.htpasswd`
+- **Encryption:** bcrypt (cost 10)
+
+### Tailscale VPN
+- **VPS Tailscale IP:** 100.99.216.71
+- **GPU (Verda) Tailscale IP:** 100.89.38.43
+- **Purpose:** Secure encrypted tunnel for Redis access between VPS and GPU workers
+- **Protocol:** WireGuard (modern, fast, secure)
+
+### SSL/TLS
+- **Provider:** Let's Encrypt
+- **Domain:** comfy.ahelme.net
+- **Expiry:** 2026-04-10 (auto-renewal enabled)
+- **Protocols:** TLSv1.2, TLSv1.3
 
 ---
 
