@@ -155,11 +155,17 @@ ssh user@your-gpu-instance
 # Navigate to models directory
 cd data/models/shared/
 
-# SDXL Base (required)
-wget https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0.safetensors
+# LTX-2 19B Dev Model (required - main checkpoint)
+wget https://huggingface.co/Lightricks/LTX-2/resolve/main/ltx-2-19b-dev-fp8.safetensors \
+  -O ./data/models/checkpoints/ltx-2-19b-dev-fp8.safetensors
 
-# SDXL Refiner (optional)
-wget https://huggingface.co/stabilityai/stable-diffusion-xl-refiner-1.0/resolve/main/sd_xl_refiner_1.0.safetensors
+# Gemma 3 Text Encoder (required for LTX-2)
+wget https://huggingface.co/Comfy-Org/ltx-2/resolve/main/split_files/text_encoders/gemma_3_12B_it.safetensors \
+  -O ./data/models/text_encoders/gemma_3_12B_it.safetensors
+
+# LTX-2 Spatial Upscaler (optional - 2x upscaling)
+wget https://huggingface.co/Lightricks/LTX-2/resolve/main/ltx-2-spatial-upscaler-x2-1.0.safetensors \
+  -O ./data/models/latent_upscale_models/ltx-2-spatial-upscaler-x2-1.0.safetensors
 
 # Video models (if doing video workshop)
 # LTX-Video, HunyuanVideo, or AnimateDiff

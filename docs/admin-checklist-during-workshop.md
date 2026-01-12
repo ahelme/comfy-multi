@@ -3,7 +3,7 @@
 **Repository:** github.com/ahelme/comfy-multi
 **Domain:** comfy.ahelme.net
 **Doc Created:** 2026-01-10
-**Doc Updated:** 2026-01-10
+**Doc Updated:** 2026-01-11
 
 ---
 
@@ -407,8 +407,8 @@ curl -X DELETE https://comfy.ahelme.net/api/jobs/{job_id}
 **"How long will my job take?"**
 ```
 Answer based on current history:
-- SDXL text-to-image: 20-60 seconds
-- SDXL with refiner: 60-120 seconds
+- LTX-2 text-to-video: 60-180 seconds (varies by length)
+- LTX-2 with upscaler: 120-240 seconds
 - Video generation: 3-10 minutes
 - Current queue: X jobs ahead
 ```

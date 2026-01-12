@@ -3,7 +3,7 @@
 **Repository:** github.com/ahelme/comfy-multi
 **Domain:** comfy.ahelme.net
 **Doc Created:** 2026-01-10
-**Doc Updated:** 2026-01-10
+**Doc Updated:** 2026-01-11
 
 ---
 
@@ -36,13 +36,13 @@ Complete these tasks to verify full system functionality and prepare materials.
 
 Download all required models to avoid delays during workshop:
 
-- [ ] SDXL Base model (50GB)
+- [x] LTX-2 19B dev model (~10GB fp8 checkpoint)
   ```bash
   # Verify it's in ./data/models/
-  ls -lah ./data/models/checkpoints/ | grep -i sdxl
+  ls -lah ./data/models/checkpoints/ | grep -i ltx-2
   ```
 
-- [ ] SDXL Refiner (24GB) - if using
+- [x] LTX-2 Gemma 3 text encoder (~5GB)
   ```bash
   ls -lah ./data/models/checkpoints/ | grep -i refiner
   ```
@@ -123,7 +123,7 @@ Download all required models to avoid delays during workshop:
 
 - [ ] Prepare 3-5 example workflows for participants
   - Simple text-to-image workflow
-  - SDXL with refiner workflow
+  - LTX-2 text-to-video workflow
   - Upscaling workflow
   - Any custom workflows
 

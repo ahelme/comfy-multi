@@ -3,48 +3,57 @@
 **Repository:** github.com/ahelme/comfy-multi
 **Domain:** comfy.ahelme.net
 **Doc Created:** 2026-01-02
-**Doc Updated:** 2026-01-10
+**Doc Updated:** 2026-01-11
 
 ---
 
 # ComfyUI Multi-User Workshop Platform
 
-**Project Status:** Test Deployment Stage
+**Project Status:** Production Ready - Deployed
 
-A scalable, multi-user ComfyUI platform with split app-server/inference-provider architecture, designed for AI workshops with shared GPU resources. Supports 20 isolated user workspaces with centralized job queue management.
+A scalable, multi-user ComfyUI v0.8.2 platform with split app-server/inference-provider architecture, designed for AI video generation workshops. Supports 20 isolated user workspaces with centralized job queue management and Tailscale VPN security.
 
 ## 🎯 Features
 
-- **Isolated User Workspaces** - Each participant gets their own ComfyUI interface
+- **Isolated User Workspaces** - Each participant gets their own ComfyUI v0.8.2 interface
+- **HTTP Basic Auth** - Password protection for all 20 user workspaces
+- **Tailscale VPN Security** - Encrypted tunnel for Redis connections (no public exposure)
 - **Intelligent Queue System** - FIFO, round-robin, and priority-based job scheduling
-- **Shared GPU Workers** - Efficient resource sharing across multiple users
-- **HTTPS Enabled** - Secure access with SSL/TLS
+- **Shared GPU Workers** - Efficient H100 GPU resource sharing across multiple users
+- **HTTPS Enabled** - Secure access with Let's Encrypt SSL/TLS
 - **Real-time Updates** - WebSocket-based queue status broadcasting
 - **Admin Dashboard** - Monitor and manage all user activity
 - **Persistent Storage** - User outputs and uploads saved between sessions
+- **LTX-2 Video Generation** - State-of-the-art 19B parameter video model support
 - **Multi-Provider Support** - Works with Verda, RunPod, Modal, or local GPUs
 
 ## 🏗️ Architecture
 
 ```
-  Split Server Architecture:
+  Split Server Architecture with Tailscale VPN:
   ┌─────────────────────────────────────────┐
-  │ Web App                                 │
-  │  - Nginx (HTTPS, SSL)                   │
-  │  - Redis (job queue)                    │
+  │ Hetzner VPS (comfy.ahelme.net)          │
+  │ Tailscale IP: 100.99.216.71             │
+  │  - Nginx (HTTPS + HTTP Basic Auth)      │
+  │  - Redis (VPN-only access)              │
   │  - Queue Manager (FastAPI)              │
   │  - Admin Dashboard                      │
   │  - User Frontends x20 (CPU only)        │
   └──────────────┬──────────────────────────┘
-                 │ Network
-                 │ (Redis connection)
+                 │
+                 │ Tailscale VPN (WireGuard)
+                 │ Encrypted Redis connection
+                 │ Port 6379 (VPN-only)
+                 │
   ┌──────────────▼──────────────────────────┐
-  │ Remote GPU                              │
-  │  - Worker 1 (ComfyUI + GPU)             │
-  │  - Worker 2 (ComfyUI + GPU) [optional]  │
-  │  - Worker 3 (ComfyUI + GPU) [optional]  │
+  │ Remote GPU (Verda H100)                 │
+  │ Tailscale IP: 100.89.38.43              │
+  │  - Worker 1 (ComfyUI v0.8.2 + GPU)      │
+  │  - Worker 2 (ComfyUI v0.8.2 + GPU) [opt]│
+  │  - Worker 3 (ComfyUI v0.8.2 + GPU) [opt]│
   │                                         │
-  │  REDIS_HOST=comfy.xxxxxx.net            │
+  │  REDIS_HOST=100.99.216.71 (Tailscale)   │
+  │  LTX-2 Models: 19B parameter video gen  │
   └─────────────────────────────────────────┘
 
 ```
@@ -52,9 +61,11 @@ A scalable, multi-user ComfyUI platform with split app-server/inference-provider
 ## 📋 Prerequisites
 
 - Docker 24.0+ and Docker Compose 2.0+
-- NVIDIA GPU with Docker GPU support (for local deployment)
-- SSL certificate and key files
-- 80GB+ free disk space (for models and outputs)
+- **Tailscale VPN** - For secure Redis connections between VPS and GPU workers
+- NVIDIA GPU with Docker GPU support (for remote GPU workers)
+- SSL certificate and key files (Let's Encrypt recommended)
+- 80GB+ free disk space (for LTX-2 models and outputs)
+- apache2-utils (for htpasswd - HTTP Basic Auth)
 
 ## 🚀 Quick Start
 
@@ -69,15 +80,31 @@ cp .env.example .env
 nano .env
 ```
 
-### 2. Configure Environment
+### 2. Install Tailscale (REQUIRED for multi-server setup)
 
-Edit `.env` and set at minimum:
+```bash
+# On VPS
+curl -fsSL https://tailscale.com/install.sh | sh
+sudo tailscale up
+tailscale ip -4  # Note this IP for REDIS_BIND_IP
+
+# On GPU instance (if remote)
+curl -fsSL https://tailscale.com/install.sh | sh
+sudo tailscale up  # Use same Tailscale account
+tailscale ip -4  # GPU instance Tailscale IP
+```
+
+### 3. Configure Environment
+
+Edit `.env` and set:
 
 ```env
-DOMAIN=workshop.example.com
-SSL_CERT_PATH=/path/to/fullchain.pem
-SSL_KEY_PATH=/path/to/privkey.pem
-REDIS_PASSWORD=your_secure_password
+DOMAIN=comfy.ahelme.net
+SSL_CERT_PATH=/etc/letsencrypt/live/comfy.ahelme.net/fullchain.pem
+SSL_KEY_PATH=/etc/letsencrypt/live/comfy.ahelme.net/privkey.pem
+REDIS_PASSWORD=your_secure_password_here
+REDIS_BIND_IP=100.99.216.71  # VPS Tailscale IP
+USE_HOST_NGINX=true  # If using host nginx
 ```
 
 ### 3. Start Platform

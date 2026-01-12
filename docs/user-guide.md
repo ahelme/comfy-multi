@@ -3,26 +3,37 @@
 **Repository:** github.com/ahelme/comfy-multi
 **Domain:** comfy.ahelme.net
 **Doc Created:** 2026-01-02
-**Doc Updated:** 2026-01-10
+**Doc Updated:** 2026-01-11
 
 ---
 
 # ComfyUI Workshop - User Guide
 
-Welcome to the ComfyUI Multi-User Workshop! This guide will help you get started with creating AI-generated videos and images.
+Welcome to the ComfyUI v0.8.2 Multi-User Workshop! This guide will help you get started with creating AI-generated videos using LTX-2, the state-of-the-art 19B parameter video generation model.
 
 ## 📍 Accessing Your Workspace
 
-Each participant has a dedicated workspace:
+Each participant has a dedicated, password-protected workspace:
 
-**Your URL**: `https://workshop.ahelme.net/userXXX/`
+**Your URL**: `https://comfy.ahelme.net/userXXX/`
 
 Where `XXX` is your assigned user number (001-020).
 
-Example:
-- User 1: `https://workshop.ahelme.net/user001/`
-- User 10: `https://workshop.ahelme.net/user010/`
-- User 20: `https://workshop.ahelme.net/user020/`
+### Login Credentials
+
+You will receive your login credentials:
+- **Username**: `userXXX` (e.g., user001, user010, user020)
+- **Password**: Provided by instructor (16-character secure password)
+
+### Access Steps:
+1. Navigate to your assigned URL in a web browser
+2. Enter your username and password when prompted (HTTP Basic Auth)
+3. Click "Sign In" or press Enter
+
+**Examples:**
+- User 1: `https://comfy.ahelme.net/user001/` (Username: user01)
+- User 10: `https://comfy.ahelme.net/user010/` (Username: user10)
+- User 20: `https://comfy.ahelme.net/user020/` (Username: user20)
 
 ## 🎨 Getting Started
 
@@ -36,14 +47,14 @@ Navigate to your assigned URL in a web browser. You'll see the ComfyUI interface
 
 ### 2. Load a Pre-built Workflow
 
-We've included several pre-built workflows to help you get started:
+We've included several pre-built workflows for LTX-2 video generation:
 
 1. Click the **Load** button (folder icon) in the top-left
 2. Navigate to the `/workflows/` directory
 3. Select a workflow:
-   - `example_workflow.json` - Basic SDXL text-to-image
-   - `video_generation.json` - Video generation (if available)
-   - `image_upscaling.json` - Enhance image quality
+   - `ltx2_text_to_video.json` - LTX-2 text-to-video generation
+   - `ltx2_with_upscaler.json` - LTX-2 video with 2x spatial upscaling
+   - `ltx2_camera_control.json` - LTX-2 with camera dolly control
 
 ### 3. Customize Your Workflow
 
@@ -298,7 +309,7 @@ To share your workflow with others:
 
 Advanced users can submit jobs via API:
 ```bash
-curl -X POST https://workshop.ahelme.net/api/jobs \
+curl -X POST https://comfy.ahelme.net/api/jobs \
   -H "Content-Type: application/json" \
   -d '{"user_id": "user001", "workflow": {...}}'
 ```
