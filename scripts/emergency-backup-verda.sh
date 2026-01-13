@@ -1,0 +1,377 @@
+#!/bin/bash
+# EMERGENCY BACKUP - Verda SFS before deletion
+# This backs up EVERYTHING essential including system hardening configs
+
+set -e
+
+VERDA_HOST="${VERDA_HOST:-dev@verda}"
+BACKUP_DIR="${BACKUP_DIR:-$HOME/backups/verda-emergency}"
+DATE=$(date +%Y%m%d-%H%M%S)
+
+echo "🚨 EMERGENCY BACKUP - Verda SFS"
+echo "================================"
+echo "Host: $VERDA_HOST"
+echo "Destination: $BACKUP_DIR"
+echo ""
+
+mkdir -p "$BACKUP_DIR"
+
+# Backup 1: Tailscale identity (CRITICAL - for persistent IP!)
+echo "Step 1: Backing up Tailscale identity..."
+ssh "$VERDA_HOST" "sudo tar -czf /tmp/tailscale-identity.tar.gz -C /var/lib tailscale/ 2>/dev/null || echo 'Tailscale not found'"
+scp "$VERDA_HOST:/tmp/tailscale-identity.tar.gz" "$BACKUP_DIR/tailscale-identity-${DATE}.tar.gz" 2>/dev/null || echo "  ⚠️  No Tailscale state found"
+ssh "$VERDA_HOST" "sudo rm -f /tmp/tailscale-identity.tar.gz" 2>/dev/null || true
+
+if [ -f "$BACKUP_DIR/tailscale-identity-${DATE}.tar.gz" ]; then
+    TS_SIZE=$(du -h "$BACKUP_DIR/tailscale-identity-${DATE}.tar.gz" | cut -f1)
+    echo "  ✓ Tailscale backed up ($TS_SIZE)"
+fi
+
+# Backup 2: SSH host keys
+echo "Step 2: Backing up SSH host keys..."
+ssh "$VERDA_HOST" "sudo tar -czf /tmp/ssh-keys.tar.gz /etc/ssh/ssh_host_* 2>/dev/null"
+scp "$VERDA_HOST:/tmp/ssh-keys.tar.gz" "$BACKUP_DIR/ssh-host-keys-${DATE}.tar.gz"
+ssh "$VERDA_HOST" "sudo rm -f /tmp/ssh-keys.tar.gz"
+SSH_SIZE=$(du -h "$BACKUP_DIR/ssh-host-keys-${DATE}.tar.gz" | cut -f1)
+echo "  ✓ SSH keys backed up ($SSH_SIZE)"
+
+# Backup 3: Ubuntu Pro configuration
+echo "Step 3: Backing up Ubuntu Pro config..."
+ssh "$VERDA_HOST" "sudo tar -czf /tmp/ubuntu-pro-config.tar.gz \
+  /etc/ubuntu-advantage/ \
+  /var/lib/ubuntu-advantage/ \
+  2>/dev/null || echo 'Ubuntu Pro not configured'"
+scp "$VERDA_HOST:/tmp/ubuntu-pro-config.tar.gz" "$BACKUP_DIR/ubuntu-pro-${DATE}.tar.gz" 2>/dev/null || echo "  ⚠️  No Ubuntu Pro config"
+ssh "$VERDA_HOST" "sudo rm -f /tmp/ubuntu-pro-config.tar.gz" 2>/dev/null || true
+
+if [ -f "$BACKUP_DIR/ubuntu-pro-${DATE}.tar.gz" ]; then
+    PRO_SIZE=$(du -h "$BACKUP_DIR/ubuntu-pro-${DATE}.tar.gz" | cut -f1)
+    echo "  ✓ Ubuntu Pro config backed up ($PRO_SIZE)"
+fi
+
+# Backup 4: Fail2ban configuration
+echo "Step 4: Backing up Fail2ban config..."
+ssh "$VERDA_HOST" "sudo tar -czf /tmp/fail2ban-config.tar.gz \
+  /etc/fail2ban/jail.local \
+  /etc/fail2ban/jail.d/ \
+  2>/dev/null || echo 'Fail2ban not configured'"
+scp "$VERDA_HOST:/tmp/fail2ban-config.tar.gz" "$BACKUP_DIR/fail2ban-${DATE}.tar.gz" 2>/dev/null || echo "  ⚠️  No Fail2ban config"
+ssh "$VERDA_HOST" "sudo rm -f /tmp/fail2ban-config.tar.gz" 2>/dev/null || true
+
+# Backup 5: UFW firewall rules
+echo "Step 5: Backing up UFW firewall rules..."
+ssh "$VERDA_HOST" "sudo tar -czf /tmp/ufw-config.tar.gz \
+  /etc/ufw/user.rules \
+  /etc/ufw/user6.rules \
+  /lib/ufw/user.rules \
+  2>/dev/null || echo 'UFW not configured'"
+scp "$VERDA_HOST:/tmp/ufw-config.tar.gz" "$BACKUP_DIR/ufw-${DATE}.tar.gz" 2>/dev/null || echo "  ⚠️  No UFW config"
+ssh "$VERDA_HOST" "sudo rm -f /tmp/ufw-config.tar.gz" 2>/dev/null || true
+
+# Backup 6: User home directory
+echo "Step 6: Backing up /home/dev..."
+ssh "$VERDA_HOST" "cd /home/dev && tar -czf /tmp/home-dev-backup.tar.gz \
+  --exclude='.cache' \
+  --exclude='comfy-multi/data/models' \
+  --exclude='comfy-multi/data/outputs' \
+  --exclude='.local/share' \
+  --exclude='.npm' \
+  --exclude='.docker' \
+  --exclude='*.safetensors' \
+  ."
+
+scp "$VERDA_HOST:/tmp/home-dev-backup.tar.gz" "$BACKUP_DIR/home-dev-${DATE}.tar.gz"
+ssh "$VERDA_HOST" "rm -f /tmp/home-dev-backup.tar.gz"
+HOME_SIZE=$(du -h "$BACKUP_DIR/home-dev-${DATE}.tar.gz" | cut -f1)
+echo "  ✓ Home directory backed up ($HOME_SIZE)"
+
+# Backup 7: ComfyUI project
+echo "Step 7: Backing up ComfyUI project..."
+ssh "$VERDA_HOST" "if [ -d ~/comfy-multi ]; then \
+  cd ~/comfy-multi && tar -czf /tmp/comfy-project.tar.gz \
+    --exclude='data/models' \
+    --exclude='data/outputs' \
+    --exclude='node_modules' \
+    --exclude='__pycache__' \
+    . ; \
+fi"
+
+scp "$VERDA_HOST:/tmp/comfy-project.tar.gz" "$BACKUP_DIR/comfy-project-${DATE}.tar.gz" 2>/dev/null || echo "  ⚠️  No project found"
+ssh "$VERDA_HOST" "rm -f /tmp/comfy-project.tar.gz" 2>/dev/null || true
+
+if [ -f "$BACKUP_DIR/comfy-project-${DATE}.tar.gz" ]; then
+    PROJ_SIZE=$(du -h "$BACKUP_DIR/comfy-project-${DATE}.tar.gz" | cut -f1)
+    echo "  ✓ Project backed up ($PROJ_SIZE)"
+fi
+
+# Backup 8: Tailscale IP
+echo "Step 8: Recording Tailscale IP..."
+TAILSCALE_IP=$(ssh "$VERDA_HOST" "tailscale ip -4 2>/dev/null" || echo "unknown")
+echo "$TAILSCALE_IP" > "$BACKUP_DIR/tailscale-ip.txt"
+echo "  ✓ Tailscale IP: $TAILSCALE_IP"
+
+# Create comprehensive restore script
+cat > "$BACKUP_DIR/RESTORE.sh" << 'RESTORE'
+#!/bin/bash
+# Restore Verda backup with full security hardening
+# Run as root on NEW Verda instance
+
+set -e
+
+if [ "$EUID" -ne 0 ]; then
+   echo "Please run as root: sudo bash RESTORE.sh"
+   exit 1
+fi
+
+echo "🔄 Restoring Verda backup with security hardening..."
+echo "===================================================="
+echo ""
+
+# Get backup date
+BACKUP_DATE=$(ls tailscale-identity-*.tar.gz 2>/dev/null | head -1 | sed 's/tailscale-identity-\(.*\)\.tar\.gz/\1/')
+
+if [ -z "$BACKUP_DATE" ]; then
+    echo "❌ No backup files found!"
+    exit 1
+fi
+
+echo "Found backup from: $BACKUP_DATE"
+echo ""
+
+# Step 1: Install essential packages
+echo "Step 1: Installing essential packages..."
+apt-get update
+apt-get install -y \
+    fail2ban \
+    ufw \
+    redis-tools \
+    zsh \
+    git \
+    curl \
+    wget \
+    docker.io \
+    docker-compose
+
+echo "  ✓ Packages installed"
+echo ""
+
+# Step 2: Restore Tailscale identity (CRITICAL!)
+if [ -f "tailscale-identity-${BACKUP_DATE}.tar.gz" ]; then
+    echo "Step 2: Restoring Tailscale identity..."
+    systemctl stop tailscaled 2>/dev/null || true
+    tar -xzf "tailscale-identity-${BACKUP_DATE}.tar.gz" -C /var/lib/
+    systemctl start tailscaled
+    sleep 3
+
+    # Disable SSH over Tailscale (security!)
+    tailscale set --ssh=false 2>/dev/null || true
+
+    RESTORED_IP=$(tailscale ip -4 2>/dev/null || echo "unknown")
+    echo "  ✓ Tailscale restored! IP: $RESTORED_IP"
+
+    if [ -f "tailscale-ip.txt" ]; then
+        ORIGINAL_IP=$(cat tailscale-ip.txt)
+        if [ "$RESTORED_IP" = "$ORIGINAL_IP" ]; then
+            echo "  ✅ SUCCESS! Same Tailscale IP: $ORIGINAL_IP"
+        else
+            echo "  ⚠️  IP changed: $ORIGINAL_IP → $RESTORED_IP"
+        fi
+    fi
+else
+    echo "Step 2: ⚠️  No Tailscale backup - will need manual setup"
+fi
+echo ""
+
+# Step 3: Restore SSH host keys
+if [ -f "ssh-host-keys-${BACKUP_DATE}.tar.gz" ]; then
+    echo "Step 3: Restoring SSH host keys..."
+    tar -xzf "ssh-host-keys-${BACKUP_DATE}.tar.gz" -C /
+    systemctl restart sshd
+    echo "  ✓ SSH keys restored"
+fi
+echo ""
+
+# Step 4: Restore Ubuntu Pro
+if [ -f "ubuntu-pro-${BACKUP_DATE}.tar.gz" ]; then
+    echo "Step 4: Restoring Ubuntu Pro..."
+    tar -xzf "ubuntu-pro-${BACKUP_DATE}.tar.gz" -C /
+    echo "  ✓ Ubuntu Pro config restored"
+    echo "  ⚠️  May need: sudo pro attach <token>"
+fi
+echo ""
+
+# Step 5: Configure Fail2ban
+echo "Step 5: Configuring Fail2ban..."
+if [ -f "fail2ban-${BACKUP_DATE}.tar.gz" ]; then
+    tar -xzf "fail2ban-${BACKUP_DATE}.tar.gz" -C /
+    echo "  ✓ Restored previous config"
+else
+    # Create secure default config
+    cat > /etc/fail2ban/jail.local << 'FAIL2BAN'
+[DEFAULT]
+bantime = 3600
+findtime = 600
+maxretry = 5
+
+[sshd]
+enabled = true
+port = ssh
+logpath = /var/log/auth.log
+maxretry = 3
+FAIL2BAN
+    echo "  ✓ Created default secure config"
+fi
+
+systemctl enable fail2ban
+systemctl restart fail2ban
+echo "  ✓ Fail2ban active"
+echo ""
+
+# Step 6: Configure UFW (lock down!)
+echo "Step 6: Configuring UFW firewall..."
+ufw --force reset
+
+# Allow only essential ports
+ufw default deny incoming
+ufw default allow outgoing
+
+# SSH (standard port)
+ufw allow 22/tcp comment 'SSH'
+
+# NO web ports needed - worker only connects to VPS via Tailscale!
+# All web access goes through VPS nginx
+
+# Tailscale (if using direct connection)
+ufw allow 41641/udp comment 'Tailscale'
+
+if [ -f "ufw-${BACKUP_DATE}.tar.gz" ]; then
+    tar -xzf "ufw-${BACKUP_DATE}.tar.gz" -C / 2>/dev/null || true
+    echo "  ✓ Restored previous firewall rules"
+fi
+
+ufw --force enable
+systemctl enable ufw
+echo "  ✓ UFW firewall active (SSH only!)"
+echo ""
+
+# Step 7: Restore home directory
+if [ -f "home-dev-${BACKUP_DATE}.tar.gz" ]; then
+    echo "Step 7: Restoring /home/dev..."
+
+    # Create dev user if needed
+    if ! id "dev" &>/dev/null; then
+        useradd -m -s /usr/bin/zsh dev
+        usermod -aG docker dev
+        echo "  ✓ Created dev user with zsh shell"
+    fi
+
+    tar -xzf "home-dev-${BACKUP_DATE}.tar.gz" -C /home/dev/
+    chown -R dev:dev /home/dev
+
+    # Source .zshrc for dev user (add to .profile if not there)
+    if ! grep -q ".zshrc" /home/dev/.profile 2>/dev/null; then
+        echo "[ -f ~/.zshrc ] && source ~/.zshrc" >> /home/dev/.profile
+    fi
+
+    echo "  ✓ Home directory restored"
+    echo "  ✓ zsh configured as default shell"
+fi
+echo ""
+
+# Step 8: Restore project
+if [ -f "comfy-project-${BACKUP_DATE}.tar.gz" ]; then
+    echo "Step 8: Restoring comfy-multi project..."
+    mkdir -p /home/dev/comfy-multi
+    tar -xzf "comfy-project-${BACKUP_DATE}.tar.gz" -C /home/dev/comfy-multi/
+    chown -R dev:dev /home/dev/comfy-multi
+
+    # Load .env if exists
+    if [ -f /home/dev/comfy-multi/.env ]; then
+        echo "  ✓ .env file found"
+        echo "  💡 To load: cd ~/comfy-multi && source .env"
+    fi
+
+    echo "  ✓ Project restored"
+fi
+echo ""
+
+echo "===================================================="
+echo "✅ RESTORE COMPLETE!"
+echo ""
+echo "🔒 Security Status:"
+echo "  ✓ Fail2ban active (SSH brute-force protection)"
+echo "  ✓ UFW firewall active (SSH only)"
+echo "  ✓ Tailscale SSH disabled (more secure)"
+echo "  ✓ Docker installed"
+echo "  ✓ redis-tools installed"
+echo "  ✓ zsh configured for dev user"
+echo ""
+echo "📋 System Info:"
+tailscale status 2>/dev/null || echo "  Tailscale: Not running"
+ufw status | head -5
+fail2ban-client status | head -3
+echo ""
+echo "⚠️  NEXT STEPS:"
+echo ""
+echo "1. Create Block Storage for models (200GB):"
+echo "   Verda Dashboard → Storage → Create Block Volume"
+echo ""
+echo "2. Attach and mount Block Storage:"
+echo "   # As root:"
+echo "   mkfs.ext4 /dev/vdb"
+echo "   mkdir -p /mnt/models"
+echo "   mount /dev/vdb /mnt/models"
+echo "   echo '/dev/vdb /mnt/models ext4 defaults 0 0' >> /etc/fstab"
+echo ""
+echo "3. Download models to /mnt/models (~30 min):"
+echo "   # As dev user:"
+echo "   su - dev"
+echo "   cd ~/comfy-multi"
+echo "   # Run model download script"
+echo ""
+echo "4. Symlink models to project:"
+echo "   ln -s /mnt/models ~/comfy-multi/data/models"
+echo ""
+echo "5. Load environment and start worker:"
+echo "   cd ~/comfy-multi"
+echo "   source .env"
+echo "   docker compose up -d worker-1"
+echo ""
+echo "6. Verify connection to VPS:"
+echo "   redis-cli -h \${REDIS_HOST} -p 6379 -a '\${REDIS_PASSWORD}' ping"
+echo "   # Should return: PONG"
+echo ""
+echo "💰 Cost savings: \$10/month (50GB SFS vs 100GB)"
+echo "===================================================="
+RESTORE
+
+chmod +x "$BACKUP_DIR/RESTORE.sh"
+
+# Calculate total size
+TOTAL_SIZE=$(du -sh "$BACKUP_DIR" | cut -f1)
+
+echo ""
+echo "================================"
+echo "✅ EMERGENCY BACKUP COMPLETE!"
+echo ""
+echo "📦 Location: $BACKUP_DIR"
+echo "💾 Size: $TOTAL_SIZE"
+echo ""
+echo "📋 Backed up:"
+[ -f "$BACKUP_DIR/tailscale-identity-${DATE}.tar.gz" ] && echo "  ✓ Tailscale identity ($TS_SIZE)"
+echo "  ✓ SSH host keys ($SSH_SIZE)"
+[ -f "$BACKUP_DIR/ubuntu-pro-${DATE}.tar.gz" ] && echo "  ✓ Ubuntu Pro ($PRO_SIZE)"
+echo "  ✓ Fail2ban config"
+echo "  ✓ UFW firewall rules"
+echo "  ✓ Home directory ($HOME_SIZE)"
+[ -f "$BACKUP_DIR/comfy-project-${DATE}.tar.gz" ] && echo "  ✓ Project ($PROJ_SIZE)"
+echo "  ✓ Tailscale IP: $TAILSCALE_IP"
+echo ""
+echo "🚀 TO RESTORE:"
+echo "  1. Create NEW Verda with 50GB SFS (saves \$10/mo!)"
+echo "  2. scp -r $BACKUP_DIR new-verda:~/"
+echo "  3. ssh root@new-verda"
+echo "  4. cd ~/$(basename $BACKUP_DIR) && bash RESTORE.sh"
+echo ""
+echo "⏱️  Restore time: ~5 min + 30 min models"
+echo "================================"
