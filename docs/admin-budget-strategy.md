@@ -43,23 +43,29 @@ Complete strategy for running a 20-person ComfyUI workshop on a **personal budge
 
 ---
 
-### Tier 2: Validation ($1-2) 💵
+### Tier 2: Validation ($0.30-0.60) 💵
 
-**Where:** Cheap GPU (Vast.ai RTX 3090 @ $0.20-0.40/hr)
-**Duration:** 1-2 hours, 1 day before workshop
-**Cost:** $0.40-0.80
+**Where:** Budget Test GPU (NVIDIA V100 16GB @ $0.14/hr) ⭐
+**Duration:** 2-4 hours, 1 day before workshop
+**Cost:** $0.28-0.56
 
 **Activities:**
-1. Deploy quick-restore package to Vast.ai
-2. Download LTX-2 models (~30 min)
+1. Deploy quick-restore package to V100 instance
+2. Download LTX-2 models (~30 min, works on V100!)
 3. Test 2-3 workflows end-to-end
-4. Time actual generation (estimate queue times)
+4. Time actual generation (slower than H100, but validates workflow)
 5. Verify outputs look good
 6. Create example videos for participants
 
 **Setup time:** 5 minutes (using quick-deploy package)
-**Total time:** 2 hours
-**Cost:** 2 × $0.40 = **$0.80**
+**Total time:** 4 hours (V100 is slower, but much cheaper!)
+**Cost:** 4 × $0.14 = **$0.56**
+
+**Why V100:**
+- ✅ Cheapest GPU with enough VRAM (16GB)
+- ✅ Validates workflows work before H100
+- ✅ 65% cheaper than RTX 3090 ($0.14 vs $0.40/hr)
+- ✅ Perfect for testing, not production
 
 ---
 
@@ -94,17 +100,46 @@ Wait time: ~5 minutes per job
 
 ---
 
-## Total Budget Breakdown
+## Total Budget Breakdown (Verda Storage Strategy)
 
-| Phase | Activity | Duration | Cost |
-|-------|----------|----------|------|
-| **Week 1-2** | Dev on CPU | 20 hours | $0.00 |
-| **Day Before** | GPU validation | 2 hours | $0.80 |
-| **Workshop** | 3× RTX 3090 | 8 hours | $7.20 |
-| **TOTAL** | | 30 hours | **$8.00** |
+### Storage Costs (Persistent, Not Hourly)
+| Component | Size | Duration | Monthly | 3-Month Total |
+|-----------|------|----------|---------|---------------|
+| SFS (System & Config) | 50GB | 3 months | $10.00 | $30.00 |
+| Block (Model Vault) | 200GB | 3 months | $20.00 | $60.00 |
+| Block (Test Scratch) | 50GB | 1 month | $5.00 | $5.00 |
+| Block (Workshop Scratch) | 300GB | 1 month | $30.00 | $30.00 |
+| **STORAGE TOTAL** | 600GB | | | **$125.00** |
 
-**Compare to:** H100 for all development + workshop = $105+ (30 hrs × $3.50/hr)
-**You saved:** **$97** (92% savings!)
+### Compute Costs (Hourly, Only When Running)
+| Phase | GPU | Duration | Rate | Cost |
+|-------|-----|----------|------|------|
+| **Week 1-2** | CPU (laptop) | 20 hours | FREE | $0.00 |
+| **Testing** | V100 16GB | 10 hours | $0.14/hr | $1.40 |
+| **Workshop** | H100 80GB | 8 hours | $4.00/hr | $32.00 |
+| **COMPUTE TOTAL** | | 38 hours | | **$33.40** |
+
+### Grand Total (3 Months)
+```
+Storage (persistent): $125.00
+Compute (on-demand):  + $33.40
+═══════════════════════════════
+TOTAL:                 $158.40
+```
+
+**Compare to alternatives:**
+- **H100 always-on (3 months):** 2,160 hrs × $4 = **$8,640** 🔥💸
+- **No storage, re-download each time:** $96 + 10 sessions × $2.50 downloads = **$121** (plus frustration!)
+- **Verda storage strategy:** **$158.40** (includes 3 months persistent storage!)
+
+**Why this wins:**
+- ✅ Models download ONCE (not 10 times!)
+- ✅ Instant V100 ↔ H100 swapping (same storage!)
+- ✅ System config persists (Tailscale, dotfiles, etc.)
+- ✅ Can shut down compute, storage remains
+- ✅ Future projects use same storage ($30/month after workshop)
+
+**You saved $8,481 vs always-on H100!** (98.2% savings)
 
 ---
 
@@ -205,20 +240,36 @@ Time: 2 minutes, bulletproof
 
 ---
 
-## Budget GPU Provider Comparison
+## Verda GPU Options (All use same storage!)
 
-| Provider | GPU | VRAM | $/hour | Pros | Cons |
-|----------|-----|------|--------|------|------|
-| **Vast.ai** | RTX 3090 | 24GB | $0.20-0.40 | Cheapest, community | Reliability varies |
-| **RunPod** | RTX 4090 | 24GB | $0.39 | Good price, reliable | Limited availability |
-| **Lambda Labs** | A100 40GB | 40GB | $1.10 | Very reliable, fast | More expensive |
-| **Modal** | A100 80GB | 80GB | $1.85 | Pay per second | Need code changes |
-| **Verda** | H100 80GB | 80GB | $3.50-5.00 | Fastest, most VRAM | Most expensive |
+| GPU | VRAM | vCPU | RAM | $/hour | Best For |
+|-----|------|------|-----|--------|----------|
+| **V100** | 16GB | 6 | 23GB | $0.14 ⭐ | Testing, dev, validation |
+| **H100** | 80GB | 24+ | 256GB+ | $3.50-5.00 | Workshop, production |
 
-**Recommendation for workshop:**
-- **Testing:** Vast.ai RTX 3090 ($0.30/hr)
-- **Workshop:** 3× Vast.ai RTX 3090 ($0.90/hr total)
-- **Emergency backup:** Lambda A100 ($1.10/hr) if Vast.ai fails
+**The Magic: Shared Storage!**
+
+Both GPUs mount the SAME storage:
+- ✅ SFS (System): /mnt/system
+- ✅ Block (Models): /mnt/models
+- ✅ Block (Outputs): /mnt/workshop
+
+**Swap workflow:**
+```
+1. Shut down V100
+2. Spin up H100 (attach same storage)
+3. Models already there!
+4. Tailscale identity restored
+5. Ready in 2 minutes
+```
+
+**No re-deployment, no downloads, no config changes!**
+
+**Recommendation:**
+- **Week 1-2:** CPU dev (FREE)
+- **Testing:** V100 ($0.14/hr) - 10 hours = $1.40
+- **Workshop:** H100 ($4/hr) - 8 hours = $32
+- **Total compute:** $33.40
 
 ---
 
