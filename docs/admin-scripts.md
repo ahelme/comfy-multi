@@ -679,7 +679,7 @@ crontab -e
 ---
 
 ### create-dotfiles-repo.sh
-**Purpose:** Create a Git repository of your dotfiles for reproducible setups
+**Purpose:** Create a Git repository of your comfy-multi GPU instance dotfiles for reproducible setups
 
 **Usage:**
 ```bash
@@ -688,7 +688,7 @@ ssh dev@verda "bash /tmp/create-dotfiles-repo.sh"
 ```
 
 **What it does:**
-1. Creates `~/dotfiles` directory
+1. Creates `~/comfy-multi-gpu-instance-dotfiles` directory
 2. Copies configuration files:
    - `.zshrc` (zsh configuration)
    - `.vimrc` (vim configuration)
@@ -701,29 +701,30 @@ ssh dev@verda "bash /tmp/create-dotfiles-repo.sh"
 
 **Output:**
 ```
-🔧 Creating dotfiles repository...
+🔧 Creating comfy-multi GPU instance dotfiles repository...
   Copying config files...
   Copying oh-my-zsh themes...
   Creating install.sh...
 
-✅ Dotfiles repo created at ~/dotfiles
+✅ Comfy-Multi GPU Instance Dotfiles repo created at ~/comfy-multi-gpu-instance-dotfiles
 
 Next steps:
   1. Create GitHub repo: https://github.com/new
+     Suggested name: comfy-multi-gpu-instance-dotfiles
   2. Push dotfiles:
-     cd ~/dotfiles
-     git remote add origin git@github.com:ahelme/dotfiles.git
+     cd ~/comfy-multi-gpu-instance-dotfiles
+     git remote add origin git@github.com:ahelme/comfy-multi-gpu-instance-dotfiles.git
      git branch -M main
      git push -u origin main
 
 To restore on a new machine:
-  git clone https://github.com/ahelme/dotfiles.git ~/dotfiles
-  cd ~/dotfiles && ./install.sh
+  git clone https://github.com/ahelme/comfy-multi-gpu-instance-dotfiles.git ~/comfy-multi-gpu-instance-dotfiles
+  cd ~/comfy-multi-gpu-instance-dotfiles && ./install.sh
 ```
 
 **Files created:**
 ```
-~/dotfiles/
+~/comfy-multi-gpu-instance-dotfiles/
 ├── .zshrc              # Your zsh config
 ├── .vimrc              # Your vim config
 ├── .gitconfig          # Your git config
@@ -742,15 +743,15 @@ To restore on a new machine:
 **After creating, push to GitHub:**
 ```bash
 ssh dev@verda
-cd ~/dotfiles
-git remote add origin git@github.com:ahelme/dotfiles.git
+cd ~/comfy-multi-gpu-instance-dotfiles
+git remote add origin git@github.com:ahelme/comfy-multi-gpu-instance-dotfiles.git
 git push -u origin main
 ```
 
 **Restore on new machine:**
 ```bash
-git clone https://github.com/ahelme/dotfiles.git ~/dotfiles
-cd ~/dotfiles
+git clone https://github.com/ahelme/comfy-multi-gpu-instance-dotfiles.git ~/comfy-multi-gpu-instance-dotfiles
+cd ~/comfy-multi-gpu-instance-dotfiles
 ./install.sh
 exec zsh  # Start using your shell
 ```

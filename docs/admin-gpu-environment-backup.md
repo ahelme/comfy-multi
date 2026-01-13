@@ -44,7 +44,7 @@ scp scripts/create-dotfiles-repo.sh dev@verda:/tmp/
 ssh dev@verda "bash /tmp/create-dotfiles-repo.sh"
 ```
 
-This creates `~/dotfiles` with:
+This creates `~/comfy-multi-gpu-instance-dotfiles` with:
 - `.zshrc` (your zsh configuration)
 - `oh-my-zsh-themes/` (custom themes like bullet-train)
 - `.vimrc`, `.tmux.conf`, `.gitconfig` (if present)
@@ -58,7 +58,7 @@ ssh dev@verda
 
 # Create GitHub repo at: https://github.com/new
 # Then push:
-cd ~/dotfiles
+cd ~/comfy-multi-gpu-instance-dotfiles
 git remote add origin git@github.com:ahelme/dotfiles.git
 git branch -M main
 git push -u origin main
@@ -70,7 +70,7 @@ Edit `scripts/verda-startup-script.sh` and add this section:
 
 ```bash
 # Install dev environment
-DOTFILES_REPO="https://github.com/ahelme/dotfiles.git"
+DOTFILES_REPO="https://github.com/ahelme/comfy-multi-gpu-instance-dotfiles.git"
 
 # Install zsh
 apt-get install -y zsh
@@ -84,8 +84,8 @@ sudo -u dev bash << 'EOF'
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 
 # Clone dotfiles
-git clone $DOTFILES_REPO ~/dotfiles
-cd ~/dotfiles && ./install.sh
+git clone $DOTFILES_REPO ~/comfy-multi-gpu-instance-dotfiles
+cd ~/comfy-multi-gpu-instance-dotfiles && ./install.sh
 EOF
 
 # Change default shell
@@ -200,9 +200,9 @@ ssh new-gpu "sudo tailscale up"
 
 ### For Production Use
 
-**Use dotfiles repo:**
-1. Create and maintain dotfiles repo (one-time setup)
-2. Update startup script to pull dotfiles
+**Use comfy-multi-gpu-instance-dotfiles repo:**
+1. Create and maintain comfy-multi-gpu-instance-dotfiles repo (one-time setup)
+2. Update startup script to pull dotfiles automatically
 3. Spin up new instances with automated setup
 
 **Backup weekly:**
@@ -222,8 +222,8 @@ crontab -e
 
 ### For Team Members
 
-1. **Share dotfiles repo:** `git clone https://github.com/ahelme/dotfiles.git`
-2. **Run install script:** `cd ~/dotfiles && ./install.sh`
+1. **Share comfy-multi-gpu-instance-dotfiles repo:** `git clone https://github.com/ahelme/comfy-multi-gpu-instance-dotfiles.git`
+2. **Run install script:** `cd ~/comfy-multi-gpu-instance-dotfiles && ./install.sh`
 3. **Consistent environment** across all team members
 
 ---
@@ -236,13 +236,13 @@ crontab -e
 - `~/backups/verda/` - Backup storage directory
 
 **On Verda (after backup):**
-- `~/dotfiles/` - Your dotfiles repository
-- `~/dotfiles/.zshrc` - Zsh configuration
-- `~/dotfiles/oh-my-zsh-themes/` - Custom themes
-- `~/dotfiles/install.sh` - Automated installation
+- `~/comfy-multi-gpu-instance-dotfiles/` - Your comfy-multi GPU instance dotfiles repository
+- `~/comfy-multi-gpu-instance-dotfiles/.zshrc` - Zsh configuration
+- `~/comfy-multi-gpu-instance-dotfiles/oh-my-zsh-themes/` - Custom themes
+- `~/comfy-multi-gpu-instance-dotfiles/install.sh` - Automated installation
 
 **On GitHub:**
-- `github.com/ahelme/dotfiles` - Public/private dotfiles repo
+- `github.com/ahelme/comfy-multi-gpu-instance-dotfiles` - ComfyUI GPU instance configuration repo
 
 ---
 
@@ -339,10 +339,10 @@ ssh -T git@github.com
 **Fix:**
 ```bash
 # Ensure script is executable
-chmod +x ~/dotfiles/install.sh
+chmod +x ~/comfy-multi-gpu-instance-dotfiles/install.sh
 
 # Run with sudo for system packages
-cd ~/dotfiles
+cd ~/comfy-multi-gpu-instance-dotfiles
 sudo apt-get update
 ./install.sh
 ```

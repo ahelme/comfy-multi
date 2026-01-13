@@ -1,30 +1,30 @@
 #!/bin/bash
-# Run this on Verda to create a dotfiles backup
+# Run this on Verda to create a comfy-multi GPU instance dotfiles backup
 
 set -e
 
-echo "🔧 Creating dotfiles repository..."
+echo "🔧 Creating comfy-multi GPU instance dotfiles repository..."
 
 # Create dotfiles repo directory
-mkdir -p ~/dotfiles
+mkdir -p ~/comfy-multi-gpu-instance-dotfiles
 
 # Copy configuration files
 echo "  Copying config files..."
-cp ~/.zshrc ~/dotfiles/ 2>/dev/null || echo "    Warning: .zshrc not found"
-cp ~/.vimrc ~/dotfiles/ 2>/dev/null || true
-cp ~/.tmux.conf ~/dotfiles/ 2>/dev/null || true
-cp ~/.gitconfig ~/dotfiles/ 2>/dev/null || true
+cp ~/.zshrc ~/comfy-multi-gpu-instance-dotfiles/ 2>/dev/null || echo "    Warning: .zshrc not found"
+cp ~/.vimrc ~/comfy-multi-gpu-instance-dotfiles/ 2>/dev/null || true
+cp ~/.tmux.conf ~/comfy-multi-gpu-instance-dotfiles/ 2>/dev/null || true
+cp ~/.gitconfig ~/comfy-multi-gpu-instance-dotfiles/ 2>/dev/null || true
 
 # Copy oh-my-zsh custom theme
 if [ -d ~/.oh-my-zsh/custom/themes ]; then
     echo "  Copying oh-my-zsh themes..."
-    mkdir -p ~/dotfiles/oh-my-zsh-themes
-    cp -r ~/.oh-my-zsh/custom/themes/* ~/dotfiles/oh-my-zsh-themes/
+    mkdir -p ~/comfy-multi-gpu-instance-dotfiles/oh-my-zsh-themes
+    cp -r ~/.oh-my-zsh/custom/themes/* ~/comfy-multi-gpu-instance-dotfiles/oh-my-zsh-themes/
 fi
 
 # Create installation script
 echo "  Creating install.sh..."
-cat > ~/dotfiles/install.sh << 'INSTALL'
+cat > ~/comfy-multi-gpu-instance-dotfiles/install.sh << 'INSTALL'
 #!/bin/bash
 set -e
 
@@ -49,16 +49,16 @@ fi
 
 # Symlink dotfiles
 echo "  Symlinking dotfiles..."
-ln -sf ~/dotfiles/.zshrc ~/.zshrc
-ln -sf ~/dotfiles/.vimrc ~/.vimrc 2>/dev/null || true
-ln -sf ~/dotfiles/.tmux.conf ~/.tmux.conf 2>/dev/null || true
-ln -sf ~/dotfiles/.gitconfig ~/.gitconfig 2>/dev/null || true
+ln -sf ~/comfy-multi-gpu-instance-dotfiles/.zshrc ~/.zshrc
+ln -sf ~/comfy-multi-gpu-instance-dotfiles/.vimrc ~/.vimrc 2>/dev/null || true
+ln -sf ~/comfy-multi-gpu-instance-dotfiles/.tmux.conf ~/.tmux.conf 2>/dev/null || true
+ln -sf ~/comfy-multi-gpu-instance-dotfiles/.gitconfig ~/.gitconfig 2>/dev/null || true
 
 # Install custom oh-my-zsh themes
-if [ -d ~/dotfiles/oh-my-zsh-themes ]; then
+if [ -d ~/comfy-multi-gpu-instance-dotfiles/oh-my-zsh-themes ]; then
     echo "  Installing oh-my-zsh themes..."
     mkdir -p ~/.oh-my-zsh/custom/themes
-    cp -r ~/dotfiles/oh-my-zsh-themes/* ~/.oh-my-zsh/custom/themes/
+    cp -r ~/comfy-multi-gpu-instance-dotfiles/oh-my-zsh-themes/* ~/.oh-my-zsh/custom/themes/
 fi
 
 # Change default shell to zsh
@@ -70,19 +70,19 @@ echo "✅ Dev environment installed!"
 echo "   Run 'exec zsh' to start using your shell"
 INSTALL
 
-chmod +x ~/dotfiles/install.sh
+chmod +x ~/comfy-multi-gpu-instance-dotfiles/install.sh
 
 # Create README
-cat > ~/dotfiles/README.md << 'README'
-# Development Environment Dotfiles
+cat > ~/comfy-multi-gpu-instance-dotfiles/README.md << 'README'
+# ComfyUI Multi-User GPU Instance Development Environment
 
-Quick setup for zsh, oh-my-zsh, custom themes, and Tailscale.
+Quick setup for zsh, oh-my-zsh, custom themes, and Tailscale for ComfyUI GPU worker instances.
 
 ## Installation
 
 ```bash
-git clone https://github.com/ahelme/dotfiles.git ~/dotfiles
-cd ~/dotfiles
+git clone https://github.com/ahelme/comfy-multi-gpu-instance-dotfiles.git ~/comfy-multi-gpu-instance-dotfiles
+cd ~/comfy-multi-gpu-instance-dotfiles
 ./install.sh
 ```
 
@@ -108,22 +108,23 @@ cd ~/dotfiles
 README
 
 # Initialize git repo
-cd ~/dotfiles
+cd ~/comfy-multi-gpu-instance-dotfiles
 git init
 git add .
-git commit -m "Initial dotfiles backup - zsh, oh-my-zsh, custom themes"
+git commit -m "Initial comfy-multi GPU instance dotfiles - zsh, oh-my-zsh, custom themes"
 
 echo ""
-echo "✅ Dotfiles repo created at ~/dotfiles"
+echo "✅ Comfy-Multi GPU Instance Dotfiles repo created at ~/comfy-multi-gpu-instance-dotfiles"
 echo ""
 echo "Next steps:"
 echo "  1. Create GitHub repo: https://github.com/new"
+echo "     Suggested name: comfy-multi-gpu-instance-dotfiles"
 echo "  2. Push dotfiles:"
-echo "     cd ~/dotfiles"
-echo "     git remote add origin git@github.com:ahelme/dotfiles.git"
+echo "     cd ~/comfy-multi-gpu-instance-dotfiles"
+echo "     git remote add origin git@github.com:ahelme/comfy-multi-gpu-instance-dotfiles.git"
 echo "     git branch -M main"
 echo "     git push -u origin main"
 echo ""
 echo "To restore on a new machine:"
-echo "  git clone https://github.com/ahelme/dotfiles.git ~/dotfiles"
-echo "  cd ~/dotfiles && ./install.sh"
+echo "  git clone https://github.com/ahelme/comfy-multi-gpu-instance-dotfiles.git ~/comfy-multi-gpu-instance-dotfiles"
+echo "  cd ~/comfy-multi-gpu-instance-dotfiles && ./install.sh"
