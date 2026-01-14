@@ -153,12 +153,32 @@ The generated restore script performs:
 3. **Create 10GB Block Storage** - "Scratch Disk"
 4. **Provision V100 16GB** - $0.14/hr for testing
 
+### Mount SFS (Shared File System)
+
+The SFS contains your system files, user config, and ComfyUI project.
+
+```bash
+# 1. Create mount directory
+sudo mkdir -p /mnt/SFS-3kFzriy5
+
+# 2. Mount the shared filesystem
+sudo mount -t nfs -o nconnect=16 nfs.fin-01.datacrunch.io:/SFS-3kFzriy5-7f7ec672 /mnt/SFS-3kFzriy5
+
+# 3. Add to fstab for persistence (auto-mount on reboot)
+grep -qxF 'nfs.fin-01.datacrunch.io:/SFS-3kFzriy5-7f7ec672 /mnt/SFS-3kFzriy5 nfs defaults,nconnect=16 0 0' /etc/fstab || \
+  echo 'nfs.fin-01.datacrunch.io:/SFS-3kFzriy5-7f7ec672 /mnt/SFS-3kFzriy5 nfs defaults,nconnect=16 0 0' | sudo tee -a /etc/fstab
+```
+
+**Note:** You can customize the mount point (e.g., `/mnt/sfs` instead of `/mnt/SFS-3kFzriy5`).
+
 ### Mount Block Storage
+
+Block storage is for models and scratch data.
 
 ```bash
 # As root on new Verda instance
-mkfs.ext4 /dev/vdb  # Model Vault
-mkfs.ext4 /dev/vdc  # Scratch Disk
+mkfs.ext4 /dev/vdb  # Model Vault (only run once on NEW volumes!)
+mkfs.ext4 /dev/vdc  # Scratch Disk (only run once on NEW volumes!)
 mkdir -p /mnt/models /mnt/scratch
 mount /dev/vdb /mnt/models
 mount /dev/vdc /mnt/scratch
