@@ -104,8 +104,22 @@ if [ -f "$BACKUP_DIR/comfy-project-${DATE}.tar.gz" ]; then
     echo "  ✓ Project backed up ($PROJ_SIZE)"
 fi
 
-# Backup 8: Tailscale IP
-echo "Step 8: Recording Tailscale IP..."
+# Backup 8: Oh-my-zsh custom themes and plugins
+echo "Step 8: Backing up oh-my-zsh custom configs..."
+ssh "$VERDA_HOST" "if [ -d ~/.oh-my-zsh/custom ]; then \
+  tar -czf /tmp/ohmyzsh-custom.tar.gz -C ~/.oh-my-zsh custom/ ; \
+fi"
+
+scp "$VERDA_HOST:/tmp/ohmyzsh-custom.tar.gz" "$BACKUP_DIR/ohmyzsh-custom-${DATE}.tar.gz" 2>/dev/null || echo "  ⚠️  No oh-my-zsh custom found"
+ssh "$VERDA_HOST" "rm -f /tmp/ohmyzsh-custom.tar.gz" 2>/dev/null || true
+
+if [ -f "$BACKUP_DIR/ohmyzsh-custom-${DATE}.tar.gz" ]; then
+    OMZ_SIZE=$(du -h "$BACKUP_DIR/ohmyzsh-custom-${DATE}.tar.gz" | cut -f1)
+    echo "  ✓ oh-my-zsh custom backed up ($OMZ_SIZE)"
+fi
+
+# Backup 9: Tailscale IP
+echo "Step 9: Recording Tailscale IP..."
 TAILSCALE_IP=$(ssh "$VERDA_HOST" "tailscale ip -4 2>/dev/null" || echo "unknown")
 echo "$TAILSCALE_IP" > "$BACKUP_DIR/tailscale-ip.txt"
 echo "  ✓ Tailscale IP: $TAILSCALE_IP"
@@ -227,6 +241,33 @@ systemctl restart fail2ban
 echo "  ✓ Fail2ban active"
 echo ""
 
+# Step 5b: Install oh-my-zsh and bullet-train theme
+echo "Step 5b: Installing oh-my-zsh and bullet-train..."
+if [ ! -d /home/dev/.oh-my-zsh ]; then
+    sudo -u dev sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+    echo "  ✓ oh-my-zsh installed"
+else
+    echo "  ✓ oh-my-zsh already present from backup"
+fi
+
+# Restore oh-my-zsh custom themes/plugins if backed up
+if [ -f "ohmyzsh-custom-${BACKUP_DATE}.tar.gz" ]; then
+    echo "  Restoring oh-my-zsh custom themes/plugins..."
+    sudo -u dev tar -xzf "ohmyzsh-custom-${BACKUP_DATE}.tar.gz" -C /home/dev/.oh-my-zsh/
+    echo "  ✓ oh-my-zsh custom restored from backup"
+else
+    # Install bullet-train theme if not present
+    if [ ! -f /home/dev/.oh-my-zsh/custom/themes/bullet-train.zsh-theme ]; then
+        sudo -u dev mkdir -p /home/dev/.oh-my-zsh/custom/themes
+        sudo -u dev curl -fsSL https://raw.githubusercontent.com/caiogondim/bullet-train.zsh/master/bullet-train.zsh-theme \
+            -o /home/dev/.oh-my-zsh/custom/themes/bullet-train.zsh-theme
+        echo "  ✓ bullet-train theme installed"
+    else
+        echo "  ✓ bullet-train theme already present"
+    fi
+fi
+echo ""
+
 # Step 6: Configure UFW (lock down!)
 echo "Step 6: Configuring UFW firewall..."
 ufw --force reset
@@ -313,24 +354,38 @@ fail2ban-client status | head -3
 echo ""
 echo "⚠️  NEXT STEPS:"
 echo ""
-echo "1. Create Block Storage for models (200GB):"
+echo "1. Create Block Storage volumes:"
 echo "   Verda Dashboard → Storage → Create Block Volume"
+echo "   - Model Vault: 40GB (for LTX-2 models ~21GB)"
+echo "   - Scratch Disk: 10GB (for outputs/temp files)"
 echo ""
 echo "2. Attach and mount Block Storage:"
 echo "   # As root:"
-echo "   mkfs.ext4 /dev/vdb"
-echo "   mkdir -p /mnt/models"
+echo "   mkfs.ext4 /dev/vdb  # Model Vault"
+echo "   mkfs.ext4 /dev/vdc  # Scratch Disk"
+echo "   mkdir -p /mnt/models /mnt/scratch"
 echo "   mount /dev/vdb /mnt/models"
+echo "   mount /dev/vdc /mnt/scratch"
+echo "   chown dev:dev /mnt/models /mnt/scratch"
 echo "   echo '/dev/vdb /mnt/models ext4 defaults 0 0' >> /etc/fstab"
+echo "   echo '/dev/vdc /mnt/scratch ext4 defaults 0 0' >> /etc/fstab"
 echo ""
-echo "3. Download models to /mnt/models (~30 min):"
+echo "3. Create symlinks to ComfyUI directories:"
 echo "   # As dev user:"
 echo "   su - dev"
-echo "   cd ~/comfy-multi"
-echo "   # Run model download script"
+echo "   mkdir -p ~/comfy-multi/data"
+echo "   ln -sf /mnt/models ~/comfy-multi/data/models"
+echo "   ln -sf /mnt/scratch ~/comfy-multi/data/outputs"
 echo ""
-echo "4. Symlink models to project:"
-echo "   ln -s /mnt/models ~/comfy-multi/data/models"
+echo "4. Download models to /mnt/models (~30 min):"
+echo "   cd ~/comfy-multi"
+echo "   # Run: bash scripts/download-models.sh"
+echo "   # Or download manually from HuggingFace:"
+echo "   # - ltx-2-19b-dev-fp8.safetensors (~10GB)"
+echo "   # - gemma_3_12B_it.safetensors (~5GB)"
+echo "   # - ltx-2-spatial-upscaler-x2-1.0.safetensors (~2GB)"
+echo "   # - ltx-2-19b-distilled-lora-384.safetensors (~2GB)"
+echo "   # - ltx-2-19b-lora-camera-control-dolly-left.safetensors (~2GB)"
 echo ""
 echo "5. Load environment and start worker:"
 echo "   cd ~/comfy-multi"
@@ -341,7 +396,7 @@ echo "6. Verify connection to VPS:"
 echo "   redis-cli -h \${REDIS_HOST} -p 6379 -a '\${REDIS_PASSWORD}' ping"
 echo "   # Should return: PONG"
 echo ""
-echo "💰 Cost savings: \$10/month (50GB SFS vs 100GB)"
+echo "💰 Storage costs: SFS 50GB (\$10) + Block 40GB (\$4) + Block 10GB (\$1) = \$15/month"
 echo "===================================================="
 RESTORE
 
@@ -365,13 +420,18 @@ echo "  ✓ Fail2ban config"
 echo "  ✓ UFW firewall rules"
 echo "  ✓ Home directory ($HOME_SIZE)"
 [ -f "$BACKUP_DIR/comfy-project-${DATE}.tar.gz" ] && echo "  ✓ Project ($PROJ_SIZE)"
+[ -f "$BACKUP_DIR/ohmyzsh-custom-${DATE}.tar.gz" ] && echo "  ✓ oh-my-zsh custom ($OMZ_SIZE)"
 echo "  ✓ Tailscale IP: $TAILSCALE_IP"
 echo ""
 echo "🚀 TO RESTORE:"
-echo "  1. Create NEW Verda with 50GB SFS (saves \$10/mo!)"
+echo "  1. Create NEW Verda instance with:"
+echo "     - 50GB SFS (\$10/mo) for system/config"
+echo "     - 40GB Block Storage (\$4/mo) for Model Vault"
+echo "     - 10GB Block Storage (\$1/mo) for Scratch Disk"
 echo "  2. scp -r $BACKUP_DIR new-verda:~/"
 echo "  3. ssh root@new-verda"
 echo "  4. cd ~/$(basename $BACKUP_DIR) && bash RESTORE.sh"
 echo ""
-echo "⏱️  Restore time: ~5 min + 30 min models"
+echo "⏱️  Restore time: ~10 min system + 30 min models"
+echo "💰 Total storage: \$15/month (was \$20/month)"
 echo "================================"
