@@ -31,7 +31,7 @@ This document covers Phases 9-12 of the ComfyUI Multi-User Workshop implementati
 | Data | Location | Size | Notes |
 |------|----------|------|-------|
 | **Models (LTX-2)** | Cloudflare R2 | ~45GB | `comfy-multi-model-vault-backup` bucket |
-| **Configs** | Hetzner VPS (mello) | ~32KB | `~/backups/verda-block-recovery-20260114/` |
+| **Configs** | Hetzner VPS (mello) | ~50KB | `~/backups/verda/` |
 | **Tailscale identity** | Hetzner VPS (mello) | 5KB | Preserves IP 100.89.38.43 |
 | **oh-my-zsh custom** | Hetzner VPS (mello) | 9KB | bullet-train theme |
 | **.zshrc** | Hetzner VPS (mello) | 14KB | Full shell config |
@@ -59,14 +59,24 @@ This document covers Phases 9-12 of the ComfyUI Multi-User Workshop implementati
 
 ### Backup Script
 
-**Location:** `scripts/emergency-backup-verda.sh`
+**Location:** `scripts/backup-verda.sh`
 
 **Run from:** VPS mello (NOT from Verda!)
 
 ```bash
 cd ~/projects/comfyui
-./scripts/emergency-backup-verda.sh
+
+# Config-only backup (default)
+./scripts/backup-verda.sh
+
+# Full backup including models to Cloudflare R2
+./scripts/backup-verda.sh --with-models
 ```
+
+**Flags:**
+| Flag | Description |
+|------|-------------|
+| `--with-models` or `-m` | Sync .safetensors files to Cloudflare R2 (compares sizes, only uploads if different) |
 
 ### What Gets Backed Up
 
@@ -81,11 +91,12 @@ cd ~/projects/comfyui
 | oh-my-zsh custom | ~/.oh-my-zsh/custom/ | Themes, plugins |
 | ComfyUI project | ~/comfy-multi/ | App code |
 | Tailscale IP | tailscale ip -4 | Reference |
+| Models (--with-models) | ~/comfy-multi/data/models/ | Synced to Cloudflare R2 |
 
 ### Backup Location
 
 ```
-~/backups/verda-emergency/
+~/backups/verda/
 ├── tailscale-identity-YYYYMMDD-HHMMSS.tar.gz
 ├── ssh-host-keys-YYYYMMDD-HHMMSS.tar.gz
 ├── ubuntu-pro-YYYYMMDD-HHMMSS.tar.gz
@@ -216,11 +227,11 @@ echo '/dev/vdc /mnt/scratch ext4 defaults 0 0' >> /etc/fstab
 
 ```bash
 # 1. Transfer backup to new instance
-scp -r ~/backups/verda-emergency/ root@new-verda:~/
+scp -r ~/backups/verda/ root@new-verda:~/
 
 # 2. SSH in and run restore
 ssh root@new-verda
-cd ~/verda-emergency
+cd ~/verda
 bash RESTORE.sh
 
 # 3. Create symlinks (as dev user)
@@ -334,12 +345,17 @@ Depends on Phase 10 research results.
 ### Backup (from mello)
 ```bash
 cd ~/projects/comfyui
-./scripts/emergency-backup-verda.sh
+
+# Config only
+./scripts/backup-verda.sh
+
+# Config + models to R2
+./scripts/backup-verda.sh --with-models
 ```
 
 ### Restore (on new Verda)
 ```bash
-cd ~/verda-emergency
+cd ~/verda
 sudo bash RESTORE.sh
 ```
 

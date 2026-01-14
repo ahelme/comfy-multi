@@ -1,17 +1,39 @@
 #!/bin/bash
-# EMERGENCY BACKUP - Verda SFS before deletion
-# This backs up EVERYTHING essential including system hardening configs
+# BACKUP VERDA - Backup Verda GPU instance configs and optionally models
+# Backs up system hardening configs, user environment, and project files
+# Optional: --with-models flag syncs models to Cloudflare R2
 
 set -e
 
+# Parse flags
+WITH_MODELS=false
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --with-models|-m)
+            WITH_MODELS=true
+            shift
+            ;;
+        *)
+            echo "Unknown option: $1"
+            echo "Usage: $0 [--with-models|-m]"
+            exit 1
+            ;;
+    esac
+done
+
 VERDA_HOST="${VERDA_HOST:-dev@verda}"
-BACKUP_DIR="${BACKUP_DIR:-$HOME/backups/verda-emergency}"
+BACKUP_DIR="${BACKUP_DIR:-$HOME/backups/verda}"
 DATE=$(date +%Y%m%d-%H%M%S)
 
-echo "🚨 EMERGENCY BACKUP - Verda SFS"
-echo "================================"
+# R2 Configuration
+R2_ENDPOINT="https://f1d627b48ef7a4f687d6ac469c8f1dea.r2.cloudflarestorage.com"
+R2_BUCKET="comfy-multi-model-vault-backup"
+
+echo "🔄 BACKUP VERDA"
+echo "==============="
 echo "Host: $VERDA_HOST"
 echo "Destination: $BACKUP_DIR"
+echo "Models to R2: $WITH_MODELS"
 echo ""
 
 mkdir -p "$BACKUP_DIR"
@@ -123,6 +145,70 @@ echo "Step 9: Recording Tailscale IP..."
 TAILSCALE_IP=$(ssh "$VERDA_HOST" "tailscale ip -4 2>/dev/null" || echo "unknown")
 echo "$TAILSCALE_IP" > "$BACKUP_DIR/tailscale-ip.txt"
 echo "  ✓ Tailscale IP: $TAILSCALE_IP"
+
+# Backup 10: Models to R2 (optional)
+if [ "$WITH_MODELS" = true ]; then
+    echo ""
+    echo "Step 10: Syncing models to Cloudflare R2..."
+
+    # Check if AWS CLI is available on Verda (used for R2 S3-compatible API)
+    if ! ssh "$VERDA_HOST" "which aws" &>/dev/null; then
+        echo "  ⚠️  AWS CLI not installed on Verda - skipping R2 sync"
+        echo "  Install with: curl 'https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip' -o '/tmp/awscliv2.zip' && cd /tmp && unzip -o awscliv2.zip && sudo ./aws/install"
+    # Check if R2 transfer already in progress (uses AWS CLI for S3-compatible API)
+    elif ssh "$VERDA_HOST" "pgrep -f 'aws s3'" &>/dev/null; then
+        echo "  ⚠️  Cloudflare R2 transfer already in progress - skipping to avoid duplicates"
+        echo ""
+        echo "  To check progress:  ssh $VERDA_HOST 'ps aux | grep \"aws s3\"'"
+        echo "  To kill & restart:  ssh $VERDA_HOST 'pkill -f \"aws s3\"' && $0 --with-models"
+        echo ""
+    else
+        # Find model directories (check common locations)
+        MODEL_DIRS=$(ssh "$VERDA_HOST" "ls -d ~/comfy-multi/data/models 2>/dev/null || ls -d /mnt/models 2>/dev/null || echo ''")
+
+        if [ -z "$MODEL_DIRS" ]; then
+            echo "  ⚠️  No model directory found"
+        else
+            echo "  Model directory: $MODEL_DIRS"
+
+            # Get list of .safetensors files
+            MODEL_FILES=$(ssh "$VERDA_HOST" "find $MODEL_DIRS -name '*.safetensors' -type f 2>/dev/null")
+
+            if [ -z "$MODEL_FILES" ]; then
+                echo "  ⚠️  No .safetensors files found"
+            else
+                SYNCED=0
+                SKIPPED=0
+
+                while IFS= read -r LOCAL_FILE; do
+                    [ -z "$LOCAL_FILE" ] && continue
+
+                    # Get relative path from models dir
+                    REL_PATH=$(ssh "$VERDA_HOST" "echo '$LOCAL_FILE' | sed 's|.*/models/||'")
+                    LOCAL_SIZE=$(ssh "$VERDA_HOST" "stat -c%s '$LOCAL_FILE' 2>/dev/null || echo 0")
+
+                    # Check if file exists in R2 with same size
+                    R2_SIZE=$(ssh "$VERDA_HOST" "aws --endpoint-url $R2_ENDPOINT s3api head-object --bucket $R2_BUCKET --key '$REL_PATH' --query ContentLength --output text 2>/dev/null || echo 0")
+
+                    if [ "$LOCAL_SIZE" = "$R2_SIZE" ] && [ "$R2_SIZE" != "0" ]; then
+                        echo "  ✓ $REL_PATH (already in R2, same size)"
+                        ((SKIPPED++))
+                    else
+                        echo "  ↑ Uploading $REL_PATH ($(numfmt --to=iec $LOCAL_SIZE))..."
+                        if ssh "$VERDA_HOST" "aws s3 cp '$LOCAL_FILE' 's3://$R2_BUCKET/$REL_PATH' --endpoint-url $R2_ENDPOINT" 2>/dev/null; then
+                            echo "    ✓ Uploaded"
+                            ((SYNCED++))
+                        else
+                            echo "    ✗ Failed"
+                        fi
+                    fi
+                done <<< "$MODEL_FILES"
+
+                echo "  Summary: $SYNCED uploaded, $SKIPPED already synced"
+            fi
+        fi
+    fi
+fi
 
 # Create comprehensive restore script
 cat > "$BACKUP_DIR/RESTORE.sh" << 'RESTORE'
@@ -407,7 +493,7 @@ TOTAL_SIZE=$(du -sh "$BACKUP_DIR" | cut -f1)
 
 echo ""
 echo "================================"
-echo "✅ EMERGENCY BACKUP COMPLETE!"
+echo "✅ BACKUP COMPLETE!"
 echo ""
 echo "📦 Location: $BACKUP_DIR"
 echo "💾 Size: $TOTAL_SIZE"

@@ -30,7 +30,7 @@
 ---
 
 ## Progress Report 9 - 2026-01-14 (Phase 9: Emergency Backup & Serverless Research)
-**Status:** 🔨 In Progress
+**Status:** ✅ Complete
 **Started:** 2026-01-14
 
 ### Activities
@@ -45,20 +45,41 @@ Plan & Documentation:
   - Complete backup/restore procedures
   - Model download instructions
   - Storage mounting guide
+- ✅ Created docs/admin-backup-restore.md (admin quick reference)
 
-Backup Script Enhancements:
-- ✅ Enhanced scripts/emergency-backup-verda.sh
-  - Added oh-my-zsh custom themes/plugins backup
-  - Added bullet-train theme auto-installation in RESTORE.sh
-  - Updated for dual block storage (models + scratch)
-  - Added symlink creation instructions
-  - Updated storage cost summary ($15/month)
+Backup Script (scripts/backup-verda.sh):
+- ✅ Renamed from emergency-backup-verda.sh
+- ✅ Added `--with-models` flag for Cloudflare R2 sync
+- ✅ Added transfer-in-progress detection (prevents duplicate uploads)
+- ✅ Added oh-my-zsh custom themes/plugins backup
+- ✅ Added bullet-train theme auto-installation in RESTORE.sh
+- ✅ Updated for dual block storage (models + scratch)
+- ✅ Tested successfully on new Verda instance
+
+Cloudflare R2 Model Backup:
+- ✅ Set up R2 bucket: `comfy-multi-model-vault-backup`
+- ✅ Uploaded LTX-2 models (~45GB):
+  - checkpoints/ltx-2-19b-dev-fp8.safetensors (25.2 GiB)
+  - text_encoders/gemma_3_12B_it.safetensors (18.6 GiB)
+- Cost: ~$0.68/month (no egress fees)
+
+New Verda Instance Setup:
+- ✅ Created new instance (brave-fish-meows-fin-01)
+- ✅ IP: 65.109.75.32
+- ✅ dev user with sudo, zsh shell
+- ✅ oh-my-zsh + bullet-train theme restored
+- ✅ Tailscale identity restored (IP: 100.89.38.43)
+- ✅ UFW firewall configured (SSH + Tailscale only)
+- ✅ fail2ban active (SSH protection)
+- ✅ comfy-multi repo cloned with .env
+- ✅ SSH config updated on mello
 
 Storage Strategy (Decided):
 - SFS 50GB: Ubuntu, ComfyMulti, user config ($10/month)
 - Block 40GB: Model Vault for LTX-2 (~21GB) ($4/month)
 - Block 10GB: Scratch Disk for outputs ($1/month)
-- **Total storage: $15/month** (down from $20)
+- R2: Model backup (~45GB) ($0.68/month)
+- **Total storage: ~$16/month**
 
 Compute Strategy:
 - V100 16GB: Testing @ $0.14/hr
@@ -70,13 +91,16 @@ Compute Strategy:
 | Hash | Description |
 |------|-------------|
 | 1fb4fe3 | feat: enhance emergency backup with oh-my-zsh and dual block storage |
+| 5903f94 | docs: add Progress Report 9 for backup & serverless phase |
+| 45589ed | docs: add SFS mount instructions for Verda |
+| 17f981e | docs: add current Verda instance details |
+| 0517302 | docs: add Cloudflare R2 model backup storage |
+| 311f943 | docs: add R2 backup details and model restore options |
 
 ### Next Steps
-- [ ] USER ACTION: Restart Verda from console
-- [ ] Execute backup from mello VPS
-- [ ] Verify backup completeness
 - [ ] Research Verda Containers serverless pricing
 - [ ] Create serverless comparison documentation
+- [ ] Test full restore process on fresh instance
 
 ---
 
