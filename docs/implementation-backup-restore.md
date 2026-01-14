@@ -26,6 +26,29 @@ This document covers Phases 9-12 of the ComfyUI Multi-User Workshop implementati
 
 ---
 
+## Backup Locations Summary
+
+| Data | Location | Size | Notes |
+|------|----------|------|-------|
+| **Models (LTX-2)** | Cloudflare R2 | ~45GB | `comfy-multi-model-vault-backup` bucket |
+| **Configs** | Hetzner VPS (mello) | ~32KB | `~/backups/verda-block-recovery-20260114/` |
+| **Tailscale identity** | Hetzner VPS (mello) | 5KB | Preserves IP 100.89.38.43 |
+| **oh-my-zsh custom** | Hetzner VPS (mello) | 9KB | bullet-train theme |
+| **.zshrc** | Hetzner VPS (mello) | 14KB | Full shell config |
+| **.env** | Hetzner VPS (mello) | 1.6KB | Environment variables |
+
+### Cloudflare R2 Details
+
+- **Bucket:** `comfy-multi-model-vault-backup`
+- **Endpoint:** `https://f1d627b48ef7a4f687d6ac469c8f1dea.r2.cloudflarestorage.com`
+- **Location:** Oceania (OC)
+- **Cost:** ~$0.68/month (no egress fees)
+- **Contents:**
+  - `checkpoints/ltx-2-19b-dev-fp8.safetensors` (26GB)
+  - `text_encoders/gemma_3_12B_it.safetensors` (19GB)
+
+---
+
 ## Phase 9: Emergency Backup Verda
 
 ### Prerequisites
@@ -207,20 +230,46 @@ ln -sf /mnt/models ~/comfy-multi/data/models
 ln -sf /mnt/scratch ~/comfy-multi/data/outputs
 ```
 
-### Model Download
+### Model Restore
 
-LTX-2 models (~21GB total):
+**Option A: Restore from Cloudflare R2 (Recommended - faster)**
+
+Models are backed up to Cloudflare R2 for fast restore:
 
 ```bash
-# Download to /mnt/models
+# Install AWS CLI (if not present)
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
+cd /tmp && unzip -o awscliv2.zip && ./aws/install
+
+# Configure R2 credentials
+mkdir -p ~/.aws
+cat > ~/.aws/credentials << 'EOF'
+[default]
+aws_access_key_id = <R2_ACCESS_KEY_ID>
+aws_secret_access_key = <R2_SECRET_ACCESS_KEY>
+EOF
+
+# Download models from R2 (~45GB, ~15-20 min)
+cd /mnt/models
+R2_ENDPOINT="https://f1d627b48ef7a4f687d6ac469c8f1dea.r2.cloudflarestorage.com"
+R2_BUCKET="comfy-multi-model-vault-backup"
+
+aws s3 sync s3://$R2_BUCKET/ . --endpoint-url $R2_ENDPOINT
+```
+
+**Option B: Download from HuggingFace (Fallback)**
+
+If R2 backup unavailable, download fresh from HuggingFace (~45GB, ~30 min):
+
+```bash
 cd /mnt/models
 mkdir -p checkpoints text_encoders latent_upscale_models loras
 
-# Main checkpoint (~10GB)
+# Main checkpoint (~26GB)
 wget https://huggingface.co/Lightricks/LTX-2/resolve/main/ltx-2-19b-dev-fp8.safetensors \
   -O checkpoints/ltx-2-19b-dev-fp8.safetensors
 
-# Text encoder (~5GB)
+# Text encoder (~19GB)
 wget https://huggingface.co/Comfy-Org/ltx-2/resolve/main/split_files/text_encoders/gemma_3_12B_it.safetensors \
   -O text_encoders/gemma_3_12B_it.safetensors
 
