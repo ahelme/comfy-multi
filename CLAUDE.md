@@ -3,7 +3,7 @@
 **Repository:** github.com/ahelme/comfy-multi
 **Domain:** comfy.ahelme.net
 **Doc Created:** 2026-01-02
-**Doc Updated:** 2026-01-11
+**Doc Updated:** 2026-01-14
 
 ---
 
@@ -98,7 +98,7 @@ Ensure these details are listed the top of ALL .md documentation files:
 **Repository:** github.com/ahelme/comfy-multi
 **Domain:** comfy.ahelme.net
 **Doc Created:** 2026-01-02
-**Doc Updated:** 2026-01-11
+**Doc Updated:** 2026-01-14
 
 ==IMPORTANT: Docs MUST be comprehensive yet NO FLUFF - NO extraneous / irrelevant info / value-statements / achievements boasting==
 
@@ -338,6 +338,15 @@ sudo ufw status
 - **Domain:** comfy.ahelme.net
 - **Expiry:** 2026-04-10 (auto-renewal enabled)
 - **Protocols:** TLSv1.2, TLSv1.3
+
+### Cloudflare R2 (Model Backup)
+- **Provider:** Cloudflare R2 (S3-compatible)
+- **Bucket:** `comfy-multi-model-vault-backup`
+- **Endpoint:** `https://f1d627b48ef7a4f687d6ac469c8f1dea.r2.cloudflarestorage.com`
+- **Location:** Oceania (OC)
+- **Purpose:** Backup storage for LTX-2 models (~45GB)
+- **Cost:** ~$0.68/month (no egress fees)
+- **Access:** Via rclone or AWS CLI with R2 API credentials
 
 ---
 
