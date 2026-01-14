@@ -3,7 +3,7 @@
 **Repository:** github.com/ahelme/comfy-multi
 **Domain:** comfy.ahelme.net
 **Doc Created:** 2026-01-04
-**Doc Updated:** 2026-01-12
+**Doc Updated:** 2026-01-14
 
 ---
 
@@ -27,6 +27,57 @@
 
 ---
 --- remember to update [COMMIT.log](./COMMIT.log) EVERY time you update this file!!!
+---
+
+## Progress Report 9 - 2026-01-14 (Phase 9: Emergency Backup & Serverless Research)
+**Status:** 🔨 In Progress
+**Started:** 2026-01-14
+
+### Activities
+
+Plan & Documentation:
+- ✅ Created comprehensive Phase 9-12 plan
+  - Phase 9: Emergency Backup Verda
+  - Phase 10: Research Verda Containers & Serverless
+  - Phase 11: Test Restore to Verda Instance
+  - Phase 12: Docker Container Registry & Serverless
+- ✅ Created docs/implementation-backup-restore.md
+  - Complete backup/restore procedures
+  - Model download instructions
+  - Storage mounting guide
+
+Backup Script Enhancements:
+- ✅ Enhanced scripts/emergency-backup-verda.sh
+  - Added oh-my-zsh custom themes/plugins backup
+  - Added bullet-train theme auto-installation in RESTORE.sh
+  - Updated for dual block storage (models + scratch)
+  - Added symlink creation instructions
+  - Updated storage cost summary ($15/month)
+
+Storage Strategy (Decided):
+- SFS 50GB: Ubuntu, ComfyMulti, user config ($10/month)
+- Block 40GB: Model Vault for LTX-2 (~21GB) ($4/month)
+- Block 10GB: Scratch Disk for outputs ($1/month)
+- **Total storage: $15/month** (down from $20)
+
+Compute Strategy:
+- V100 16GB: Testing @ $0.14/hr
+- H100 80GB: Workshop @ $4/hr
+- Estimated workshop compute: ~$25
+
+### Commits
+
+| Hash | Description |
+|------|-------------|
+| 1fb4fe3 | feat: enhance emergency backup with oh-my-zsh and dual block storage |
+
+### Next Steps
+- [ ] USER ACTION: Restart Verda from console
+- [ ] Execute backup from mello VPS
+- [ ] Verify backup completeness
+- [ ] Research Verda Containers serverless pricing
+- [ ] Create serverless comparison documentation
+
 ---
 
 ## Progress Report 8 - 2026-01-11 (Phase 8: Security & Production Deployment)
