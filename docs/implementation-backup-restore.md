@@ -15,14 +15,19 @@ Complete guide for backing up Verda GPU instance, restoring to new storage confi
 
 ## Overview
 
-This document covers Phases 9-12 of the ComfyUI Multi-User Workshop implementation:
+This document covers Phases 9-13 of the ComfyUI Multi-User Workshop implementation:
 
 | Phase | Description | Status |
 |-------|-------------|--------|
-| **Phase 9** | Emergency Backup Verda | In Progress |
-| **Phase 10** | Research Verda Containers & Serverless | Pending |
-| **Phase 11** | Test Restore to Verda Instance | Pending |
-| **Phase 12** | Docker Container Registry & Serverless | Pending |
+| **Phase 9** | Emergency Backup Verda | ✅ Complete |
+| **Phase 10** | Research Verda Containers & Serverless | ✅ Complete |
+| **Phase 11** | Test Single GPU Instance (Restore & Verify) | 🔨 Current |
+| **Phase 12** | Docker Container Registry | Pending |
+| **Phase 13** | Serverless Container Development | Pending |
+
+**Architecture Options:**
+- **Single GPU Instance:** Fallback, open-source friendly, small workshops
+- **Serverless Containers:** Production, 20+ filmmakers, auto-scaling
 
 ---
 
@@ -178,7 +183,7 @@ The generated restore script performs:
 
 ---
 
-## Phase 11: Test Restore to Verda Instance
+## Phase 11: Test Single GPU Instance (Restore & Verify)
 
 ### Storage Setup (Verda Console)
 
@@ -312,12 +317,12 @@ wget https://huggingface.co/Lightricks/LTX-2-19b-LoRA-Camera-Control-Dolly-Left/
 
 ---
 
-## Phase 12: Docker Container Registry & Serverless
+## Phase 12: Docker Container Registry
 
 ### Container Registry Options
 
-1. **Docker Hub** - Free tier available
-2. **GitHub Container Registry** - Free for public repos
+1. **GitHub Container Registry** (ghcr.io) - Free for public repos, recommended
+2. **Docker Hub** - Free tier available
 3. **Verda Registry** - If available
 
 ### Build and Push
@@ -327,16 +332,108 @@ wget https://huggingface.co/Lightricks/LTX-2-19b-LoRA-Camera-Control-Dolly-Left/
 cd ~/projects/comfyui
 docker build -t comfyui-worker:latest -f comfyui-worker/Dockerfile .
 
-# Tag for registry
-docker tag comfyui-worker:latest username/comfyui-worker:latest
+# Tag for GitHub Container Registry
+docker tag comfyui-worker:latest ghcr.io/ahelme/comfyui-worker:latest
+
+# Login to GHCR
+echo $GITHUB_TOKEN | docker login ghcr.io -u ahelme --password-stdin
 
 # Push
-docker push username/comfyui-worker:latest
+docker push ghcr.io/ahelme/comfyui-worker:latest
 ```
 
-### Serverless Configuration (TBD)
+### Success Criteria
+- [ ] Worker image builds successfully
+- [ ] Image pushed to registry
+- [ ] Image can be pulled from registry
+- [ ] Image runs on fresh Verda instance
 
-Depends on Phase 10 research results.
+---
+
+## Phase 13: Serverless Container Development
+
+### Overview
+
+Build and deploy ComfyUI workers as Verda Serverless Containers for auto-scaling workshop infrastructure.
+
+**Target:** 16-40 concurrent containers for filmmaker workshop
+
+### Prerequisites
+
+- Phase 11 complete (single instance verified working)
+- Phase 12 complete (container in registry)
+- Verda account with Containers access
+
+### Container Requirements
+
+1. **Base Image:** ComfyUI worker from Phase 12
+2. **Model Loading:** From shared Verda Block Storage or R2
+3. **Health Check:** HTTP endpoint for autoscaling
+4. **API Compatibility:** OpenAI-style or custom endpoint
+
+### Development Tasks
+
+1. [ ] Adapt worker Dockerfile for serverless
+   - Add health check endpoint
+   - Configure model path from environment
+   - Optimize startup time
+
+2. [ ] Create serverless configuration
+   ```yaml
+   # verda-container.yaml (example)
+   name: comfyui-worker
+   image: ghcr.io/ahelme/comfyui-worker:latest
+   gpu: H100-SXM5-80GB
+   replicas:
+     min: 0
+     max: 40
+   scaling:
+     metric: queue_length
+     target: 1
+   storage:
+     - type: block
+       path: /mnt/models
+   ```
+
+3. [ ] Test cold start times
+   - Baseline measurement
+   - Optimize if >30 seconds
+   - Consider warm pool (2-3 replicas)
+
+4. [ ] Configure autoscaling
+   - Queue-based scaling sensitivity
+   - Scale-down delay (avoid thrashing)
+   - Max replicas limit
+
+5. [ ] Integration testing
+   - Deploy to Verda Containers
+   - Test with simulated 15 concurrent requests
+   - Monitor metrics (Prometheus/Loki)
+
+6. [ ] Update queue-manager integration
+   - Route jobs to serverless endpoint
+   - Handle async responses
+   - Update status webhooks
+
+### Cost Optimization
+
+- **Acceptable scenario:** Max 16 containers, ~$80-100/workshop
+- **Ideal scenario:** Max 40 containers, ~$200-250/workshop
+- Scale to zero between rounds/breaks
+
+### Success Criteria
+
+- [ ] Container deploys to Verda Containers
+- [ ] Autoscaling responds to queue length
+- [ ] Cold start <30 seconds
+- [ ] 15 concurrent jobs complete successfully
+- [ ] Scale to zero when idle
+- [ ] Integrated with existing queue-manager
+
+### Related Documentation
+
+- [Serverless GPU Research](./research-serverless-gpu.md) - Cost analysis
+- [Verda Containers Docs](https://docs.verda.com/containers/overview)
 
 ---
 
