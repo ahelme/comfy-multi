@@ -168,63 +168,104 @@ Comparison of serverless GPU providers for ComfyUI video generation workshop.
 
 ## Workshop Cost Estimate
 
-**Realistic Filmmaker Assumptions:**
+**Common Assumptions:**
 - 8-hour workshop (2.5 hrs active generation, rest is instruction/breaks)
 - 20 professional filmmakers with discerning standards
 - **20% success rate** - need ~5 attempts per satisfactory "take"
-- Goal: 3 "circle takes" per 30-min round = **15 generations per person per round**
 - 5 generation rounds across the day
 - 3-5 minute inference per video (avg 4 min)
+
+---
+
+### Scenario Comparison
+
+| Metric | Ideal | Acceptable |
+|--------|-------|------------|
+| Takes per round | 3 "circle takes" | 1-2 takes |
+| Generations per person/round | 15 | 6 |
+| Jobs per round (20 people) | 300 | 120 |
+| Total jobs (5 rounds) | **1,500** | **600** |
+| Total GPU-hours | **100** | **40** |
+| Creative freedom | Full iteration | Constrained |
+
+---
+
+### Ideal Scenario: 15 generations/person/round
+
+**Goal:** 3 "circle takes" per round with full creative iteration
 
 **Per 30-min Generation Round:**
 | Metric | Value |
 |--------|-------|
-| Total jobs | 20 people × 15 gens = **300 jobs** |
-| GPU-minutes | 300 × 4 min = **1,200 GPU-min** |
-| GPU-hours | **20 GPU-hours per round** |
+| Total jobs | 20 × 15 = **300 jobs** |
+| GPU-minutes | 300 × 4 = **1,200 GPU-min** |
 
 **Full Workshop:**
 | Metric | Value |
 |--------|-------|
-| Total generations | 5 rounds × 300 = **1,500 jobs** |
-| Total GPU-hours | 5 × 20 = **100 GPU-hours** |
+| Total generations | **1,500 jobs** |
+| Total GPU-hours | **100 GPU-hours** |
 
-### Scenario A: Single H100 Instance
+**Infrastructure Required:**
+- Peak containers: 300 × 4 / 30 = **~40 containers**
+- Cost: ~$200-250
+- Per filmmaker: $10-12.50
+
+---
+
+### Acceptable Scenario: 6 generations/person/round
+
+**Goal:** 1-2 takes per round, more constrained iteration
+
+**Per 30-min Generation Round:**
+| Metric | Value |
+|--------|-------|
+| Total jobs | 20 × 6 = **120 jobs** |
+| GPU-minutes | 120 × 4 = **480 GPU-min** |
+
+**Full Workshop:**
+| Metric | Value |
+|--------|-------|
+| Total generations | **600 jobs** |
+| Total GPU-hours | **40 GPU-hours** |
+
+**Infrastructure Required:**
+- Peak containers: 120 × 4 / 30 = **~16 containers**
+- Cost: ~$80-100
+- Per filmmaker: $4-5
+
+---
+
+### Single H100 Instance Capacity
 
 | Metric | Value |
 |--------|-------|
 | Cost | $2.29 × 8 = **$18.32** |
-| Capacity | 1 job at a time = ~15 jobs/hr |
-| Can process | 8 hrs × 15 = **120 jobs total** |
-| **Reality** | **Cannot handle 1,500 jobs** |
-| Wait time | Unusable - massive backlog |
+| Capacity | ~15 jobs/hr × 8 hrs = **120 jobs** |
 
-**Verdict:** Single instance is not viable for this workload.
+| Scenario | Jobs Needed | Shortfall |
+|----------|-------------|-----------|
+| Ideal (1,500) | 1,500 | **12.5x** - not viable |
+| Acceptable (600) | 600 | **5x** - not viable |
 
-### Scenario B: Verda Serverless (Required)
+**Verdict:** Single instance cannot handle either scenario.
 
-**Concurrency needed per round:**
-- 300 jobs in 30 mins at 4 min each
-- Need: 300 × 4 / 30 = **~40 containers at peak**
+---
 
-| Metric | Value |
-|--------|-------|
-| Peak containers | 40 |
-| Per-round cost | 40 × $2.29 × 0.5hr = **$45.80** |
-| 5 rounds | 5 × $45.80 = **$229** |
-| Scale to zero | Between rounds, lunch, instruction |
-| Realistic total | **~$200-250** |
+### Final Cost Comparison
 
-**Per-person cost:** $200 / 20 = **$10-12.50 per filmmaker**
+| Approach | Cost | Ideal (1,500) | Acceptable (600) | UX |
+|----------|------|---------------|------------------|-----|
+| Single H100 | $18 | 12.5x short | 5x short | Unusable |
+| 5× H100 instances | ~$92 | 2.5x short | Barely works | Poor |
+| Serverless 16x | ~$90 | No | **Yes** | Good |
+| Serverless 40x | ~$225 | **Yes** | Overkill | Excellent |
 
-### Cost Comparison
+**Recommendations:**
+- **Ideal ($200-250):** Full creative freedom, 40 containers, excellent UX
+- **Acceptable ($80-100):** Constrained iteration, 16 containers, good UX
 
-| Approach | Cost | Can Handle Load? | UX |
-|----------|------|------------------|-----|
-| Single H100 | $18 | No (120 vs 1,500 jobs) | Unusable |
-| Serverless 40x | ~$225 | Yes | Excellent |
-
-**Reality check:** This is a production workload, not a demo. Budget accordingly.
+**Reality check:** Even "acceptable" requires serverless. Single instance is not an option.
 
 ---
 
@@ -232,27 +273,29 @@ Comparison of serverless GPU providers for ComfyUI video generation workshop.
 
 ### Required: Verda Containers (Serverless)
 
-**Single instance is not viable.** The math doesn't work:
-- 1,500 jobs needed vs 120 capacity = 12.5x shortfall
+**Single instance is not viable for either scenario.**
 
 **Why Verda Containers:**
-- **Scale:** Can autoscale to 40+ containers for peak demand
-- **Concurrency:** Handle 300 jobs in 30-min rounds
+- **Scale:** Autoscale 16-40 containers based on chosen scenario
 - **EU compliance:** GDPR, data stays in EU
 - **Green energy:** 100% renewable (filmmaker values)
 - **Shared storage:** Models on Verda block storage
 - **Familiar platform:** Already using Verda
 
-**Budget reality:**
-- ~$200-250 for workshop compute
-- $10-12.50 per filmmaker
-- This is professional production infrastructure
+### Budget Options
+
+| Scenario | Containers | Cost | Per Person | Creative Freedom |
+|----------|------------|------|------------|------------------|
+| **Acceptable** | 16 | ~$80-100 | $4-5 | Constrained (6 gens/round) |
+| **Ideal** | 40 | ~$200-250 | $10-12.50 | Full (15 gens/round) |
+
+**Recommendation:** Start with Acceptable ($80-100), scale up if budget allows.
 
 ### Fallback Options
 If Verda Containers unavailable:
-1. **Multiple H100 instances** (5-10x) - manual scaling, ~$180
-2. **RunPod Serverless** - per-second billing, similar cost
-3. **Reduce scope** - fewer rounds, longer wait times
+1. **RunPod Serverless** - per-second billing, similar cost
+2. **Multiple H100 instances** (5-10x) - manual scaling, poor UX
+3. **Reduce scope** - fewer rounds, accept delays
 
 ---
 
