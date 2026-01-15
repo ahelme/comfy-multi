@@ -227,8 +227,8 @@ echo "🔄 Restoring Verda backup with security hardening..."
 echo "===================================================="
 echo ""
 
-# Get backup date
-BACKUP_DATE=$(ls tailscale-identity-*.tar.gz 2>/dev/null | head -1 | sed 's/tailscale-identity-\(.*\)\.tar\.gz/\1/')
+# Get backup date (use most recent backup that has home-dev file)
+BACKUP_DATE=$(ls home-dev-*.tar.gz 2>/dev/null | tail -1 | sed 's/home-dev-\(.*\)\.tar\.gz/\1/')
 
 if [ -z "$BACKUP_DATE" ]; then
     echo "❌ No backup files found!"
@@ -238,9 +238,11 @@ fi
 echo "Found backup from: $BACKUP_DATE"
 echo ""
 
-# Step 1: Install essential packages
+# Step 1: Install essential packages (skip if already installed)
 echo "Step 1: Installing essential packages..."
 apt-get update
+
+# Install packages that won't conflict
 apt-get install -y \
     fail2ban \
     ufw \
@@ -248,9 +250,15 @@ apt-get install -y \
     zsh \
     git \
     curl \
-    wget \
-    docker.io \
-    docker-compose
+    wget
+
+# Only install docker if not already present (Verda images have it pre-installed)
+if ! command -v docker &> /dev/null; then
+    apt-get install -y docker.io docker-compose
+    echo "  ✓ Docker installed"
+else
+    echo "  ✓ Docker already installed (skipping)"
+fi
 
 echo "  ✓ Packages installed"
 echo ""
@@ -286,7 +294,7 @@ echo ""
 if [ -f "ssh-host-keys-${BACKUP_DATE}.tar.gz" ]; then
     echo "Step 3: Restoring SSH host keys..."
     tar -xzf "ssh-host-keys-${BACKUP_DATE}.tar.gz" -C /
-    systemctl restart sshd
+    systemctl restart ssh || systemctl restart sshd || true
     echo "  ✓ SSH keys restored"
 fi
 echo ""
