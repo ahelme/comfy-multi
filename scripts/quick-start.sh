@@ -15,7 +15,7 @@ if [ -z "$SFS_ENDPOINT" ]; then
     exit 1
 fi
 
-echo "🚀 QUICK-START: Verda GPU Worker"
+echo ">>> QUICK-START: Verda GPU Worker"
 echo "================================="
 echo ""
 
@@ -29,9 +29,9 @@ chmod 700 /root/.ssh
 if ! grep -q "dev@vps-for-verda" /root/.ssh/authorized_keys 2>/dev/null; then
     echo "$MELLO_KEY" >> /root/.ssh/authorized_keys
     chmod 600 /root/.ssh/authorized_keys
-    echo "  ✓ Mello SSH key added to root"
+    echo "  OK Mello SSH key added to root"
 else
-    echo "  ✓ Mello SSH key already present"
+    echo "  OK Mello SSH key already present"
 fi
 
 # Also add for dev user if exists
@@ -42,9 +42,9 @@ if id dev &>/dev/null; then
         echo "$MELLO_KEY" >> /home/dev/.ssh/authorized_keys
         chmod 600 /home/dev/.ssh/authorized_keys
         chown -R dev:dev /home/dev/.ssh
-        echo "  ✓ Mello SSH key added to dev user"
+        echo "  OK Mello SSH key added to dev user"
     else
-        echo "  ✓ Mello SSH key already present for dev"
+        echo "  OK Mello SSH key already present for dev"
     fi
 fi
 echo ""
@@ -53,9 +53,9 @@ echo ""
 echo "Step 2: Checking NFS client..."
 if ! command -v mount.nfs &>/dev/null; then
     apt-get update && apt-get install -y nfs-common
-    echo "  ✓ NFS client installed"
+    echo "  OK NFS client installed"
 else
-    echo "  ✓ NFS client already installed"
+    echo "  OK NFS client already installed"
 fi
 echo ""
 
@@ -64,12 +64,12 @@ echo "Step 3: Mounting SFS..."
 mkdir -p /mnt/models
 
 if mountpoint -q /mnt/models; then
-    echo "  ✓ /mnt/models already mounted"
+    echo "  OK /mnt/models already mounted"
 else
     if mount -t nfs "$SFS_ENDPOINT":/share /mnt/models; then
-        echo "  ✓ SFS mounted at /mnt/models"
+        echo "  OK SFS mounted at /mnt/models"
     else
-        echo "  ✗ Failed to mount SFS"
+        echo "  FAIL Failed to mount SFS"
         echo "  Check endpoint: $SFS_ENDPOINT"
         exit 1
     fi
@@ -79,9 +79,9 @@ echo ""
 # Step 4: Verify models exist
 echo "Step 4: Verifying models..."
 if [ -f /mnt/models/checkpoints/ltx-2-19b-dev-fp8.safetensors ]; then
-    echo "  ✓ LTX-2 checkpoint found"
+    echo "  OK LTX-2 checkpoint found"
 else
-    echo "  ⚠️  Models not found - run RESTORE.sh --with-models first"
+    echo "  !!  Models not found - run RESTORE.sh --with-models first"
 fi
 echo ""
 
@@ -95,9 +95,9 @@ if [ ! -f "$CONTAINER_IMAGE" ]; then
     echo "  Container image not on SFS, trying to fetch from mello..."
 
     if scp -o ConnectTimeout=10 "$MELLO_HOST:$MELLO_BACKUP" "$CONTAINER_IMAGE" 2>/dev/null; then
-        echo "  ✓ Downloaded from mello!"
+        echo "  OK Downloaded from mello!"
     else
-        echo "  ⚠️  Could not fetch from mello"
+        echo "  !!  Could not fetch from mello"
         echo "  Run RESTORE.sh --build-container first"
         exit 1
     fi
@@ -108,14 +108,14 @@ if [ -f "$CONTAINER_IMAGE" ]; then
     echo "  Loading $IMAGE_SIZE image..."
 
     if docker load < "$CONTAINER_IMAGE"; then
-        echo "  ✓ Container loaded!"
+        echo "  OK Container loaded!"
         docker images | grep -E "comfy|worker" | head -3
     else
-        echo "  ✗ Failed to load container"
+        echo "  FAIL Failed to load container"
         exit 1
     fi
 else
-    echo "  ✗ Container image not found"
+    echo "  FAIL Container image not found"
     exit 1
 fi
 echo ""
@@ -128,7 +128,7 @@ if id dev &>/dev/null; then
     mkdir -p /mnt/scratch
     ln -sf /mnt/scratch /home/dev/comfy-multi/data/outputs 2>/dev/null || true
     chown -R dev:dev /home/dev/comfy-multi/data /mnt/scratch
-    echo "  ✓ Symlinks created"
+    echo "  OK Symlinks created"
 fi
 echo ""
 
@@ -141,18 +141,18 @@ if [ -f /home/dev/comfy-multi/docker-compose.yml ]; then
     [ -f .env ] && source .env
 
     if sudo -u dev docker compose up -d worker-1; then
-        echo "  ✓ Worker started!"
+        echo "  OK Worker started!"
     else
-        echo "  ⚠️  Failed to start worker - check docker compose logs"
+        echo "  !!  Failed to start worker - check docker compose logs"
     fi
 else
-    echo "  ⚠️  docker-compose.yml not found"
+    echo "  !!  docker-compose.yml not found"
     echo "  Clone the repo first or run RESTORE.sh"
 fi
 echo ""
 
 echo "================================="
-echo "✅ QUICK-START COMPLETE!"
+echo "OK QUICK-START COMPLETE!"
 echo ""
 echo "Check worker status:"
 echo "  docker ps"
