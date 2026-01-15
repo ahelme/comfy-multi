@@ -182,6 +182,82 @@ REDIS_HOST=<vps-tailscale-ip> docker compose up -d worker-1
 
 ---
 
+## Deployment Learnings
+
+Hard-won insights from deploying ComfyUI on cloud GPU infrastructure.
+
+### Inference Strategies
+
+**Dedicated Instance** - Spin up a GPU, run jobs, shut down.
+- Simple, predictable pricing
+- Best for: small workshops, testing, development
+- Gotcha: queue backlog during bursts (everyone generates at once after a demo)
+
+**Serverless Containers** - Auto-scale 0→N based on queue depth.
+- Pay per second/minute of actual compute
+- Best for: 10+ concurrent users, bursty workloads
+- Gotcha: cold start time (10-30 seconds for first request)
+
+**Reality check:** A single H100 processes ~15 jobs/hour. With 20 filmmakers generating 5 iterations each after a demo, that's 100 jobs = 6+ hour queue. Serverless with 16 containers clears it in ~25 minutes.
+
+### Storage Proximity Matters
+
+Models are 45GB+. Download time dominates cold start.
+
+| Storage Location | Time to GPU | Best For |
+|------------------|-------------|----------|
+| Same-region SFS/NFS | ~2 seconds (mount) | Fastest warm-up |
+| Same-provider block | ~30 seconds (attach + mount) | Good balance |
+| Cross-region S3/R2 | ~15-30 minutes | Permanent backup only |
+
+**The pattern:** Keep models on provider-local storage (SFS) during active use. Use R2 for permanent backup, not runtime loading.
+
+### Container Strategies
+
+**Container Registry** (Docker Hub, GHCR, provider registry)
+- Pros: Versioned, pull from anywhere, integrates with serverless
+- Cons: Push/pull overhead, registry costs at scale
+- Best for: Serverless, multi-region, team environments
+
+**Tarball on Shared Storage** (our approach)
+- Pros: `docker load` in ~2 seconds from SFS, no registry needed
+- Cons: Manual versioning, tied to one provider's storage
+- Best for: Single-provider deployments, workshops
+
+**Why we chose tarball:** With models on Verda SFS anyway, adding the container image (~3GB) means instant `docker load` - no registry round-trip, no cold pull. Total warm-up: mount SFS + load container = ~5 seconds.
+
+### Cloud Provider Gotchas
+
+**Block storage wipe:** Some providers (Verda, others) format block storage attached during instance creation. Always attach storage *after* the instance is running.
+
+**Spot instance termination:** Your GPU can disappear mid-job. Use persistent storage (SFS/NFS) so you don't lose models. Keep state in Redis on your VPS, not on the GPU.
+
+**Container conflicts:** GPU cloud images often have Docker pre-installed. Don't `apt install docker.io` - it conflicts. Check what's already there.
+
+### The Optimal Setup
+
+For workshops and bursty workloads:
+
+```
+Off-season ($1/month):
+  └─ Models in R2 (permanent backup)
+
+Workshop month ($15/month + compute):
+  ├─ VPS running 24/7 (queue + UI)
+  ├─ SFS with models + container tarball
+  └─ GPU instances spin up/down as needed
+
+Daily workflow (30 seconds):
+  1. Create spot GPU instance (no storage attached)
+  2. Mount SFS → models instantly available
+  3. docker load < tarball → worker ready
+  4. Worker connects to VPS queue via Tailscale
+```
+
+**Cost breakdown:** $10 VPS + $14 SFS + $1 R2 + GPU hours. An 8-hour workshop day costs ~$30 total vs $1,700/month for always-on H100.
+
+---
+
 ## Architecture Details
 
 ```
