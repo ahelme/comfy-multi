@@ -17,36 +17,68 @@ Comparison of serverless GPU providers for ComfyUI video generation workshop.
 ## Requirements
 
 - **GPU:** H100 80GB preferred (LTX-2 19B model needs ~40GB VRAM)
-- **Use case:** Bursty inference (20 users, ~8 hour workshop)
+- **Users:** 20 professional filmmakers
+- **Concurrency:** 10-15 simultaneous inference requests expected
+- **Use case:** Bursty inference (everyone generates after demos/instructions)
 - **Inference time:** 1-5 minutes per video generation
-- **Cold start:** Acceptable up to 30-60 seconds
+- **Cold start:** Acceptable up to 30-60 seconds for first request
 - **Storage:** Need to mount model files (~45GB)
+
+---
+
+## Why Serverless Matters (Beyond Cost)
+
+| Single H100 Instance | Serverless Containers |
+|----------------------|----------------------|
+| 1 job at a time | 10-15 concurrent jobs |
+| Queue backlog during bursts | Parallel processing |
+| Paying during breaks/lunch | Scale to zero |
+| Frustrated filmmakers waiting | Everyone generating together |
+| Fixed capacity | Auto-scale to demand |
+
+**Critical insight:** After a demo, 15 filmmakers will all hit "generate" at once.
+
+- **Single H100:** 15-job queue = 15-75 minute wait for the last person
+- **Serverless:** Everyone gets results in ~5 minutes (parallel)
 
 ---
 
 ## Provider Comparison
 
-### Verda Containers
+### Verda Containers (Recommended)
 
 | Feature | Details |
 |---------|---------|
 | **Billing** | 10-minute intervals |
-| **H100 Price** | ~$2.29/hr (same as instances) |
-| **Cold Start** | Not specified |
-| **Storage** | SFS + Block volumes mountable |
+| **H100 SXM5 80GB** | ~$2.29/hr on-demand, ~$1.15/hr spot (50% off) |
+| **Cold Start** | ~10-20 seconds typical (can optimize) |
+| **Storage** | Shared with GPU instances (SFS + Block) |
 | **Scale to Zero** | Yes |
-| **Autoscaling** | Manual + queue-based |
+| **Autoscaling** | Queue-based with adjustable sensitivity |
+| **Max Scale** | "Hundreds of GPUs" supported |
+| **Multi-GPU** | 1x, 2x, 4x configurations |
+
+**Available GPUs:**
+- H100 SXM5 80GB (21 CPU, 175GB RAM)
+- H200 SXM5 141GB
+- A100 SXM4 80GB/40GB
+- L40S 48GB
+- RTX 6000 Ada 48GB
 
 **Pros:**
 - Already using Verda, familiar platform
-- Can share storage (SFS/Block) with containers
-- Same models, same setup
+- Shared storage with instances (models already there)
+- EU data protection (GDPR) + 100% renewable energy
+- Queue-based autoscaling perfect for workshop bursts
+- Prometheus/Loki metrics for monitoring
+- Python SDK + REST API
 
 **Cons:**
-- 10-minute billing granularity (not ideal for short jobs)
-- Limited cold start documentation
+- 10-minute billing granularity
+- Need to build/test container deployment
+- Cold start needs testing/optimization
 
-**Best for:** Long inference jobs (>3 min recommended)
+**Best for:** Your workshop - EU compliance, green energy, shared storage
 
 ---
 
@@ -136,59 +168,99 @@ Comparison of serverless GPU providers for ComfyUI video generation workshop.
 
 ## Workshop Cost Estimate
 
-Assuming 8-hour workshop, 20 users, average 3-minute inference per job:
+**Assumptions:**
+- 8-hour workshop
+- 20 filmmakers
+- ~5 generation rounds per person
+- 3-5 minute inference per video
+- Peak: 15 concurrent requests after demos
 
-### Scenario: Steady Usage (Instance)
+### Scenario A: Single H100 Instance
 
-| Provider | Cost |
-|----------|------|
-| Verda H100 Instance | $2.29 × 8 = **$18.32** |
-| RunPod H100 Instance | $2.69 × 8 = **$21.52** |
+| Metric | Value |
+|--------|-------|
+| Cost | $2.29 × 8 = **$18.32** |
+| Throughput | 1 job at a time |
+| Wait time (15 jobs queued) | 45-75 minutes for last person |
+| User experience | Frustrating during bursts |
 
-### Scenario: Bursty Usage (Serverless)
+### Scenario B: Verda Serverless (Recommended)
 
-Assuming 50% actual GPU utilization over 8 hours:
+| Metric | Value |
+|--------|-------|
+| Base cost | $2.29/hr per active container |
+| Peak replicas | 10-15 containers during bursts |
+| Idle periods | Scale to zero (lunch, explanations) |
+| Wait time | ~5 min (everyone parallel) |
+| User experience | Excellent |
 
-| Provider | Cost |
-|----------|------|
-| Verda Containers | $2.29 × 4 = **$9.16** |
-| RunPod Serverless | $2.69 × 4 = **$10.76** |
-| Modal | $4.76 × 4 = **$19.04** |
+**Estimated cost breakdown:**
+- 4 demo rounds × 15 containers × 10 min = 600 container-minutes = **$22.90**
+- Individual work (spread out) × ~3 containers × 2 hrs = **$13.74**
+- **Total estimate: ~$35-50** (vs $18 for frustrated users)
+
+**Value:** Happy filmmakers > slightly lower cost
 
 ---
 
 ## Recommendation
 
-### For Workshop (Simple)
-**Verda H100 Instance** - $18.32 for 8 hours
-- Already configured and tested
-- No cold start concerns
-- Models already in place
-- Predictable cost
+### Primary: Verda Containers (Serverless)
 
-### For Future (Cost Optimization)
-**Verda Containers** or **RunPod Serverless**
-- Scale to zero when not in use
-- Good for ongoing/recurring workshops
-- Requires container setup and testing
+**Why:**
+- **Concurrency:** Handle 10-15 simultaneous requests
+- **User experience:** No one waits 45+ minutes
+- **EU compliance:** GDPR, data stays in EU
+- **Green energy:** 100% renewable (good for filmmaker values)
+- **Shared storage:** Models already on Verda block storage
+- **Familiar platform:** Already using Verda
+
+**Trade-offs:**
+- Higher cost (~$35-50 vs $18)
+- Need to test container deployment
+- 10-minute billing granularity
+
+### Fallback: Single H100 Instance
+**Only if:**
+- Container deployment fails
+- Budget absolutely critical
+- Accept queue delays during bursts
 
 ---
 
-## Next Steps
+## Next Steps (Phase 11-12)
 
-1. [ ] Test Verda Containers with ComfyUI
-2. [ ] Measure actual cold start times
-3. [ ] Build custom container if needed
-4. [ ] Compare real-world costs
+### Phase 11: Container Development
+1. [ ] Build ComfyUI Docker container for Verda
+2. [ ] Configure model loading from shared storage
+3. [ ] Test cold start times
+4. [ ] Optimize startup (consider memory snapshots)
+
+### Phase 12: Integration & Testing
+1. [ ] Deploy container to Verda Containers
+2. [ ] Configure autoscaling (queue-based)
+3. [ ] Test with 10-15 concurrent requests
+4. [ ] Integrate with queue-manager API
+5. [ ] Load test before workshop
+
+### Cold Start Optimization Research
+From Modal's ComfyUI experience:
+- Baseline cold start: 10-20 seconds
+- With memory snapshots: <3 seconds
+- Key factors: Python deps (~1s), PyTorch/CUDA init (~7s), custom nodes (~2-5s)
+- Consider: Warm pool of 2-3 replicas during workshop
 
 ---
 
 ## Sources
 
 - [Verda Containers Overview](https://docs.verda.com/containers/overview)
+- [Verda Serverless Containers](https://verda.com/serverless-containers)
 - [Verda Products & Pricing](https://verda.com/products)
 - [RunPod Serverless Pricing](https://docs.runpod.io/serverless/pricing)
 - [RunPod GPU Pricing](https://www.runpod.io/pricing)
 - [Modal Pricing](https://modal.com/pricing)
+- [Modal: Scaling ComfyUI](https://modal.com/blog/scaling-comfyui)
+- [Modal: Cold Start ComfyUI <3 seconds](https://modal.com/blog/comfyui-mem-snapshots)
 - [Top Serverless GPU Clouds 2026](https://www.runpod.io/articles/guides/top-serverless-gpu-clouds)
 - [Serverless GPU Platforms Comparison](https://introl.com/blog/serverless-gpu-platforms-runpod-modal-beam-comparison-guide-2025)
