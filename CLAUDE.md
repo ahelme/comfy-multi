@@ -356,6 +356,31 @@ None yet.
 
 ---
 
+## ⚠️ Verda GPU Cloud Gotchas
+
+**CRITICAL: Block storage attached during instance provisioning gets WIPED!**
+
+Verda formats/wipes any block storage volume that is attached during instance creation. This will destroy all data on the volume.
+
+**Safe workflow for existing block storage with data:**
+1. Create instance **WITHOUT** block storage attached
+2. Boot the instance
+3. **Shut down** the instance (required for attachment)
+4. Attach block storage via Verda Dashboard
+5. Boot instance again
+6. Mount the volume: `mount /dev/vdc /mnt/models`
+
+**Volume naming convention:**
+- `OS-*` = OS disks (will have Ubuntu installed)
+- `Volume-*` = Data volumes (your actual block storage)
+
+**Other Verda notes:**
+- Verda images have Docker pre-installed (don't try to install docker.io - conflicts with containerd)
+- Ubuntu 24.04 uses `ssh` service name, not `sshd`
+- Spot instances can be terminated anytime - always use block storage for persistent data
+
+---
+
 ## 🔗 External Links
 
 ### Research References

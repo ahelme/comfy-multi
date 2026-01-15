@@ -57,9 +57,25 @@ cd ~/projects/comfyui
 
 ### 1. Provision Instance (Verda Console)
 
-- Create V100 16GB instance ($0.14/hr for testing)
-- **Do NOT attach block storage during provisioning** (it may get formatted)
-- Attach block storage AFTER instance is running if using existing storage
+⚠️ **CRITICAL: Verda WIPES block storage attached during provisioning!**
+
+- Create A100/H100 instance (spot for cost savings)
+- **Do NOT attach block storage during creation** - it will be formatted/wiped!
+- Instance will boot with ephemeral OS disk only
+
+### 1b. Attach Block Storage (AFTER instance is running)
+
+For **existing** block storage with data:
+1. **Shut down** the instance (required for attachment)
+2. Attach block storage via Verda Dashboard
+3. Boot instance
+4. Mount: `mount /dev/vdc /mnt/models`
+
+For **new** block storage:
+1. Create 60GB volume in Verda Dashboard
+2. Shut down instance, attach volume, boot
+3. Format: `mkfs.ext4 /dev/vdc`
+4. Mount: `mount /dev/vdc /mnt/models`
 
 ### 2. Transfer & Run Restore
 
