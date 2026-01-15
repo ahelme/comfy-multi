@@ -168,63 +168,91 @@ Comparison of serverless GPU providers for ComfyUI video generation workshop.
 
 ## Workshop Cost Estimate
 
-**Assumptions:**
-- 8-hour workshop
-- 20 filmmakers
-- ~5 generation rounds per person
-- 3-5 minute inference per video
-- Peak: 15 concurrent requests after demos
+**Realistic Filmmaker Assumptions:**
+- 8-hour workshop (2.5 hrs active generation, rest is instruction/breaks)
+- 20 professional filmmakers with discerning standards
+- **20% success rate** - need ~5 attempts per satisfactory "take"
+- Goal: 3 "circle takes" per 30-min round = **15 generations per person per round**
+- 5 generation rounds across the day
+- 3-5 minute inference per video (avg 4 min)
+
+**Per 30-min Generation Round:**
+| Metric | Value |
+|--------|-------|
+| Total jobs | 20 people × 15 gens = **300 jobs** |
+| GPU-minutes | 300 × 4 min = **1,200 GPU-min** |
+| GPU-hours | **20 GPU-hours per round** |
+
+**Full Workshop:**
+| Metric | Value |
+|--------|-------|
+| Total generations | 5 rounds × 300 = **1,500 jobs** |
+| Total GPU-hours | 5 × 20 = **100 GPU-hours** |
 
 ### Scenario A: Single H100 Instance
 
 | Metric | Value |
 |--------|-------|
 | Cost | $2.29 × 8 = **$18.32** |
-| Throughput | 1 job at a time |
-| Wait time (15 jobs queued) | 45-75 minutes for last person |
-| User experience | Frustrating during bursts |
+| Capacity | 1 job at a time = ~15 jobs/hr |
+| Can process | 8 hrs × 15 = **120 jobs total** |
+| **Reality** | **Cannot handle 1,500 jobs** |
+| Wait time | Unusable - massive backlog |
 
-### Scenario B: Verda Serverless (Recommended)
+**Verdict:** Single instance is not viable for this workload.
+
+### Scenario B: Verda Serverless (Required)
+
+**Concurrency needed per round:**
+- 300 jobs in 30 mins at 4 min each
+- Need: 300 × 4 / 30 = **~40 containers at peak**
 
 | Metric | Value |
 |--------|-------|
-| Base cost | $2.29/hr per active container |
-| Peak replicas | 10-15 containers during bursts |
-| Idle periods | Scale to zero (lunch, explanations) |
-| Wait time | ~5 min (everyone parallel) |
-| User experience | Excellent |
+| Peak containers | 40 |
+| Per-round cost | 40 × $2.29 × 0.5hr = **$45.80** |
+| 5 rounds | 5 × $45.80 = **$229** |
+| Scale to zero | Between rounds, lunch, instruction |
+| Realistic total | **~$200-250** |
 
-**Estimated cost breakdown:**
-- 4 demo rounds × 15 containers × 10 min = 600 container-minutes = **$22.90**
-- Individual work (spread out) × ~3 containers × 2 hrs = **$13.74**
-- **Total estimate: ~$35-50** (vs $18 for frustrated users)
+**Per-person cost:** $200 / 20 = **$10-12.50 per filmmaker**
 
-**Value:** Happy filmmakers > slightly lower cost
+### Cost Comparison
+
+| Approach | Cost | Can Handle Load? | UX |
+|----------|------|------------------|-----|
+| Single H100 | $18 | No (120 vs 1,500 jobs) | Unusable |
+| Serverless 40x | ~$225 | Yes | Excellent |
+
+**Reality check:** This is a production workload, not a demo. Budget accordingly.
 
 ---
 
 ## Recommendation
 
-### Primary: Verda Containers (Serverless)
+### Required: Verda Containers (Serverless)
 
-**Why:**
-- **Concurrency:** Handle 10-15 simultaneous requests
-- **User experience:** No one waits 45+ minutes
+**Single instance is not viable.** The math doesn't work:
+- 1,500 jobs needed vs 120 capacity = 12.5x shortfall
+
+**Why Verda Containers:**
+- **Scale:** Can autoscale to 40+ containers for peak demand
+- **Concurrency:** Handle 300 jobs in 30-min rounds
 - **EU compliance:** GDPR, data stays in EU
-- **Green energy:** 100% renewable (good for filmmaker values)
-- **Shared storage:** Models already on Verda block storage
+- **Green energy:** 100% renewable (filmmaker values)
+- **Shared storage:** Models on Verda block storage
 - **Familiar platform:** Already using Verda
 
-**Trade-offs:**
-- Higher cost (~$35-50 vs $18)
-- Need to test container deployment
-- 10-minute billing granularity
+**Budget reality:**
+- ~$200-250 for workshop compute
+- $10-12.50 per filmmaker
+- This is professional production infrastructure
 
-### Fallback: Single H100 Instance
-**Only if:**
-- Container deployment fails
-- Budget absolutely critical
-- Accept queue delays during bursts
+### Fallback Options
+If Verda Containers unavailable:
+1. **Multiple H100 instances** (5-10x) - manual scaling, ~$180
+2. **RunPod Serverless** - per-second billing, similar cost
+3. **Reduce scope** - fewer rounds, longer wait times
 
 ---
 
