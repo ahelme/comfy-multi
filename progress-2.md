@@ -3,7 +3,7 @@
 **Repository:** github.com/ahelme/comfy-multi
 **Domain:** comfy.ahelme.net
 **Doc Created:** 2026-01-04
-**Doc Updated:** 2026-01-14
+**Doc Updated:** 2026-01-15
 
 ---
 
@@ -27,6 +27,48 @@
 
 ---
 --- remember to update [COMMIT.log](./COMMIT.log) EVERY time you update this file!!!
+---
+
+## Progress Report 10 - 2026-01-15 (Phase 11: Test Restore & Smart Model Handling)
+**Status:** 🔨 In Progress
+**Started:** 2026-01-15
+
+### Activities
+
+RESTORE.sh Improvements:
+- ✅ Fixed Verda image compatibility (Docker pre-installed conflict)
+- ✅ Fixed SSH service name (Ubuntu 24.04 uses `ssh` not `sshd`)
+- ✅ Fixed backup date selection (was selecting oldest instead of newest)
+- ✅ Added command-line flags for model handling:
+  - `--with-models` - Download from R2 (default if no models)
+  - `--skip-models` - Skip download, use existing
+  - `--fresh-models` - Delete and re-download
+- ✅ Added smart model detection (checks /mnt/models, /mnt/block, /mnt/data)
+- ✅ Added unmounted block device detection with warning
+- ✅ Added interactive prompt when models detected (no flag given)
+- ✅ Fixed nested symlinks issue
+
+Testing on Verda A100:
+- ✅ Provisioned A100 80GB spot instance (€0.39/hr)
+- ⚠️ Block storage got formatted during provisioning (Verda gotcha)
+- ✅ Documented fix: Attach storage AFTER instance running
+- 🔄 Re-downloading models from R2 (~44GB)
+
+Documentation:
+- ✅ Updated docs/admin-backup-restore.md with new RESTORE.sh flags
+- ✅ Added troubleshooting section for block storage gotcha
+- ✅ Stored R2 credentials in mello .env (gitignored)
+
+### Commits
+- `4e6ef21` - fix: RESTORE.sh compatibility with Verda images
+- `eb302d2` - feat: smart model handling in RESTORE.sh
+
+### Next Steps
+- [ ] Complete model download from R2
+- [ ] Start ComfyUI worker and verify GPU inference
+- [ ] Test end-to-end workflow (queue-manager → worker)
+- [ ] Run backup to preserve configured instance
+
 ---
 
 ## Progress Report 9 - 2026-01-14 (Phase 9: Emergency Backup & Serverless Research)

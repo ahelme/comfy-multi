@@ -4,7 +4,7 @@
 **Repository:** github.com/ahelme/comfy-multi
 **Domain:** comfy.ahelme.net
 **Doc Created:** 2026-01-14
-**Doc Updated:** 2026-01-14
+**Doc Updated:** 2026-01-15
 
 ---
 
@@ -58,7 +58,8 @@ cd ~/projects/comfyui
 ### 1. Provision Instance (Verda Console)
 
 - Create V100 16GB instance ($0.14/hr for testing)
-- Attach storage volumes if needed
+- **Do NOT attach block storage during provisioning** (it may get formatted)
+- Attach block storage AFTER instance is running if using existing storage
 
 ### 2. Transfer & Run Restore
 
@@ -69,23 +70,55 @@ scp -r ~/backups/verda/ root@<new-verda-ip>:~/
 # On new instance
 ssh root@<new-verda-ip>
 cd ~/verda
+sudo bash RESTORE.sh [OPTIONS]
+```
+
+### 3. RESTORE.sh Model Options
+
+The restore script handles model download automatically with these flags:
+
+| Flag | Description |
+|------|-------------|
+| `--with-models` | Download models from R2 (default if no models found) |
+| `--skip-models` | Skip download, use existing models |
+| `--fresh-models` | Delete existing models and download fresh from R2 |
+| *(no flag)* | Interactive prompt if models detected |
+
+**Examples:**
+```bash
+# Fully automated - download models if missing
+sudo bash RESTORE.sh --with-models
+
+# Skip models (using attached block storage with models)
+sudo bash RESTORE.sh --skip-models
+
+# Fresh install - delete and re-download everything
+sudo bash RESTORE.sh --fresh-models
+
+# Interactive - script will prompt if models detected
 sudo bash RESTORE.sh
 ```
 
-### 3. Restore Models from Cloudflare R2
+**Smart Detection:** The script automatically checks:
+- `/mnt/models` - default model directory
+- `/mnt/block`, `/mnt/data`, `/mnt/storage` - common block storage mounts
+- Unmounted block devices with filesystems (warns you to mount them)
+
+### 4. Manual Model Restore (if needed)
+
+If models didn't download (missing R2 credentials):
 
 ```bash
 # As dev user on Verda
-cd /mnt/models  # or wherever models should go
-
-# Configure AWS CLI for R2 (S3-compatible API)
 export AWS_ACCESS_KEY_ID=<R2_ACCESS_KEY_ID>
 export AWS_SECRET_ACCESS_KEY=<R2_SECRET_ACCESS_KEY>
-
-# Download all models from R2
 R2_ENDPOINT="https://f1d627b48ef7a4f687d6ac469c8f1dea.r2.cloudflarestorage.com"
-aws s3 sync s3://comfy-multi-model-vault-backup/ . --endpoint-url $R2_ENDPOINT
+
+# Download all models (idempotent - safe to restart)
+aws s3 sync s3://comfy-multi-model-vault-backup/ /mnt/models/ --endpoint-url $R2_ENDPOINT
 ```
+
+**Note:** R2 credentials are stored in mello's `.env` file (gitignored).
 
 ---
 
@@ -140,6 +173,27 @@ aws --endpoint-url $R2_ENDPOINT s3 ls s3://comfy-multi-model-vault-backup/ --rec
 ---
 
 ## Troubleshooting
+
+### Block Storage Got Wiped on New Instance
+**Symptom:** Attached block storage shows Ubuntu OS partitions instead of your models.
+
+**Cause:** Attaching block storage during instance provisioning can cause Verda to format it with the OS image.
+
+**Solution:**
+1. Provision instance WITHOUT block storage
+2. Attach block storage AFTER instance is running
+3. Mount the existing filesystem (don't format)
+
+```bash
+# Check attached devices
+lsblk -f
+
+# Mount existing block storage (usually /dev/vdc or /dev/sdb)
+sudo mount /dev/vdc /mnt/models
+
+# If models are there, add to fstab for persistence
+echo '/dev/vdc /mnt/models ext4 defaults 0 0' | sudo tee -a /etc/fstab
+```
 
 ### SSH Host Key Changed
 ```bash
