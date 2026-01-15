@@ -217,10 +217,17 @@ cat > "$BACKUP_DIR/RESTORE.sh" << 'RESTORE'
 # Run as root on NEW Verda instance
 #
 # Usage: sudo bash RESTORE.sh [OPTIONS]
+#
+# Model options:
 #   --with-models     Download models from R2 (default if no models found)
 #   --skip-models     Skip model download entirely
 #   --fresh-models    Delete existing models and download fresh from R2
 #   (no flag)         Interactive prompt if models detected
+#
+# Container options:
+#   --load-container  Load worker image from block storage (fast, ~2 sec)
+#   --build-container Build worker image and save to block storage
+#   --skip-container  Don't handle container (default, manual setup)
 
 set -e
 
@@ -231,6 +238,7 @@ fi
 
 # Parse command line arguments
 MODEL_ACTION=""
+CONTAINER_ACTION="skip"  # Default: don't handle container (backwards compatible)
 while [[ $# -gt 0 ]]; do
     case $1 in
         --with-models)
@@ -245,9 +253,31 @@ while [[ $# -gt 0 ]]; do
             MODEL_ACTION="fresh"
             shift
             ;;
+        --load-container)
+            CONTAINER_ACTION="load"
+            shift
+            ;;
+        --build-container)
+            CONTAINER_ACTION="build"
+            shift
+            ;;
+        --skip-container)
+            CONTAINER_ACTION="skip"
+            shift
+            ;;
         *)
             echo "Unknown option: $1"
-            echo "Usage: sudo bash RESTORE.sh [--with-models|--skip-models|--fresh-models]"
+            echo "Usage: sudo bash RESTORE.sh [MODEL_OPTIONS] [CONTAINER_OPTIONS]"
+            echo ""
+            echo "Model options:"
+            echo "  --with-models     Download models from R2"
+            echo "  --skip-models     Skip model download"
+            echo "  --fresh-models    Delete and re-download models"
+            echo ""
+            echo "Container options:"
+            echo "  --load-container  Load from block storage (fast)"
+            echo "  --build-container Build and save to block storage"
+            echo "  --skip-container  Don't handle container (default)"
             exit 1
             ;;
     esac
@@ -617,6 +647,71 @@ else
 fi
 echo ""
 
+# Step 11: Handle container image based on action
+echo "Step 11: Container image (action: $CONTAINER_ACTION)..."
+
+CONTAINER_IMAGE_PATH="/mnt/models/worker-image.tar.gz"
+COMFY_MULTI_DIR="/home/dev/comfy-multi"
+
+if [ "$CONTAINER_ACTION" = "skip" ]; then
+    echo "  ⏭️  Skipping container setup (manual)"
+    echo "  To build manually: cd ~/comfy-multi && docker compose build worker-1"
+
+elif [ "$CONTAINER_ACTION" = "load" ]; then
+    # Load container from block storage
+    if [ -f "$CONTAINER_IMAGE_PATH" ]; then
+        echo "  📦 Loading worker image from block storage..."
+        IMAGE_SIZE=$(du -h "$CONTAINER_IMAGE_PATH" | cut -f1)
+        echo "  Image size: $IMAGE_SIZE"
+
+        if docker load < "$CONTAINER_IMAGE_PATH"; then
+            echo "  ✓ Worker image loaded successfully!"
+            docker images | grep -E "comfy|worker" | head -5
+        else
+            echo "  ⚠️  Failed to load image - will need manual build"
+        fi
+    else
+        echo "  ⚠️  Container image not found at $CONTAINER_IMAGE_PATH"
+        echo "  Run with --build-container to create it, or build manually"
+    fi
+
+elif [ "$CONTAINER_ACTION" = "build" ]; then
+    # Build container and save to block storage
+    echo "  🔨 Building worker image..."
+
+    if [ -d "$COMFY_MULTI_DIR/comfyui-worker" ]; then
+        cd "$COMFY_MULTI_DIR"
+
+        # Build the image
+        if sudo -u dev docker compose build worker-1; then
+            echo "  ✓ Worker image built successfully!"
+
+            # Get the image name
+            IMAGE_NAME=$(docker compose config --images | grep -E "worker" | head -1)
+            if [ -z "$IMAGE_NAME" ]; then
+                IMAGE_NAME="comfy-multi-worker-1"
+            fi
+
+            echo "  💾 Saving image to block storage..."
+            echo "  Image: $IMAGE_NAME"
+            echo "  Destination: $CONTAINER_IMAGE_PATH"
+
+            if docker save "$IMAGE_NAME" | gzip > "$CONTAINER_IMAGE_PATH"; then
+                chown dev:dev "$CONTAINER_IMAGE_PATH"
+                IMAGE_SIZE=$(du -h "$CONTAINER_IMAGE_PATH" | cut -f1)
+                echo "  ✓ Image saved! Size: $IMAGE_SIZE"
+            else
+                echo "  ⚠️  Failed to save image to block storage"
+            fi
+        else
+            echo "  ⚠️  Failed to build worker image"
+        fi
+    else
+        echo "  ⚠️  comfy-multi directory not found at $COMFY_MULTI_DIR"
+    fi
+fi
+echo ""
+
 echo "===================================================="
 echo "✅ RESTORE COMPLETE!"
 echo ""
@@ -636,30 +731,39 @@ echo ""
 echo "📋 Model Status:"
 ls -lh /mnt/models/checkpoints/ /mnt/models/text_encoders/ 2>/dev/null || echo "  (no models yet)"
 echo ""
+echo "🐳 Container Status:"
+if [ -f "/mnt/models/worker-image.tar.gz" ]; then
+    echo "  ✓ worker-image.tar.gz found ($(du -h /mnt/models/worker-image.tar.gz | cut -f1))"
+else
+    echo "  (no container image on block storage)"
+fi
+docker images | grep -E "comfy|worker" | head -3 || echo "  (no worker images loaded)"
+echo ""
 echo "⚠️  NEXT STEPS:"
 echo ""
-echo "1. Verify models are ready:"
-echo "   ls -lh /mnt/models/checkpoints/ /mnt/models/text_encoders/"
-echo ""
-echo "2. (If models missing) Resume download:"
-echo "   # Set R2 credentials if not in .env"
-echo "   export R2_ACCESS_KEY_ID=your_key"
-echo "   export R2_SECRET_ACCESS_KEY=your_secret"
-echo "   aws --endpoint-url $R2_ENDPOINT s3 sync s3://$R2_BUCKET/ /mnt/models/"
-echo ""
-echo "3. Start ComfyUI worker:"
+echo "1. Start ComfyUI worker:"
 echo "   su - dev"
 echo "   cd ~/comfy-multi && source .env"
 echo "   docker compose up -d worker-1"
 echo ""
-echo "4. Verify connection to VPS (mello):"
+echo "2. Verify connection to VPS (mello):"
 echo "   redis-cli -h \${REDIS_HOST} -p 6379 -a '\${REDIS_PASSWORD}' ping"
 echo "   # Should return: PONG"
 echo ""
-echo "💡 Script flags for automation:"
-echo "   sudo bash RESTORE.sh --skip-models    # Use existing models"
-echo "   sudo bash RESTORE.sh --with-models    # Download from R2"
-echo "   sudo bash RESTORE.sh --fresh-models   # Delete & re-download"
+echo "💡 Script flags:"
+echo ""
+echo "  Model options:"
+echo "   --skip-models      Use existing models on block storage"
+echo "   --with-models      Download from R2 (default if none found)"
+echo "   --fresh-models     Delete & re-download from R2"
+echo ""
+echo "  Container options:"
+echo "   --load-container   Load from block storage (~2 sec)"
+echo "   --build-container  Build fresh & save to block storage"
+echo "   --skip-container   Manual setup (default)"
+echo ""
+echo "  Example (fast workshop startup):"
+echo "   sudo bash RESTORE.sh --skip-models --load-container"
 echo "===================================================="
 RESTORE
 
