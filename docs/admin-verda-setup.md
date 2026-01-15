@@ -4,39 +4,120 @@
 **Repository:** github.com/ahelme/comfy-multi
 **Domain:** comfy.ahelme.net
 **Doc Created:** 2026-01-12
-**Doc Updated:** 2026-01-14
+**Doc Updated:** 2026-01-15
 
 ---
 
-## Current Instance Details
+# Verda GPU Setup
 
-| Field | Value |
-|-------|-------|
-| **Hostname** | brave-fish-meows-fin-01 |
-| **Instance Type** | ubuntu-24-04-cuda-12-8-open-docker-cpu-8v-32g-fin-01 |
-| **IP Address** | 65.109.75.32 |
-| **Instance ID** | 039a7e02-f6d5-4f11-a562-66b92ecc3d2a |
-| **Location** | FIN-01 |
-| **Compute** | 8x CPU Node (CPU.8V.32G) - 8 CPU, 32GB RAM |
-| **OS** | Ubuntu 24.04, CUDA 12.8 Open |
-| **Root Disk** | 50 GB |
-| **Price** | €0.04760/hr |
-| **SSH** | `ssh root@65.109.75.32` |
-
-### Attached Storage
-
-| Volume | Type | Size | Contents |
-|--------|------|------|----------|
-| Block (vdb) | Previous instance root | 100GB | /home/dev, comfy-multi, models (44GB), Tailscale |
+Quick reference for Verda infrastructure configuration.
 
 ---
 
-## Storage Budget (Planned)
+## Storage Strategy (Current)
 
-| Component | Size | Duration | Monthly Rate | Total Cost |
-|-----------|------|----------|--------------|------------|
-| SFS (System & Config) | 50 GB | 3 Months | $10.00 | **$30.00** |
-| Block (Model Vault) | 200 GB | 3 Months | $20.00 | **$60.00** |
-| Block (Test Scratch) | 50 GB | 1 Month | $5.00 | **$5.00** |
-| Block (Workshop Scratch) | 300 GB | 1 Month | $30.00 | **$30.00** |
-| **TOTAL (USD)** | | | | **$125.00** |
+**Recommended: Shared File System (SFS)**
+
+| Storage | Size | Purpose | Cost |
+|---------|------|---------|------|
+| **Verda SFS** | 50GB | Models + Container | ~$14 AUD/month |
+| **Cloudflare R2** | ~45GB | Permanent model backup | ~$1/month |
+| **Hetzner VPS** | - | Configs, scripts, container backup | (existing) |
+
+**Why SFS over Block Storage:**
+- No wipe-on-provision risk (NFS-based, network-attached)
+- Mount from any instance instantly
+- Multiple instances can share storage
+- Simple: `mount -t nfs <endpoint>:/share /mnt/models`
+
+---
+
+## Quick Start (Daily GPU Instance)
+
+```bash
+# 1. Create GPU spot instance (Verda Dashboard) - NO storage attached
+# 2. SSH in and run quick-start script
+ssh root@<new-instance-ip>
+curl -sL https://raw.githubusercontent.com/ahelme/comfy-multi/main/scripts/quick-start.sh | bash -s <sfs-endpoint>
+
+# Done! (~30 seconds)
+```
+
+See [Workshop Workflow](./admin-workflow-workshop.md) for full details.
+
+---
+
+## Verda Gotchas
+
+### Block Storage Gets WIPED on Provisioning
+
+**Critical:** If you attach block storage during instance creation, Verda WIPES it!
+
+**Safe workflow (if using block storage):**
+1. Create instance WITHOUT block storage
+2. Boot the instance
+3. Shut down instance (required for attachment)
+4. Attach block storage via Verda Dashboard
+5. Boot instance again
+6. Mount: `mount /dev/vdc /mnt/models`
+
+**Volume naming:**
+- `OS-*` = OS disks (will have Ubuntu)
+- `Volume-*` = Data volumes (your block storage)
+
+### Other Notes
+
+- Verda images have Docker pre-installed (don't install docker.io - conflicts)
+- Ubuntu 24.04 uses `ssh` service name, not `sshd`
+- Spot instances can be terminated anytime - use persistent storage (SFS)
+
+---
+
+## SFS Mount Instructions
+
+```bash
+# Install NFS client if needed
+apt-get update && apt-get install -y nfs-common
+
+# Mount SFS
+mkdir -p /mnt/models
+mount -t nfs <sfs-endpoint>:/share /mnt/models
+
+# Add to fstab for persistence
+echo "<sfs-endpoint>:/share /mnt/models nfs defaults 0 0" >> /etc/fstab
+```
+
+---
+
+## GPU Options
+
+| GPU | VRAM | Rate | Best For |
+|-----|------|------|----------|
+| **V100 16GB** | 16GB | ~$0.14/hr | Testing, validation |
+| **A100 80GB** | 80GB | ~$0.39/hr | Development |
+| **H100 80GB** | 80GB | ~$2.29/hr | Workshop production |
+
+**Tip:** Test on V100 first ($0.14/hr), then use H100 for workshop.
+
+---
+
+## Workshop Cost Estimate
+
+| Period | Compute | Storage | Total |
+|--------|---------|---------|-------|
+| **Setup (1 day)** | ~$2 (V100 spot) | $0.50 | ~$3 |
+| **Workshop month** | Variable | ~$14 (SFS) + $1 (R2) | $15 + compute |
+| **Off-season** | $0 | $1 (R2 only) | $1/month |
+
+---
+
+## Related Docs
+
+- [Workshop Workflow](./admin-workflow-workshop.md) - Daily startup procedures
+- [Backup & Restore](./admin-backup-restore.md) - Backup procedures
+- [Budget Strategy](./admin-budget-strategy.md) - Cost optimization
+- [Serverless Research](./research-serverless-gpu.md) - Container scaling options
+
+---
+
+**Last Updated:** 2026-01-15

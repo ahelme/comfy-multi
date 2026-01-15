@@ -29,13 +29,13 @@
 --- remember to update [COMMIT.log](./COMMIT.log) EVERY time you update this file!!!
 ---
 
-## Progress Report 10 - 2026-01-15 (Phase 11: Test Restore & Smart Model Handling)
+## Progress Report 10 - 2026-01-15 (Phase 11: SFS Storage & Quick-Start Workflow)
 **Status:** 🔨 In Progress
 **Started:** 2026-01-15
 
 ### Activities
 
-RESTORE.sh Improvements:
+#### Part 1: RESTORE.sh Improvements
 - ✅ Fixed Verda image compatibility (Docker pre-installed conflict)
 - ✅ Fixed SSH service name (Ubuntu 24.04 uses `ssh` not `sshd`)
 - ✅ Fixed backup date selection (was selecting oldest instead of newest)
@@ -48,26 +48,80 @@ RESTORE.sh Improvements:
 - ✅ Added interactive prompt when models detected (no flag given)
 - ✅ Fixed nested symlinks issue
 
-Testing on Verda A100:
-- ✅ Provisioned A100 80GB spot instance (€0.39/hr)
-- ⚠️ Block storage got formatted during provisioning (Verda gotcha)
-- ✅ Documented fix: Attach storage AFTER instance running
-- 🔄 Re-downloading models from R2 (~44GB)
+#### Part 2: Verda Block Storage Discovery
+- ⚠️ **Critical Discovery:** Block storage gets WIPED if attached during instance provisioning
+- Both Volume-* volumes showed `data` (no filesystem) when checked with `file -s`
+- This means Verda formats block storage attached at creation time
+- Documented safe workflow: Attach block storage AFTER instance is running
 
-Documentation:
-- ✅ Updated docs/admin-backup-restore.md with new RESTORE.sh flags
-- ✅ Added troubleshooting section for block storage gotcha
-- ✅ Stored R2 credentials in mello .env (gitignored)
+#### Part 3: SFS Storage Decision
+- ✅ Evaluated Verda Shared File System (SFS) as alternative
+- **Pricing:** €0.01168/h for 50GB (~$14 AUD/month)
+- **Benefits:**
+  - No wipe-on-provision risk (NFS-based)
+  - Mount from any instance instantly
+  - Multiple instances can share storage
+  - Models + container image all in one place
+- **Decision:** Use SFS instead of multiple block storage volumes
+
+#### Part 4: Workshop Workflow Redesign
+- ✅ Created `docs/admin-workflow-workshop.md` - Complete workshop workflow
+  - Jan 31: Initial setup (~45 min) - Create SFS, download models, build container
+  - Feb 1-28: Daily startup (~30 seconds!) - Mount SFS, load container, start worker
+  - Mar 1: Cleanup - Delete SFS, keep R2 backup
+- ✅ New storage strategy:
+  - Verda SFS 50GB: Models + Container (~$14/month during workshop)
+  - Cloudflare R2: Permanent model backup (~$1/month)
+  - Hetzner VPS: Configs, RESTORE.sh, container backup (existing)
+
+#### Part 5: Quick-Start Script
+- ✅ Created `scripts/quick-start.sh` - Daily GPU instance startup
+  - Adds mello SSH key (dev@vps-for-verda)
+  - Installs NFS client if needed
+  - Mounts SFS at /mnt/models
+  - Fetches container from mello if not on SFS
+  - Loads container image (docker load)
+  - Creates symlinks for ComfyUI
+  - Starts worker via docker compose
+- ✅ Fixed emoji characters for Verda console compatibility (ASCII only)
+
+#### Part 6: Container Build on Mello
+- 🔄 Building worker container on mello (ARM, no GPU needed)
+- Container will be saved to `/home/dev/backups/verda/worker-image.tar.gz`
+- Tarball approach: `docker save | gzip` on mello, `docker load` on Verda
 
 ### Commits
 - `4e6ef21` - fix: RESTORE.sh compatibility with Verda images
-- `eb302d2` - feat: smart model handling in RESTORE.sh
+- `d41c4a5` - docs: add workshop workflow guide with SFS
+- `a0c402c` - docs: add critical Verda block storage warning
+- `de19cb6` - docs: add SFS as recommended storage option
+- `19e0798` - feat: add quick-start.sh for daily GPU instance startup
+- `2f11b48` - feat: quick-start.sh fetches container from mello if not on SFS
+- `b41b0aa` - fix: replace emojis with ASCII for Verda console compatibility
+
+### New Storage Strategy
+
+| Storage | Purpose | Cost |
+|---------|---------|------|
+| **Verda SFS 50GB** | Models + Container (workshop month only) | ~$14/month |
+| **Cloudflare R2** | Permanent model backup | ~$1/month |
+| **Hetzner VPS** | Configs, scripts, container backup | (existing) |
+
+### Files Created
+- `docs/admin-workflow-workshop.md` - Workshop month workflow guide
+- `scripts/quick-start.sh` - Daily GPU instance startup script
+
+### Files Modified
+- `CLAUDE.md` - Added Verda GPU Cloud Gotchas section
+- `docs/admin-backup-restore.md` - Added SFS recommendation
+- `scripts/backup-verda.sh` - Added `--with-container` flag
 
 ### Next Steps
-- [ ] Complete model download from R2
-- [ ] Start ComfyUI worker and verify GPU inference
-- [ ] Test end-to-end workflow (queue-manager → worker)
-- [ ] Run backup to preserve configured instance
+- [ ] Complete container build on mello
+- [ ] Save container tarball to backup location
+- [ ] User: Delete empty Verda volumes and CPU test instance
+- [ ] User: Create SFS and GPU instance for testing
+- [ ] Test quick-start.sh on Verda with SFS
 
 ---
 

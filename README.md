@@ -3,370 +3,391 @@
 **Repository:** github.com/ahelme/comfy-multi
 **Domain:** comfy.ahelme.net
 **Doc Created:** 2026-01-02
-**Doc Updated:** 2026-01-11
+**Doc Updated:** 2026-01-15
 
 ---
 
 # ComfyUI Multi-User Workshop Platform
 
-**Project Status:** Production Ready - Deployed
+A scalable, multi-user ComfyUI platform with **split CPU/GPU architecture** - run 20 user interfaces on cheap VPS hosting while spinning up GPU workers only when needed.
 
-A scalable, multi-user ComfyUI v0.8.2 platform with split app-server/inference-provider architecture, designed for AI video generation workshops. Supports 20 isolated user workspaces with centralized job queue management and Tailscale VPN security.
+**Perfect for:** Workshops, team environments, or anyone who wants ComfyUI without 24/7 GPU costs.
 
-## 🎯 Features
+---
 
-- **Isolated User Workspaces** - Each participant gets their own ComfyUI v0.8.2 interface
-- **HTTP Basic Auth** - Password protection for all 20 user workspaces
-- **Tailscale VPN Security** - Encrypted tunnel for Redis connections (no public exposure)
-- **Intelligent Queue System** - FIFO, round-robin, and priority-based job scheduling
-- **Shared GPU Workers** - Efficient H100 GPU resource sharing across multiple users
-- **HTTPS Enabled** - Secure access with Let's Encrypt SSL/TLS
-- **Real-time Updates** - WebSocket-based queue status broadcasting
-- **Admin Dashboard** - Monitor and manage all user activity
-- **Persistent Storage** - User outputs and uploads saved between sessions
-- **LTX-2 Video Generation** - State-of-the-art 19B parameter video model support
-- **Multi-Provider Support** - Works with Verda, RunPod, Modal, or local GPUs
-
-## 🏗️ Architecture
+## Core Strategy: Split Architecture
 
 ```
-  Split Server Architecture with Tailscale VPN:
-  ┌─────────────────────────────────────────┐
-  │ Hetzner VPS (comfy.ahelme.net)          │
-  │ Tailscale IP: 100.99.216.71             │
-  │  - Nginx (HTTPS + HTTP Basic Auth)      │
-  │  - Redis (VPN-only access)              │
-  │  - Queue Manager (FastAPI)              │
-  │  - Admin Dashboard                      │
-  │  - User Frontends x20 (CPU only)        │
-  └──────────────┬──────────────────────────┘
+┌─────────────────────────────────────┐
+│   CHEAP CPU HOSTING (~$5-20/month)  │
+│   (Hetzner, DigitalOcean, Linode)   │
+│                                     │
+│   - Web App (Nginx + SSL)           │
+│   - 20 User Interfaces (CPU only)   │
+│   - Job Queue (Redis)               │
+│   - Admin Dashboard                 │
+│   - Always running, minimal cost    │
+└────────────────┬────────────────────┘
                  │
-                 │ Tailscale VPN (WireGuard)
-                 │ Encrypted Redis connection
-                 │ Port 6379 (VPN-only)
+                 │ VPN (Tailscale)
                  │
-  ┌──────────────▼──────────────────────────┐
-  │ Remote GPU (Verda H100)                 │
-  │ Tailscale IP: 100.89.38.43              │
-  │  - Worker 1 (ComfyUI v0.8.2 + GPU)      │
-  │  - Worker 2 (ComfyUI v0.8.2 + GPU) [opt]│
-  │  - Worker 3 (ComfyUI v0.8.2 + GPU) [opt]│
-  │                                         │
-  │  REDIS_HOST=100.99.216.71 (Tailscale)   │
-  │  LTX-2 Models: 19B parameter video gen  │
-  └─────────────────────────────────────────┘
-
+┌────────────────▼────────────────────┐
+│   GPU CLOUD (Pay-per-use)           │
+│   (Verda, RunPod, Lambda, Local)    │
+│                                     │
+│   - ComfyUI Workers (GPU)           │
+│   - Spin up when needed             │
+│   - Spin down when done             │
+│   - $0 when not running             │
+└────────────────┬────────────────────┘
+                 │
+                 │ S3 API
+                 │
+┌────────────────▼────────────────────┐
+│   MODEL VAULT (Permanent Storage)   │
+│   (Cloudflare R2, S3, Backblaze B2) │
+│                                     │
+│   - LTX-2 models (~45GB)            │
+│   - ~$1/month (R2 has free egress)  │
+│   - Download to GPU on startup      │
+└─────────────────────────────────────┘
 ```
 
-## 📋 Prerequisites
+**Why this works:**
+- VPS runs 24/7 for ~$10/month (users can queue jobs anytime)
+- GPU costs $0 when not running
+- Models stored permanently for ~$1/month
+- Spin up GPU in ~30 seconds when ready to generate
 
-- Docker 24.0+ and Docker Compose 2.0+
-- **Tailscale VPN** - For secure Redis connections between VPS and GPU workers
-- NVIDIA GPU with Docker GPU support (for remote GPU workers)
-- SSL certificate and key files (Let's Encrypt recommended)
-- 80GB+ free disk space (for LTX-2 models and outputs)
-- apache2-utils (for htpasswd - HTTP Basic Auth)
+---
 
-## 🚀 Quick Start
+## Cost Comparison
 
-### 1. Clone and Configure
+| Approach | Monthly Cost | Notes |
+|----------|--------------|-------|
+| **This architecture** | ~$15 + GPU hours | VPS $10 + R2 $1 + GPU only when used |
+| H100 always-on | ~$1,700 | 24/7 × $2.30/hr |
+| Gaming PC + electricity | ~$50-100 | Plus wear, noise, heat |
+| Managed services | ~$100-500 | Replicate, Banana.dev markup |
+
+**Workshop example (8-hour day):**
+- VPS: $10/month (already running)
+- GPU (H100 × 8hrs): $18
+- R2: $1/month
+- **Total: ~$30** vs $1,700/month always-on
+
+---
+
+## Features
+
+- **20 Isolated User Workspaces** - Each participant gets their own ComfyUI interface
+- **HTTP Basic Auth** - Password protection for all workspaces
+- **Tailscale VPN Security** - Encrypted tunnel for Redis (no public exposure)
+- **Intelligent Queue** - FIFO, round-robin, and priority scheduling
+- **Real-time Updates** - WebSocket queue status broadcasting
+- **Admin Dashboard** - Monitor and manage all activity
+- **LTX-2 Video Generation** - 19B parameter video model support
+- **Multi-Provider** - Works with any GPU cloud or local hardware
+
+---
+
+## Quick Start
+
+### Option A: Use Our Quick-Start Script (Recommended)
 
 ```bash
+# On a fresh GPU instance
+curl -sL https://raw.githubusercontent.com/ahelme/comfy-multi/main/scripts/quick-start.sh | bash -s <your-sfs-endpoint>
+```
+
+### Option B: Manual Setup
+
+#### 1. Set Up VPS (CPU Hosting)
+
+```bash
+# Clone repo
 git clone https://github.com/ahelme/comfy-multi.git
 cd comfy-multi
 
-# Copy and edit configuration
+# Configure
 cp .env.example .env
-nano .env
-```
+nano .env  # Set DOMAIN, SSL paths, REDIS_PASSWORD
 
-### 2. Install Tailscale (REQUIRED for multi-server setup)
-
-```bash
-# On VPS
+# Install Tailscale
 curl -fsSL https://tailscale.com/install.sh | sh
 sudo tailscale up
-tailscale ip -4  # Note this IP for REDIS_BIND_IP
+echo "Your Tailscale IP: $(tailscale ip -4)"
 
-# On GPU instance (if remote)
-curl -fsSL https://tailscale.com/install.sh | sh
-sudo tailscale up  # Use same Tailscale account
-tailscale ip -4  # GPU instance Tailscale IP
+# Start services
+./scripts/start.sh
 ```
 
-### 3. Configure Environment
+#### 2. Set Up Model Vault (R2/S3)
 
-Edit `.env` and set:
+```bash
+# Create Cloudflare R2 bucket (or any S3-compatible storage)
+# Upload your models once:
+aws s3 sync ./models/ s3://your-bucket/ --endpoint-url https://your-r2-endpoint
+```
+
+#### 3. Set Up GPU Worker (When Needed)
+
+```bash
+# SSH to GPU instance
+ssh root@your-gpu-instance
+
+# Install Tailscale (same account as VPS)
+curl -fsSL https://tailscale.com/install.sh | sh
+sudo tailscale up
+
+# Download models from R2
+aws s3 sync s3://your-bucket/ /mnt/models/ --endpoint-url https://your-r2-endpoint
+
+# Start worker
+cd ~/comfy-multi
+REDIS_HOST=<vps-tailscale-ip> docker compose up -d worker-1
+```
+
+---
+
+## Deployment Options
+
+### GPU Cloud Providers
+
+| Provider | H100 Price | Best For |
+|----------|------------|----------|
+| **Verda** | ~$2.30/hr | EU compliance, green energy |
+| **RunPod** | ~$2.40/hr | Per-second billing, good availability |
+| **Lambda Labs** | ~$2.50/hr | Reliable, good support |
+| **Vast.ai** | ~$1.50/hr | Cheapest, variable quality |
+| **Local GPU** | $0/hr | If you have hardware |
+
+### Storage Options
+
+| Provider | Cost | Notes |
+|----------|------|-------|
+| **Cloudflare R2** | ~$0.015/GB/month | Free egress (recommended) |
+| **AWS S3** | ~$0.023/GB/month | Egress fees apply |
+| **Backblaze B2** | ~$0.006/GB/month | Cheapest, S3-compatible |
+| **Verda SFS** | ~$0.20/GB/month | Network-attached, instant mount |
+
+### VPS Options
+
+| Provider | ~$10/month Plan | Notes |
+|----------|-----------------|-------|
+| **Hetzner** | CX22 (4GB RAM) | Great EU option |
+| **DigitalOcean** | Basic (4GB RAM) | Simple, reliable |
+| **Linode** | Shared 4GB | Good performance |
+| **Vultr** | Cloud Compute | Many locations |
+
+---
+
+## Architecture Details
+
+```
+[User Browser]
+    ↓ HTTPS
+[Nginx :443] → SSL termination, routing, HTTP Basic Auth
+    ├─→ /user001-020/ → Frontend containers (CPU only)
+    ├─→ /api → Queue Manager (FastAPI)
+    └─→ /admin → Admin Dashboard
+
+[Queue Manager :3000]
+    ↓ Redis (via Tailscale VPN)
+[Job Queue]
+    ↓
+[ComfyUI Workers :8188+] ← GPU processing
+    ↓
+[Shared Storage] ← models from R2, outputs to local
+```
+
+---
+
+## Daily Workflow
+
+### Workshop Day
+
+```bash
+# Morning: Spin up GPU (~30 seconds)
+1. Create GPU spot instance (no storage attached)
+2. SSH in and run quick-start script
+3. Workers connect to VPS queue automatically
+
+# During workshop
+- Users submit jobs via web interface
+- Queue distributes to GPU workers
+- Monitor via admin dashboard
+
+# Evening: Shut down GPU
+1. docker compose down
+2. Terminate GPU instance
+3. $0 GPU costs overnight
+```
+
+### Development (Free)
+
+```bash
+# Test queue system without GPU
+./scripts/start.sh  # VPS services only
+# Submit test jobs - they queue but don't process
+# Perfect for UI/UX development
+```
+
+---
+
+## Configuration
+
+### Environment Variables
 
 ```env
-DOMAIN=comfy.ahelme.net
-SSL_CERT_PATH=/etc/letsencrypt/live/comfy.ahelme.net/fullchain.pem
-SSL_KEY_PATH=/etc/letsencrypt/live/comfy.ahelme.net/privkey.pem
-REDIS_PASSWORD=your_secure_password_here
-REDIS_BIND_IP=100.99.216.71  # VPS Tailscale IP
-USE_HOST_NGINX=true  # If using host nginx
+# Domain & SSL
+DOMAIN=your-domain.com
+SSL_CERT_PATH=/etc/letsencrypt/live/your-domain/fullchain.pem
+SSL_KEY_PATH=/etc/letsencrypt/live/your-domain/privkey.pem
+
+# Security
+REDIS_PASSWORD=your_secure_password
+REDIS_BIND_IP=100.x.x.x  # Your VPS Tailscale IP
+
+# Users
+NUM_USERS=20
+
+# Queue
+QUEUE_MODE=fifo  # fifo, round-robin, priority
+
+# Model Storage (R2/S3)
+R2_ENDPOINT=https://xxx.r2.cloudflarestorage.com
+R2_BUCKET=your-model-bucket
 ```
 
-### 3. Start Platform
+---
 
-```bash
-./scripts/start.sh
-```
-
-### 4. Access
-
-- **Landing Page**: `https://your-domain/`
-- **Health Check**: `https://your-domain/health` *(Check system status)*
-- **Admin Dashboard**: `https://your-domain/admin`
-- **User Workspaces**: `https://your-domain/user001/` through `/user020/`
-
-## 📖 Documentation
-
-### For Participants
-- **[Quick Start Guide](./docs/quick-start.md)** - Get creating in 5 minutes! 🚀
-- **[How-To Guides](./docs/how-to-guides.md)** - Step-by-step task guides
-- **[FAQ](./docs/faq.md)** - Common questions answered
-- [Complete User Guide](./docs/user-guide.md) - Full reference manual
-
-### For Instructors
-- **[Deployment Guide](./DEPLOYMENT.md)** - Deploy to comfy.ahelme.net
-- [Admin Guide](./docs/admin-guide.md) - Workshop management
-- [Workshop Runbook](./docs/workshop-runbook.md) - Day-of execution
-- [Troubleshooting Guide](./docs/troubleshooting.md) - Fix common issues
-
-### For Developers
-- [README.md](./README.md) - Public code project overview and dev quickstart
-- [Progress Log](./progress.md) - Session logs, metrics, standup notes
-- [Implementation Plan](./implementation.md) - Architecture & success criteria
-- [Product Requirements](./prd.md) - Full requirements
-- [Claude Guide](./claude.md) - Development context
-- [Test Report](./TEST_REPORT.md) - Comprehensive test suite analysis
-- [Code Review](./CODE_REVIEW.md) - Quality review findings
-
-## 🧪 Testing
-
-The platform includes a comprehensive test suite with 161 tests:
-
-```bash
-# Install test dependencies
-pip install -r tests/requirements.txt
-
-# Run all tests
-pytest tests/ -v
-
-# Run with coverage
-pytest tests/ --cov=queue-manager --cov=comfyui-worker --cov-report=term-missing
-
-# Run specific test module
-pytest tests/test_models.py -v
-```
-
-**Test Coverage:**
-- 42 model validation tests (security, size limits, path traversal)
-- 32 worker functionality tests (job lifecycle, error handling)
-- 31 API endpoint tests (FastAPI routes, error responses)
-- 33 Redis operation tests (CRUD, queues, atomic operations)
-- 23 WebSocket tests (connections, broadcasting, reconnection)
-
-## 🛠️ Management Commands
-
-```bash
-# Start all services
-./scripts/start.sh
-
-# Stop platform
-./scripts/stop.sh
-
-# Check status
-./scripts/status.sh
-
-# View logs
-docker-compose logs -f
-
-# View specific service logs
-docker-compose logs -f queue-manager
-docker-compose logs -f worker-1
-```
-
-## 📁 Project Structure
+## Project Structure
 
 ```
 comfy-multi/
 ├── docker-compose.yml       # Service orchestration
 ├── .env.example             # Configuration template
-├── nginx/                   # Reverse proxy with SSL
-├── redis/                   # Job queue configuration
+├── scripts/
+│   ├── quick-start.sh       # GPU instance bootstrap
+│   ├── backup-verda.sh      # Backup to R2
+│   └── start.sh             # Start VPS services
+├── nginx/                   # Reverse proxy + SSL
 ├── queue-manager/           # FastAPI job scheduler
-├── comfyui-worker/          # GPU workers
+├── comfyui-worker/          # GPU worker container
 ├── comfyui-frontend/        # User interface containers
 ├── admin/                   # Admin dashboard
-├── scripts/                 # Management scripts
 ├── data/                    # Persistent storage
-│   ├── models/              # Shared & user models
-│   ├── outputs/             # Generated outputs
-│   ├── inputs/              # User uploads
-│   └── workflows/           # Pre-loaded workflows
+│   ├── models/              # Symlink to mounted storage
+│   └── outputs/             # Generated outputs
 └── docs/                    # Documentation
 ```
 
-## ⚙️ Configuration
+---
 
-### Inference Providers
+## Documentation
 
-The platform supports multiple inference providers:
+### For Workshop Organizers
+- [Workshop Workflow](./docs/admin-workflow-workshop.md) - Daily startup procedures
+- [Backup & Restore](./docs/admin-backup-restore.md) - Backup to R2
+- [Budget Strategy](./docs/admin-budget-strategy.md) - Cost optimization
+- [Verda Setup](./docs/admin-verda-setup.md) - GPU cloud configuration
 
-- **Verda** (default) - European GPU cloud
-- **RunPod** - Serverless GPU containers
-- **Modal** - Serverless infrastructure
-- **Local** - On-premises GPU
+### For Participants
+- [Quick Start](./docs/quick-start.md) - Get creating in 5 minutes
+- [User Guide](./docs/user-guide.md) - Full reference
+- [FAQ](./docs/faq.md) - Common questions
 
-Configure in `.env`:
-
-```env
-INFERENCE_PROVIDER=verda
-VERDA_API_KEY=your_api_key
-```
-
-### Queue Modes
-
-- **FIFO** (First In, First Out) - Fair sequential processing
-- **Round-robin** - Equal distribution across users
-- **Priority** - Instructor override for demos
-
-```env
-QUEUE_MODE=fifo
-ENABLE_PRIORITY=true
-```
-
-### Scaling Workers
-
-Adjust the number of GPU workers:
-
-```env
-NUM_WORKERS=1  # Start with 1, scale to 2-3 based on usage
-```
-
-## 🔒 Security
-
-- HTTPS enforced (HTTP redirects to HTTPS)
-- Redis password-protected
-- User workspace isolation
-- Admin dashboard authentication (optional)
-
-## 📊 Monitoring
-
-### Health Checks
-
-**Web Dashboard:**
-- Visit: `https://your-domain/health` (beautiful real-time dashboard)
-
-**Command Line:**
-```bash
-# Check all services
-./scripts/status.sh
-
-# Simple ping
-curl https://your-domain/health/ping
-
-# API status JSON
-curl https://your-domain/api/queue/status
-```
-
-### Logs
-
-```bash
-# All services
-docker-compose logs -f
-
-# Queue manager only
-docker-compose logs -f queue-manager
-
-# Worker only
-docker-compose logs -f worker-1
-```
-
-## 🐛 Troubleshooting
-
-### Services won't start
-
-```bash
-# Check configuration
-./scripts/status.sh
-
-# Validate .env
-cat .env | grep -v "^#" | grep -v "^$"
-
-# Check SSL certificates
-ls -la /path/to/certs/
-```
-
-### Queue not processing jobs
-
-```bash
-# Check worker status
-docker-compose logs worker-1
-
-# Check Redis connection
-docker-compose exec redis redis-cli -a $REDIS_PASSWORD ping
-
-# Restart queue manager
-docker-compose restart queue-manager
-```
-
-### User can't access workspace
-
-```bash
-# Check nginx configuration
-docker-compose logs nginx
-
-# Test routing
-curl -k https://localhost/user001/
-```
-
-## 🚧 Development
-
-### Local Development
-
-```bash
-# Use development overrides
-docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
-
-# Run with debug logging
-DEBUG=true VERBOSE_LOGS=true docker-compose up
-```
-
-### Testing
-
-```bash
-# Run integration tests (coming soon)
-./scripts/test.sh
-
-# Load test with 20 concurrent users (coming soon)
-./scripts/load-test.sh
-```
-
-## 📝 License
-
-MIT License - see LICENSE file for details
-
-## 🤝 Contributing
-
-This is a workshop-specific platform. For issues or suggestions, please contact the workshop organizer.
-
-## 🙏 Acknowledgments
-
-- Built with [ComfyUI](https://github.com/comfyanonymous/ComfyUI)
-- Queue patterns inspired by [SaladTechnologies/comfyui-api](https://github.com/SaladTechnologies/comfyui-api)
-- Architecture concepts from [Visionatrix](https://github.com/Visionatrix/Visionatrix)
-
-## 📞 Support
-
-- **Repository**: https://github.com/ahelme/comfy-multi
-- **Issues**: https://github.com/ahelme/comfy-multi/issues
-- **Documentation**: See `/docs` directory
+### For Developers
+- [Implementation Plan](./implementation.md) - Architecture details
+- [Progress Log](./progress.md) - Development history
+- [Claude Guide](./CLAUDE.md) - AI assistant context
 
 ---
 
-**Status**: ✅ Phase 4 Complete - Production Ready!
-**Next**: Phase 5 - Deployment & Testing
-**Version**: 1.0.0-beta
+## Adapting for Your Setup
+
+### Different GPU Provider
+
+```bash
+# Edit comfyui-worker/.env or pass at runtime
+REDIS_HOST=<your-vps-tailscale-ip>
+REDIS_PASSWORD=<your-password>
+
+# The worker connects to your VPS queue automatically
+docker compose up -d worker-1
+```
+
+### Different Storage
+
+```bash
+# Any S3-compatible storage works
+# Just change the endpoint and credentials
+aws s3 sync s3://your-bucket/ /mnt/models/ \
+  --endpoint-url https://your-storage-endpoint
+```
+
+### Local GPU
+
+```bash
+# Same setup, just run worker locally
+cd comfy-multi
+REDIS_HOST=<vps-tailscale-ip> docker compose up -d worker-1
+```
+
+### Serverless (RunPod, Modal)
+
+See [Serverless Research](./docs/research-serverless-gpu.md) for auto-scaling configuration with 16-40 concurrent containers.
+
+---
+
+## Troubleshooting
+
+### GPU Worker Won't Connect
+
+```bash
+# Check Tailscale
+tailscale status  # Should show VPS and GPU
+
+# Test Redis connectivity
+redis-cli -h <vps-tailscale-ip> -a <password> ping
+```
+
+### Models Not Loading
+
+```bash
+# Check mount
+ls -la /mnt/models/checkpoints/
+
+# Re-download from R2
+aws s3 sync s3://your-bucket/ /mnt/models/ --endpoint-url $R2_ENDPOINT
+```
+
+### Queue Not Processing
+
+```bash
+# Check worker logs
+docker logs comfy-multi-worker-1
+
+# Check queue manager
+curl https://your-domain/api/queue/status
+```
+
+---
+
+## License
+
+MIT License - see LICENSE file
+
+---
+
+## Acknowledgments
+
+- Built with [ComfyUI](https://github.com/comfyanonymous/ComfyUI)
+- Queue patterns from [SaladTechnologies/comfyui-api](https://github.com/SaladTechnologies/comfyui-api)
+- Architecture concepts from [Visionatrix](https://github.com/Visionatrix/Visionatrix)
+
+---
+
+**Version:** 1.0.0
+**Status:** Production Ready
