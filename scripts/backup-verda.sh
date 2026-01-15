@@ -215,6 +215,12 @@ cat > "$BACKUP_DIR/RESTORE.sh" << 'RESTORE'
 #!/bin/bash
 # Restore Verda backup with full security hardening
 # Run as root on NEW Verda instance
+#
+# Usage: sudo bash RESTORE.sh [OPTIONS]
+#   --with-models     Download models from R2 (default if no models found)
+#   --skip-models     Skip model download entirely
+#   --fresh-models    Delete existing models and download fresh from R2
+#   (no flag)         Interactive prompt if models detected
 
 set -e
 
@@ -222,6 +228,30 @@ if [ "$EUID" -ne 0 ]; then
    echo "Please run as root: sudo bash RESTORE.sh"
    exit 1
 fi
+
+# Parse command line arguments
+MODEL_ACTION=""
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --with-models)
+            MODEL_ACTION="download"
+            shift
+            ;;
+        --skip-models)
+            MODEL_ACTION="skip"
+            shift
+            ;;
+        --fresh-models)
+            MODEL_ACTION="fresh"
+            shift
+            ;;
+        *)
+            echo "Unknown option: $1"
+            echo "Usage: sudo bash RESTORE.sh [--with-models|--skip-models|--fresh-models]"
+            exit 1
+            ;;
+    esac
+done
 
 echo "🔄 Restoring Verda backup with security hardening..."
 echo "===================================================="
@@ -430,6 +460,163 @@ if [ -f "comfy-project-${BACKUP_DATE}.tar.gz" ]; then
 fi
 echo ""
 
+# Step 9: Setup model directories, symlinks, and handle model downloads
+echo "Step 9: Setting up model directories and storage..."
+
+# R2 Configuration
+R2_ENDPOINT="https://f1d627b48ef7a4f687d6ac469c8f1dea.r2.cloudflarestorage.com"
+R2_BUCKET="comfy-multi-model-vault-backup"
+
+# Check for existing block storage with models
+MODELS_DIR="/mnt/models"
+BLOCK_STORAGE_PATHS=("/mnt/block" "/mnt/data" "/mnt/storage")
+EXISTING_MODELS=""
+EXISTING_MODELS_SIZE=0
+
+# First check /mnt/models
+if [ -d "$MODELS_DIR" ]; then
+    MODEL_COUNT=$(find "$MODELS_DIR" -name "*.safetensors" -o -name "*.ckpt" 2>/dev/null | wc -l)
+    if [ "$MODEL_COUNT" -gt 0 ]; then
+        EXISTING_MODELS="$MODELS_DIR"
+        EXISTING_MODELS_SIZE=$(du -sh "$MODELS_DIR" 2>/dev/null | cut -f1)
+    fi
+fi
+
+# Check common block storage mount points
+if [ -z "$EXISTING_MODELS" ]; then
+    for BLOCK_PATH in "${BLOCK_STORAGE_PATHS[@]}"; do
+        if [ -d "$BLOCK_PATH" ]; then
+            MODEL_COUNT=$(find "$BLOCK_PATH" -name "*.safetensors" -o -name "*.ckpt" 2>/dev/null | wc -l)
+            if [ "$MODEL_COUNT" -gt 0 ]; then
+                EXISTING_MODELS="$BLOCK_PATH"
+                EXISTING_MODELS_SIZE=$(du -sh "$BLOCK_PATH" 2>/dev/null | cut -f1)
+                break
+            fi
+        fi
+    done
+fi
+
+# Check for unmounted block devices that might have models
+echo "  Checking for block storage..."
+UNMOUNTED_BLOCK=""
+for DEV in /dev/vdc /dev/vdd /dev/sdb /dev/sdc; do
+    if [ -b "$DEV" ] && ! mount | grep -q "$DEV"; then
+        # Check if it has a filesystem
+        if blkid "$DEV" 2>/dev/null | grep -q "TYPE="; then
+            UNMOUNTED_BLOCK="$DEV"
+            echo "  ⚠️  Found unmounted block device: $DEV"
+            echo "      You may want to mount it: mount $DEV /mnt/models"
+            break
+        fi
+    fi
+done
+
+# Report what we found
+if [ -n "$EXISTING_MODELS" ]; then
+    echo "  ✓ Found existing models at: $EXISTING_MODELS ($EXISTING_MODELS_SIZE)"
+    MODEL_FILES=$(find "$EXISTING_MODELS" -name "*.safetensors" -o -name "*.ckpt" 2>/dev/null | head -5)
+    echo "$MODEL_FILES" | while read -r f; do
+        [ -n "$f" ] && echo "    - $(basename "$f")"
+    done
+fi
+
+# Determine action based on flags or prompt user
+if [ -z "$MODEL_ACTION" ]; then
+    if [ -n "$EXISTING_MODELS" ]; then
+        echo ""
+        echo "  Models detected! Choose an action:"
+        echo "    1) Skip download - use existing models"
+        echo "    2) Sync from R2 - download missing/changed files only"
+        echo "    3) Fresh download - delete existing and download all from R2"
+        echo ""
+        read -p "  Enter choice [1-3, default=1]: " CHOICE
+        case "$CHOICE" in
+            2) MODEL_ACTION="download" ;;
+            3) MODEL_ACTION="fresh" ;;
+            *) MODEL_ACTION="skip" ;;
+        esac
+    else
+        # No models found - default to download
+        MODEL_ACTION="download"
+        echo "  No existing models found - will download from R2"
+    fi
+fi
+
+# Create directory structure
+mkdir -p /mnt/models/checkpoints /mnt/models/text_encoders /mnt/models/latent_upscale_models /mnt/models/loras
+mkdir -p /mnt/scratch
+chown -R dev:dev /mnt/models /mnt/scratch
+
+# Create symlinks (remove existing first to avoid nested symlinks)
+sudo -u dev mkdir -p /home/dev/comfy-multi/data
+rm -rf /home/dev/comfy-multi/data/models 2>/dev/null || true
+rm -rf /home/dev/comfy-multi/data/outputs 2>/dev/null || true
+sudo -u dev ln -sf /mnt/models /home/dev/comfy-multi/data/models
+sudo -u dev ln -sf /mnt/scratch /home/dev/comfy-multi/data/outputs
+echo "  ✓ Model directories created"
+echo "  ✓ Symlinks created: data/models -> /mnt/models"
+echo "  ✓ Symlinks created: data/outputs -> /mnt/scratch"
+echo ""
+
+# Step 10: Handle model download based on action
+echo "Step 10: Model download (action: $MODEL_ACTION)..."
+
+if [ "$MODEL_ACTION" = "skip" ]; then
+    echo "  ⏭️  Skipping model download (using existing models)"
+    ls -lh /mnt/models/checkpoints/ /mnt/models/text_encoders/ 2>/dev/null || true
+else
+    # Fresh download - clear existing first
+    if [ "$MODEL_ACTION" = "fresh" ]; then
+        echo "  🗑️  Clearing existing models..."
+        rm -rf /mnt/models/checkpoints/* /mnt/models/text_encoders/* /mnt/models/loras/* /mnt/models/latent_upscale_models/* 2>/dev/null || true
+    fi
+
+    # Install AWS CLI if needed (for R2 S3-compatible API)
+    if ! command -v aws &> /dev/null; then
+        echo "  Installing AWS CLI..."
+        curl -s "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
+        cd /tmp && unzip -qo awscliv2.zip && ./aws/install --update >/dev/null 2>&1
+        echo "  ✓ AWS CLI installed"
+    fi
+
+    # Load R2 credentials from environment or .env file
+    if [ -z "$AWS_ACCESS_KEY_ID" ] && [ -f /home/dev/comfy-multi/.env ]; then
+        source /home/dev/comfy-multi/.env 2>/dev/null || true
+    fi
+
+    if [ -n "$R2_ACCESS_KEY_ID" ] && [ -n "$R2_SECRET_ACCESS_KEY" ]; then
+        export AWS_ACCESS_KEY_ID="$R2_ACCESS_KEY_ID"
+        export AWS_SECRET_ACCESS_KEY="$R2_SECRET_ACCESS_KEY"
+    fi
+
+    if [ -n "$AWS_ACCESS_KEY_ID" ] && [ -n "$AWS_SECRET_ACCESS_KEY" ]; then
+        echo "  ✓ R2 credentials found"
+        echo "  📥 Downloading models from Cloudflare R2..."
+        echo "  (This may take 30-60 minutes for ~45GB - safe to interrupt and resume)"
+        echo ""
+
+        # Download with sync (idempotent - only downloads missing/changed files)
+        if aws --endpoint-url "$R2_ENDPOINT" s3 sync "s3://$R2_BUCKET/" /mnt/models/ --exclude "test.txt"; then
+            chown -R dev:dev /mnt/models
+            echo ""
+            echo "  ✓ Models downloaded successfully!"
+            ls -lh /mnt/models/checkpoints/ /mnt/models/text_encoders/ 2>/dev/null || true
+        else
+            echo ""
+            echo "  ⚠️  Download interrupted or failed"
+            echo "  Run again to resume - s3 sync will continue where it left off"
+        fi
+    else
+        echo "  ⚠️  R2 credentials not found - skipping download"
+        echo ""
+        echo "  To download models manually, set credentials and run:"
+        echo "    export R2_ACCESS_KEY_ID=your_key"
+        echo "    export R2_SECRET_ACCESS_KEY=your_secret"
+        echo "    aws --endpoint-url $R2_ENDPOINT s3 sync s3://$R2_BUCKET/ /mnt/models/"
+    fi
+fi
+echo ""
+
 echo "===================================================="
 echo "✅ RESTORE COMPLETE!"
 echo ""
@@ -446,51 +633,33 @@ tailscale status 2>/dev/null || echo "  Tailscale: Not running"
 ufw status | head -5
 fail2ban-client status | head -3
 echo ""
+echo "📋 Model Status:"
+ls -lh /mnt/models/checkpoints/ /mnt/models/text_encoders/ 2>/dev/null || echo "  (no models yet)"
+echo ""
 echo "⚠️  NEXT STEPS:"
 echo ""
-echo "1. Create Block Storage volumes:"
-echo "   Verda Dashboard → Storage → Create Block Volume"
-echo "   - Model Vault: 40GB (for LTX-2 models ~21GB)"
-echo "   - Scratch Disk: 10GB (for outputs/temp files)"
+echo "1. Verify models are ready:"
+echo "   ls -lh /mnt/models/checkpoints/ /mnt/models/text_encoders/"
 echo ""
-echo "2. Attach and mount Block Storage:"
-echo "   # As root:"
-echo "   mkfs.ext4 /dev/vdb  # Model Vault"
-echo "   mkfs.ext4 /dev/vdc  # Scratch Disk"
-echo "   mkdir -p /mnt/models /mnt/scratch"
-echo "   mount /dev/vdb /mnt/models"
-echo "   mount /dev/vdc /mnt/scratch"
-echo "   chown dev:dev /mnt/models /mnt/scratch"
-echo "   echo '/dev/vdb /mnt/models ext4 defaults 0 0' >> /etc/fstab"
-echo "   echo '/dev/vdc /mnt/scratch ext4 defaults 0 0' >> /etc/fstab"
+echo "2. (If models missing) Resume download:"
+echo "   # Set R2 credentials if not in .env"
+echo "   export R2_ACCESS_KEY_ID=your_key"
+echo "   export R2_SECRET_ACCESS_KEY=your_secret"
+echo "   aws --endpoint-url $R2_ENDPOINT s3 sync s3://$R2_BUCKET/ /mnt/models/"
 echo ""
-echo "3. Create symlinks to ComfyUI directories:"
-echo "   # As dev user:"
+echo "3. Start ComfyUI worker:"
 echo "   su - dev"
-echo "   mkdir -p ~/comfy-multi/data"
-echo "   ln -sf /mnt/models ~/comfy-multi/data/models"
-echo "   ln -sf /mnt/scratch ~/comfy-multi/data/outputs"
-echo ""
-echo "4. Download models to /mnt/models (~30 min):"
-echo "   cd ~/comfy-multi"
-echo "   # Run: bash scripts/download-models.sh"
-echo "   # Or download manually from HuggingFace:"
-echo "   # - ltx-2-19b-dev-fp8.safetensors (~10GB)"
-echo "   # - gemma_3_12B_it.safetensors (~5GB)"
-echo "   # - ltx-2-spatial-upscaler-x2-1.0.safetensors (~2GB)"
-echo "   # - ltx-2-19b-distilled-lora-384.safetensors (~2GB)"
-echo "   # - ltx-2-19b-lora-camera-control-dolly-left.safetensors (~2GB)"
-echo ""
-echo "5. Load environment and start worker:"
-echo "   cd ~/comfy-multi"
-echo "   source .env"
+echo "   cd ~/comfy-multi && source .env"
 echo "   docker compose up -d worker-1"
 echo ""
-echo "6. Verify connection to VPS:"
+echo "4. Verify connection to VPS (mello):"
 echo "   redis-cli -h \${REDIS_HOST} -p 6379 -a '\${REDIS_PASSWORD}' ping"
 echo "   # Should return: PONG"
 echo ""
-echo "💰 Storage costs: SFS 50GB (\$10) + Block 40GB (\$4) + Block 10GB (\$1) = \$15/month"
+echo "💡 Script flags for automation:"
+echo "   sudo bash RESTORE.sh --skip-models    # Use existing models"
+echo "   sudo bash RESTORE.sh --with-models    # Download from R2"
+echo "   sudo bash RESTORE.sh --fresh-models   # Delete & re-download"
 echo "===================================================="
 RESTORE
 
