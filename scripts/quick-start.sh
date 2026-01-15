@@ -88,6 +88,20 @@ echo ""
 # Step 5: Load container image
 echo "Step 5: Loading worker container..."
 CONTAINER_IMAGE="/mnt/models/worker-image.tar.gz"
+MELLO_HOST="dev@comfy.ahelme.net"
+MELLO_BACKUP="/home/dev/backups/verda/worker-image.tar.gz"
+
+if [ ! -f "$CONTAINER_IMAGE" ]; then
+    echo "  Container image not on SFS, trying to fetch from mello..."
+
+    if scp -o ConnectTimeout=10 "$MELLO_HOST:$MELLO_BACKUP" "$CONTAINER_IMAGE" 2>/dev/null; then
+        echo "  ✓ Downloaded from mello!"
+    else
+        echo "  ⚠️  Could not fetch from mello"
+        echo "  Run RESTORE.sh --build-container first"
+        exit 1
+    fi
+fi
 
 if [ -f "$CONTAINER_IMAGE" ]; then
     IMAGE_SIZE=$(du -h "$CONTAINER_IMAGE" | cut -f1)
@@ -101,8 +115,7 @@ if [ -f "$CONTAINER_IMAGE" ]; then
         exit 1
     fi
 else
-    echo "  ⚠️  Container image not found at $CONTAINER_IMAGE"
-    echo "  Run RESTORE.sh --build-container first"
+    echo "  ✗ Container image not found"
     exit 1
 fi
 echo ""
