@@ -92,6 +92,18 @@ docker compose up worker-1
 
 ### Quick Start (existing SFS)
 
+**Option A: One-liner with quick-start.sh**
+```bash
+# 1. Create GPU spot instance (Verda Dashboard)
+
+# 2. SSH and run quick-start script
+ssh root@<new-instance-ip>
+curl -sL https://raw.githubusercontent.com/ahelme/comfy-multi/main/scripts/quick-start.sh | bash -s <sfs-endpoint>
+
+# Done! Mello SSH access + SFS mount + container loaded + worker started
+```
+
+**Option B: Manual steps**
 ```bash
 # 1. Create GPU spot instance (Verda Dashboard)
 #    - NO storage attached during creation
