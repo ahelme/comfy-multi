@@ -1,21 +1,35 @@
 #!/bin/bash
-# BACKUP VERDA - Backup Verda GPU instance configs and optionally models
-# Backs up system hardening configs, user environment, and project files
-# Optional: --with-models flag syncs models to Cloudflare R2
+# BACKUP VERDA - Backup Verda GPU instance configs, container image, and optionally models
+# Backs up system hardening configs, user environment, project files, and container tarball
+#
+# Usage: ./backup-verda.sh [OPTIONS]
+#   --with-models     Sync models to Cloudflare R2
+#   --with-container  Backup container image tarball from block storage
+#   --full            Backup everything (models + container)
 
 set -e
 
 # Parse flags
 WITH_MODELS=false
+WITH_CONTAINER=false
 while [[ $# -gt 0 ]]; do
     case $1 in
         --with-models|-m)
             WITH_MODELS=true
             shift
             ;;
+        --with-container|-c)
+            WITH_CONTAINER=true
+            shift
+            ;;
+        --full|-f)
+            WITH_MODELS=true
+            WITH_CONTAINER=true
+            shift
+            ;;
         *)
             echo "Unknown option: $1"
-            echo "Usage: $0 [--with-models|-m]"
+            echo "Usage: $0 [--with-models|-m] [--with-container|-c] [--full|-f]"
             exit 1
             ;;
     esac
@@ -34,6 +48,7 @@ echo "==============="
 echo "Host: $VERDA_HOST"
 echo "Destination: $BACKUP_DIR"
 echo "Models to R2: $WITH_MODELS"
+echo "Container backup: $WITH_CONTAINER"
 echo ""
 
 mkdir -p "$BACKUP_DIR"
@@ -207,6 +222,34 @@ if [ "$WITH_MODELS" = true ]; then
                 echo "  Summary: $SYNCED uploaded, $SKIPPED already synced"
             fi
         fi
+    fi
+fi
+
+# Backup 11: Container image tarball (optional)
+if [ "$WITH_CONTAINER" = true ]; then
+    echo ""
+    echo "Step 11: Backing up container image..."
+
+    CONTAINER_IMAGE_PATH="/mnt/models/worker-image.tar.gz"
+
+    # Check if container image exists on Verda
+    if ssh "$VERDA_HOST" "[ -f $CONTAINER_IMAGE_PATH ]" 2>/dev/null; then
+        REMOTE_SIZE=$(ssh "$VERDA_HOST" "du -h $CONTAINER_IMAGE_PATH | cut -f1")
+        echo "  Found: $CONTAINER_IMAGE_PATH ($REMOTE_SIZE)"
+        echo "  Downloading to mello..."
+
+        if scp "$VERDA_HOST:$CONTAINER_IMAGE_PATH" "$BACKUP_DIR/worker-image.tar.gz"; then
+            LOCAL_SIZE=$(du -h "$BACKUP_DIR/worker-image.tar.gz" | cut -f1)
+            echo "  ✓ Container image backed up ($LOCAL_SIZE)"
+        else
+            echo "  ⚠️  Failed to download container image"
+        fi
+    else
+        echo "  ⚠️  Container image not found at $CONTAINER_IMAGE_PATH"
+        echo "  Build it first on Verda:"
+        echo "    cd ~/comfy-multi"
+        echo "    docker compose build worker-1"
+        echo "    docker save <image> | gzip > /mnt/models/worker-image.tar.gz"
     fi
 fi
 
@@ -658,20 +701,37 @@ if [ "$CONTAINER_ACTION" = "skip" ]; then
     echo "  To build manually: cd ~/comfy-multi && docker compose build worker-1"
 
 elif [ "$CONTAINER_ACTION" = "load" ]; then
-    # Load container from block storage
+    # Load container from block storage or backup directory
+    BACKUP_IMAGE_PATH="./worker-image.tar.gz"
+    IMAGE_TO_LOAD=""
+
     if [ -f "$CONTAINER_IMAGE_PATH" ]; then
-        echo "  📦 Loading worker image from block storage..."
-        IMAGE_SIZE=$(du -h "$CONTAINER_IMAGE_PATH" | cut -f1)
+        echo "  ✓ Found image on block storage"
+        IMAGE_TO_LOAD="$CONTAINER_IMAGE_PATH"
+    elif [ -f "$BACKUP_IMAGE_PATH" ]; then
+        echo "  ✓ Found image in backup directory"
+        echo "  Copying to block storage for future use..."
+        cp "$BACKUP_IMAGE_PATH" "$CONTAINER_IMAGE_PATH"
+        chown dev:dev "$CONTAINER_IMAGE_PATH"
+        IMAGE_TO_LOAD="$CONTAINER_IMAGE_PATH"
+    fi
+
+    if [ -n "$IMAGE_TO_LOAD" ]; then
+        echo "  📦 Loading worker image..."
+        IMAGE_SIZE=$(du -h "$IMAGE_TO_LOAD" | cut -f1)
         echo "  Image size: $IMAGE_SIZE"
 
-        if docker load < "$CONTAINER_IMAGE_PATH"; then
+        if docker load < "$IMAGE_TO_LOAD"; then
             echo "  ✓ Worker image loaded successfully!"
             docker images | grep -E "comfy|worker" | head -5
         else
             echo "  ⚠️  Failed to load image - will need manual build"
         fi
     else
-        echo "  ⚠️  Container image not found at $CONTAINER_IMAGE_PATH"
+        echo "  ⚠️  Container image not found"
+        echo "  Checked: $CONTAINER_IMAGE_PATH (block storage)"
+        echo "  Checked: $BACKUP_IMAGE_PATH (backup directory)"
+        echo ""
         echo "  Run with --build-container to create it, or build manually"
     fi
 
