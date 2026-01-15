@@ -6,6 +6,9 @@
 **Doc Created:** 2026-01-14
 **Doc Updated:** 2026-01-15
 
+> **Recommended:** Use Shared File System (SFS) instead of Block Storage for simpler workflow.
+> See [Workshop Workflow](./admin-workflow-workshop.md) for SFS-based setup.
+
 ---
 
 # Admin Guide: Backup & Restore

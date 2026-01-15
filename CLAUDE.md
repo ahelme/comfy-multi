@@ -358,11 +358,21 @@ None yet.
 
 ## ⚠️ Verda GPU Cloud Gotchas
 
-**CRITICAL: Block storage attached during instance provisioning gets WIPED!**
+### Storage Options
 
-Verda formats/wipes any block storage volume that is attached during instance creation. This will destroy all data on the volume.
+**Recommended: Shared File System (SFS)** - €0.01168/h for 50GB (~$14 AUD/month)
+- Network-attached (NFS), mount from any instance
+- No provisioning gotchas - just mount and go
+- Multiple instances can share same storage
+- Mount: `mount -t nfs <sfs-endpoint>:/share /mnt/models`
 
-**Safe workflow for existing block storage with data:**
+**Alternative: Block Storage** - Cheaper but riskier
+- ⚠️ **CRITICAL: Gets WIPED if attached during instance provisioning!**
+- Must use shutdown-attach-boot workflow for existing data
+- Only one instance can use it at a time
+
+### Block Storage Safe Workflow (if using)
+
 1. Create instance **WITHOUT** block storage attached
 2. Boot the instance
 3. **Shut down** the instance (required for attachment)
@@ -374,10 +384,10 @@ Verda formats/wipes any block storage volume that is attached during instance cr
 - `OS-*` = OS disks (will have Ubuntu installed)
 - `Volume-*` = Data volumes (your actual block storage)
 
-**Other Verda notes:**
+### Other Verda Notes
 - Verda images have Docker pre-installed (don't try to install docker.io - conflicts with containerd)
 - Ubuntu 24.04 uses `ssh` service name, not `sshd`
-- Spot instances can be terminated anytime - always use block storage for persistent data
+- Spot instances can be terminated anytime - always use persistent storage (SFS or Block)
 
 ---
 
