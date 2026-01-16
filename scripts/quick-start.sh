@@ -72,17 +72,18 @@ else
         cat > /etc/motd << 'MOTD'
 
 ╔══════════════════════════════════════════════════════════════════╗
-║  ⚠️  SFS NOT MOUNTED - ACTION REQUIRED                           ║
+║  SFS NOT MOUNTED - ACTION REQUIRED                               ║
 ╠══════════════════════════════════════════════════════════════════╣
 ║                                                                  ║
 ║  1. Get mount command from Verda Dashboard:                      ║
-║     Storage → Shared File Systems → SFS-Model-Vault              ║
+║     Storage -> Shared File Systems -> SFS-Model-Vault            ║
 ║                                                                  ║
-║  2. Run quick-start with the endpoint:                           ║
-║     bash /root/quick-start.sh <sfs-endpoint>                     ║
+║  2. Create mount point and mount SFS:                            ║
+║     mkdir -p /mnt/models                                         ║
+║     mount -t nfs -o nconnect=16 <sfs-endpoint> /mnt/models       ║
 ║                                                                  ║
-║  Example:                                                        ║
-║     bash /root/quick-start.sh nfs.fin-01.datacrunch.io:/SFS-...  ║
+║  3. Then run quick-start again:                                  ║
+║     bash /root/quick-start.sh                                    ║
 ║                                                                  ║
 ╚══════════════════════════════════════════════════════════════════╝
 
