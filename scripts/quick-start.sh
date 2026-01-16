@@ -171,18 +171,35 @@ else
 fi
 echo ""
 
-# Step 4: Verify models exist
-echo "Step 4: Verifying models..."
+# Step 4: Check for restore scripts
+echo "Step 4: Checking restore scripts..."
+MELLO_HOST="dev@comfy.ahelme.net"
+MELLO_BACKUP_DIR="/home/dev/backups/verda"
+
+if [ -f /root/RESTORE-SFS.sh ] && [ -f /root/RESTORE-BLOCK-MELLO.sh ]; then
+    chmod +x /root/RESTORE-SFS.sh /root/RESTORE-BLOCK-MELLO.sh 2>/dev/null || true
+    echo "  OK Restore scripts found in /root/"
+else
+    echo "  !! Restore scripts not found"
+    echo ""
+    echo "  Run this FROM MELLO to push restore scripts:"
+    echo "  scp $MELLO_BACKUP_DIR/RESTORE-*.sh $MELLO_BACKUP_DIR/README-RESTORE.md root@$(hostname -I | awk '{print $1}'):/root/"
+    echo ""
+fi
+echo ""
+
+# Step 5: Verify models exist
+echo "Step 5: Verifying models..."
 if [ -f "$SFS_MOUNT/checkpoints/ltx-2-19b-dev-fp8.safetensors" ]; then
     echo "  OK LTX-2 checkpoint found"
 else
     echo "  !! Models not found on SFS"
-    echo "  Run RESTORE.sh --with-models to download from R2"
+    echo "  Run: bash /root/RESTORE-SFS.sh --full"
 fi
 echo ""
 
-# Step 5: Load container image
-echo "Step 5: Loading worker container..."
+# Step 6: Load container image
+echo "Step 6: Loading worker container..."
 CONTAINER_IMAGE="$SFS_MOUNT/worker-image.tar.gz"
 MELLO_HOST="dev@comfy.ahelme.net"
 MELLO_BACKUP="/home/dev/backups/verda/worker-image.tar.gz"
@@ -204,12 +221,12 @@ elif [ -f "$CONTAINER_IMAGE" ]; then
     fi
 else
     echo "  !! Container image not on SFS"
-    echo "  Run RESTORE.sh --with-models to download from R2"
+    echo "  Run: bash /root/RESTORE-SFS.sh --with-container"
 fi
 echo ""
 
-# Step 6: Create symlinks for ComfyUI
-echo "Step 6: Setting up symlinks..."
+# Step 7: Create symlinks for ComfyUI
+echo "Step 7: Setting up symlinks..."
 mkdir -p /home/dev/comfy-multi/data 2>/dev/null || true
 ln -sf "$SFS_MOUNT" /home/dev/comfy-multi/data/models 2>/dev/null || true
 mkdir -p /mnt/scratch 2>/dev/null || true
@@ -221,13 +238,13 @@ fi
 echo "  OK Symlinks created"
 echo ""
 
-# Step 7: Check for comfy-multi project
-echo "Step 7: Checking project setup..."
+# Step 8: Check for comfy-multi project
+echo "Step 8: Checking project setup..."
 if [ -f /home/dev/comfy-multi/docker-compose.yml ]; then
     echo "  OK comfy-multi project found"
 else
     echo "  !! comfy-multi project not found"
-    echo "  Run RESTORE.sh to set up the project"
+    echo "  Run: bash /root/RESTORE-BLOCK-MELLO.sh (for full system restore)"
 fi
 echo ""
 
@@ -241,9 +258,14 @@ echo "QUICK-START COMPLETE!"
 echo ""
 echo "SFS mounted at: $SFS_MOUNT"
 echo ""
+echo "Restore scripts in /root/:"
+echo "  - RESTORE-SFS.sh --full      (populate SFS: models + container)"
+echo "  - RESTORE-BLOCK-MELLO.sh     (full system restore from mello)"
+echo "  - README-RESTORE.md          (which script to use when)"
+echo ""
 echo "Next steps:"
-echo "  1. Run RESTORE.sh if models/container not found"
-echo "  2. Or start worker: cd ~/comfy-multi && docker compose up -d worker-1"
+echo "  If models/container missing: bash /root/RESTORE-SFS.sh --full"
+echo "  If all ready: cd ~/comfy-multi && docker compose up -d worker-1"
 echo ""
 echo "Connect from mello:"
 echo "  ssh root@$(hostname -I | awk '{print $1}')"
