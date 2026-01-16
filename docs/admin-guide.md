@@ -359,6 +359,6 @@ During the workshop, keep these metrics in mind:
 
 ---
 
-**Last Updated:** 2026-01-10
+**Last Updated:** 2026-01-16
 
 For detailed information on any topic, refer to the specific guide linked above. Good luck with your workshop!
