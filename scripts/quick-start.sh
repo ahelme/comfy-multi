@@ -71,21 +71,24 @@ else
         # Add MOTD reminder for next login
         cat > /etc/motd << 'MOTD'
 
-╔══════════════════════════════════════════════════════════════════╗
-║  SFS NOT MOUNTED - ACTION REQUIRED                               ║
-╠══════════════════════════════════════════════════════════════════╣
-║                                                                  ║
-║  1. Get mount command from Verda Dashboard:                      ║
-║     Storage -> Shared File Systems -> SFS-Model-Vault            ║
-║                                                                  ║
-║  2. Create mount point and mount SFS:                            ║
-║     mkdir -p /mnt/models                                         ║
-║     mount -t nfs -o nconnect=16 <sfs-endpoint> /mnt/models       ║
-║                                                                  ║
-║  3. Then run quick-start again:                                  ║
-║     bash /root/quick-start.sh                                    ║
-║                                                                  ║
-╚══════════════════════════════════════════════════════════════════╝
+╔═══════════════════════════════════════════════════════════════════════╗
+║  SFS NOT MOUNTED - ACTION REQUIRED                                    ║
+╠═══════════════════════════════════════════════════════════════════════╣
+║                                                                       ║
+║  1. Get PSEUDOPATH from Verda Dashboard:                              ║
+║     Storage tab -> Click dropdown on SFS-Model-Vault -> PSEUDOPATH    ║
+║     Example: nfs.fin-01.datacrunch.io:/SFS-Model-Vault-273f8ad9       ║
+║                                                                       ║
+║  2. Create mount point:                                               ║
+║     mkdir -p /mnt/models                                              ║
+║                                                                       ║
+║  3. Mount SFS (replace <PSEUDOPATH> with value from step 1):          ║
+║     mount -t nfs -o nconnect=16 <PSEUDOPATH> /mnt/models              ║
+║                                                                       ║
+║  4. Run quick-start again:                                            ║
+║     bash /root/quick-start.sh                                         ║
+║                                                                       ║
+╚═══════════════════════════════════════════════════════════════════════╝
 
 MOTD
 
