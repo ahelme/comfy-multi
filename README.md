@@ -115,7 +115,9 @@ nano .env  # Set DOMAIN, SSL paths, REDIS_PASSWORD
 
 # Install Tailscale
 curl -fsSL https://tailscale.com/install.sh | sh
-sudo tailscale up
+sudo tailscale up --ssh=false
+# Visit the URL shown in your browser to authenticate
+# Example: https://login.tailscale.com/a/abc123xyz
 echo "Your Tailscale IP: $(tailscale ip -4)"
 
 # Start services
@@ -138,7 +140,8 @@ ssh root@your-gpu-instance
 
 # Install Tailscale (same account as VPS)
 curl -fsSL https://tailscale.com/install.sh | sh
-sudo tailscale up
+sudo tailscale up --ssh=false
+# Visit the URL shown in your browser to authenticate
 
 # Download models from R2
 aws s3 sync s3://your-bucket/ /mnt/models/ --endpoint-url https://your-r2-endpoint

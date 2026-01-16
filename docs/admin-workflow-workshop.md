@@ -73,7 +73,25 @@ cd ~/verda
 sudo bash RESTORE.sh --with-models --build-container
 ```
 
-### 4. Verify Setup
+### 5. Authenticate Tailscale
+
+After RESTORE.sh runs, Tailscale is installed but needs authentication:
+
+```bash
+# Authenticate Tailscale (opens browser URL)
+sudo tailscale up --ssh=false
+
+# You'll see a URL like: https://login.tailscale.com/a/abc123xyz
+# Visit this URL in your browser to authenticate the device
+
+# Verify connection (should show mello VPS)
+tailscale status
+tailscale ip -4  # Should be 100.89.38.43
+```
+
+**Note:** `--ssh=false` disables Tailscale SSH - we use regular SSH instead.
+
+### 6. Verify Setup
 
 ```bash
 # Check models (~45GB)
@@ -89,7 +107,7 @@ cd ~/comfy-multi
 docker compose up worker-1
 ```
 
-### 5. Backup Container to Mello
+### 7. Backup Container to Mello
 
 ```bash
 # From mello

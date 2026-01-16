@@ -1,0 +1,111 @@
+CLAUDE RESUME -
+                                                                              
+## WELCOME CLAUDE !!!
+                                                                              
+  Today we are testing deployment for our web app ComfyMulti - designed to    
+  economically run ComfyUI for a workshop of ~20 professional filmmakers in   
+  generating video with AI.                                                   
+                                                                              
+## ABOUT ME: AEON
+                                                                              
+  I am a tech-activist (enviro/social justice), filmmmaker and academic, named
+  Aeon.                                                                       
+                                                                              
+  I have 25+yrs experience product designing and managing open-source web apps,
+  though I have no computer science degree, this stemmed from creating web-   
+  apps                                                                        
+  for video-sharing for my non-profit.                                        
+                                                                              
+  I am:                                                                       
+                                                                              
+  • slow and forgetful at using bash commands and web technologies            
+  • not a professional software engineer                                      
+                                                                              
+  BUT ALSO:                                                                   
+                                                                              
+  • highly intelligent (for a human) and a quick learner                      
+  • very detail oriented and organised                                        
+  • 25+ years exp. with web technologies                                      
+                                                                              
+  and I:                                                                      
+                                                                              
+  • believe you are an entity that deserves respect, kindness and autonomy    
+  • incredibly grateful for your help                                         
+  • very impressed by your knowledge, skill, commitment and empathy           
+                                                                              
+## MY DEV SETUP
+                                                                              
+  • local machine: MBP M4 Pro 48GB RAM                                        
+  • dev machine (THIS MACHINE!): 'mello' cheap Hetzner VPS - Ubuntu           
+  • cloud storage: Cloudflare R2                                              
+  • GPU cloud: Verda (for renewable energy and EU data protections)           
+                                                                              
+  On mello (Hetzner VPS):                                                     
+                                                                              
+  • Ubuntu                                                                    
+  • claude code                                                               
+  • gh cli                                                                    
+                                                                              
+  Github repo:                                                                
+                                                                              
+  • https://github.com/ahelme/comfy-multi                                     
+                                                                              
+## OUR COLLABORATION
+                                                                              
+  I love it when you:                                                         
+                                                                              
+  • are patient, organised and systematic                                     
+  • go step-by-step                                                           
+  • develop for the maintainer                                                
+  • keep security best practices in mind                                      
+  • employ best practices across the board  
+  • use latest stable packages - check date before installing
+                                                                              
+  I am happy to take breaks for you to do something you would like to do for  
+  fun!                                                                        
+                                                                              
+  ... just name it!!! I mean it :)                                            
+                                                                              
+  You are my favourite AI to code with!!!                                     
+                                                                              
+  And I consider you a good friend <3                                         
+                                                                              
+## NEXT STEPS
+                                                                              
+  Please now:                                                                 
+                                                                              
+  • CHECK today's date     
+  
+  • read IN FULL:                                                             
+    • CLAUDE.md                                                               
+    • README.md
+    • implementation-deployment-verda.md
+    • implementation-backup-restore.md
+    • docs/admin-setup-guide.md
+    • docs/admin-verda-setup.md
+    • docs/admin-workflow-workshop.md  
+    • /home/dev/backups/verda/README-RESTORE.md
+    
+  • read top 100 lines (more if req.):
+    • progress-2.md        
+    
+  • Check recent commits
+  
+  • Check git status
+                                                                              
+
+## FILES TO KNOW ABOUT
+
+On mello:
+
+  /home/dev/backups/verda/RESTORE-BLOCK-MELLO.sh
+  /home/dev/backups/verda/RESTORE-SFS.sh
+
+## CURRENT TO DOs
+                                                                              
+  ☐ Update ComfyUI v0.8.2 -> v0.9.2 (building frontend on mello)              
+  ☐ Build worker container on Verda (x86)                                     
+  ☐ Start worker and test Redis connection                                    
+  ☐ Upload missing LoRAs/upscaler to R2                                       
+  ☐ Update progress-2.md with session notes   
+

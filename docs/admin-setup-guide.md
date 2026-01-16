@@ -61,9 +61,18 @@ nano .env
 ./scripts/start.sh
 ```
 
-**Or use deployment script:**
+**Or use quick-start script (recommended for Verda):**
 ```bash
-./scripts/deploy-verda.sh user@your-gpu-instance.com
+# Run quick-start to mount SFS and set up basics
+curl -sL https://raw.githubusercontent.com/ahelme/comfy-multi/main/scripts/quick-start.sh | bash -s <sfs-endpoint>
+
+# Authenticate Tailscale (REQUIRED for Redis connection)
+sudo tailscale up --ssh=false
+# Visit the URL shown in your browser to authenticate
+# Verify: tailscale ip -4  # Should show 100.89.38.43
+
+# If fresh SFS, download models from R2
+sudo bash RESTORE-SFS.sh --full
 ```
 
 ### 3. Environment Variables Configuration
@@ -237,11 +246,14 @@ curl -k https://localhost/health
 **Test network connectivity (GPU ↔ VPS):**
 
 ```bash
-# From GPU instance, test Redis connection to VPS
-redis-cli -h comfy.ahelme.net -p 6379 -a $REDIS_PASSWORD ping
+# First: Authenticate Tailscale on GPU instance
+sudo tailscale up --ssh=false
+# Visit the URL shown (e.g., https://login.tailscale.com/a/abc123) in your browser
+# Verify connection: tailscale status
 
-# From VPS, verify firewall allows GPU instance
-# (must allow inbound connections from GPU instance IP on port 6379)
+# From GPU instance, test Redis connection to VPS via Tailscale
+redis-cli -h 100.99.216.71 -p 6379 -a $REDIS_PASSWORD ping
+# Should return: PONG
 ```
 
 **Load test (optional - simulate workshop load):**

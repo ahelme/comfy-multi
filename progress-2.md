@@ -3,7 +3,7 @@
 **Repository:** github.com/ahelme/comfy-multi
 **Domain:** comfy.ahelme.net
 **Doc Created:** 2026-01-04
-**Doc Updated:** 2026-01-15
+**Doc Updated:** 2026-01-16
 
 ---
 
@@ -27,6 +27,131 @@
 
 ---
 --- remember to update [COMMIT.log](./COMMIT.log) EVERY time you update this file!!!
+---
+
+## Progress Report 11 - 2026-01-16 (Phase 11: Worker Testing & Documentation)
+**Status:** 🔨 In Progress
+**Started:** 2026-01-16
+
+### Activities
+
+#### Part 1: Session Resume & Status Check
+- ✅ Resumed from previous session (context compacted)
+- ✅ Verified worker container built on Verda (comfyui-worker:v0.9.2 - 6.82GB)
+- ✅ Verified frontend built on mello (comfyui-frontend:v0.9.2)
+- ✅ Verified models synced to SFS from R2 (~47GB)
+- ✅ Fixed circular symlink on SFS (/mnt/models/models)
+
+#### Part 2: Tailscale Setup on Verda
+- ✅ Discovered Tailscale not installed on current Verda instance (65.108.33.124)
+- ✅ Installed Tailscale via official install script
+- ✅ Started authentication process (`tailscale up --ssh=false`)
+- 🔄 Waiting for user to authenticate via browser URL
+
+#### Part 3: Documentation Gap Analysis
+Found Tailscale authentication step missing from key docs:
+- ❌ admin-workflow-workshop.md - NO mention of Tailscale
+- ❌ implementation-backup-restore.md - Missing auth step
+- ❌ README.md - Had `tailscale up` but no browser auth explanation
+- ❌ CLAUDE.md - Missing auth process
+- ❌ admin-setup-guide.md - Missing auth step
+- ❌ admin-scripts.md - Missing RESTORE scripts documentation
+
+#### Part 4: Documentation Updates
+Updated 6 docs with Tailscale authentication instructions:
+
+| Doc | Changes |
+|-----|---------|
+| admin-workflow-workshop.md | Added Step 5: Authenticate Tailscale (renumbered 6, 7) |
+| implementation-backup-restore.md | Added Step 3: Authenticate Tailscale + checklist item |
+| README.md | Added browser auth comments to VPS and GPU setup |
+| CLAUDE.md | Added Authentication and Note lines to Tailscale VPN section |
+| admin-setup-guide.md | Added quick-start + Tailscale auth flow, updated network test |
+| admin-scripts.md | **Major update:** Added RESTORE-SFS.sh, RESTORE-BLOCK-MELLO.sh, quick-start.sh sections |
+
+#### Part 5: admin-scripts.md Overhaul
+- ✅ Added 3 new scripts to quick reference table
+- ✅ Added "Restore Scripts" section with:
+  - "Which Restore Script to Use?" decision table
+  - RESTORE-SFS.sh documentation (purpose, usage, options)
+  - RESTORE-BLOCK-MELLO.sh documentation (purpose, usage, what it does)
+  - quick-start.sh documentation (purpose, usage)
+- ✅ Documented all flags and scenarios for each script
+
+#### Part 6: RESTORE-SFS.sh Rewrite
+- ✅ Backed up original RESTORE-SFS.sh to RESTORE-SFS.sh.bak
+- ✅ Copied RESTORE-BLOCK-MELLO.sh as base (identical system restore)
+- ✅ Updated header comments for SFS workflow
+- ✅ Replaced NEXT STEPS section with SFS/R2 instructions instead of Block Storage
+- ✅ Key difference: Models from R2, storage on SFS (not Block)
+
+#### Part 7: Tailscale Identity Restoration
+- ✅ Discovered new Verda instance got new Tailscale IP (100.75.24.125)
+- ✅ Transferred tailscale-identity backup from mello to Verda
+- ✅ Restored Tailscale identity - IP now correct: **100.89.38.43**
+- ✅ Tested Redis connection via Tailscale: **PONG** success!
+
+#### Part 8: Verda Instance Lost
+- ⚠️ Verda instance (65.108.33.124) became unreachable
+- Instance may have been terminated or IP changed
+- Need to provision new instance to continue testing
+
+### Files Modified
+- ~/backups/verda/RESTORE-SFS.sh (rewritten to match RESTORE-BLOCK-MELLO.sh)
+- docs/admin-workflow-workshop.md
+- docs/implementation-backup-restore.md
+- docs/admin-setup-guide.md
+- docs/admin-scripts.md
+- README.md
+- CLAUDE.md
+- progress-2.md
+
+### Key Learnings
+1. **Tailscale identity must be restored BEFORE `tailscale up`** to preserve IP
+2. **RESTORE-SFS.sh and RESTORE-BLOCK-MELLO.sh should be identical** except for storage instructions
+3. **quick-start.sh checks for restore scripts** and shows scp command if missing
+
+### Next Steps (Test Restore Process)
+1. [ ] Provision new Verda GPU instance with SFS attached
+2. [ ] Run quick-start.sh to mount SFS and check for scripts
+3. [ ] Push backup files from mello: `scp ~/backups/verda/* root@<ip>:/root/`
+4. [ ] Run RESTORE-SFS.sh and verify full system restore
+5. [ ] Verify Tailscale IP is 100.89.38.43
+6. [ ] Test Redis connection via Tailscale
+7. [ ] Start worker and test end-to-end job execution
+8. [ ] Document any issues found during restore test
+
+### Files Modified
+- docs/admin-workflow-workshop.md
+- docs/implementation-backup-restore.md
+- docs/admin-setup-guide.md
+- docs/admin-scripts.md (major update)
+- README.md
+- CLAUDE.md
+- progress-2.md (this file)
+
+### Current State
+
+**Verda GPU Instance (65.108.33.124):**
+- Worker image: comfyui-worker:v0.9.2 ✅
+- SFS mounted: /mnt/models ✅
+- Models on SFS: ~47GB ✅
+- Tailscale: Installed, awaiting authentication 🔄
+
+**Mello VPS:**
+- Frontend image: comfyui-frontend:v0.9.2 ✅
+- All 23 containers running ✅
+- Redis accessible via Tailscale ✅
+
+### Pending
+- [ ] User authenticates Tailscale (browser URL)
+- [ ] Test Redis connection from Verda
+- [ ] Start worker container
+- [ ] Upload missing LoRAs/upscaler to R2
+
+### Blockers
+- Tailscale authentication required before Redis test
+
 ---
 
 ## Progress Report 10 - 2026-01-15 (Phase 11: SFS Storage & Quick-Start Workflow)
@@ -550,4 +675,4 @@ None - Phase 7 complete.
 
 ---
 
-**Last Updated:** 2026-01-12
+**Last Updated:** 2026-01-16

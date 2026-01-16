@@ -3,7 +3,7 @@
 **Repository:** github.com/ahelme/comfy-multi
 **Domain:** comfy.ahelme.net
 **Doc Created:** 2026-01-10
-**Doc Updated:** 2026-01-11
+**Doc Updated:** 2026-01-16
 
 ---
 
@@ -81,7 +81,19 @@ Before starting, verify:
 
 ---
 
-## Provider-Specific Setup
+## Recommended: SFS Workflow (Verda)
+
+For Verda deployments, use the automated restore workflow:
+
+- **[Workshop Workflow Guide](./docs/admin-workflow-workshop.md)** - Daily startup & full setup
+- **[Scripts Reference](./docs/admin-scripts.md)** - quick-start.sh, RESTORE-SFS.sh, RESTORE-BLOCK-MELLO.sh
+- **[Backup & Restore](./docs/implementation-backup-restore.md)** - Complete restore procedures
+
+Key scripts: `quick-start.sh` (daily), `RESTORE-SFS.sh` (full restore with SFS), `RESTORE-BLOCK-MELLO.sh` (full restore with Block Storage)
+
+---
+
+## Provider-Specific Setup (Manual)
 
 ### Option A: Verda H100 Instance
 

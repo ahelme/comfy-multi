@@ -247,7 +247,12 @@ ssh root@new-verda
 cd ~/verda
 bash RESTORE.sh
 
-# 3. Create symlinks (as dev user)
+# 3. Authenticate Tailscale (required for Redis connection)
+sudo tailscale up --ssh=false
+# Visit the URL shown (e.g., https://login.tailscale.com/a/abc123) in your browser
+# Verify: tailscale ip -4  # Should show 100.89.38.43
+
+# 4. Create symlinks (as dev user)
 su - dev
 mkdir -p ~/comfy-multi/data
 ln -sf /mnt/models ~/comfy-multi/data/models
@@ -311,6 +316,7 @@ wget https://huggingface.co/Lightricks/LTX-2-19b-LoRA-Camera-Control-Dolly-Left/
 
 ### Verification Checklist
 
+- [ ] Tailscale authenticated (visited browser URL)
 - [ ] Tailscale IP is 100.89.38.43
 - [ ] SSH access works
 - [ ] UFW active (SSH + Tailscale only)

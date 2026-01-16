@@ -3,7 +3,7 @@
 **Repository:** github.com/ahelme/comfy-multi
 **Domain:** comfy.ahelme.net
 **Doc Created:** 2026-01-12
-**Doc Updated:** 2026-01-12
+**Doc Updated:** 2026-01-16
 
 ---
 
@@ -29,6 +29,10 @@ Complete reference for all management and automation scripts in the ComfyUI Work
 | **test.sh** | Run tests | `./scripts/test.sh` |
 | **load-test.sh** | Load testing | `./scripts/load-test.sh` |
 | **backup-verda-env.sh** | Backup Verda environment | `./scripts/backup-verda-env.sh` |
+| **backup-verda.sh** | Backup Verda configs to mello | `./scripts/backup-verda.sh` |
+| **quick-start.sh** | Daily GPU instance startup | `curl ... \| bash -s <sfs-endpoint>` |
+| **RESTORE-SFS.sh** | Download models/container to SFS | `sudo bash RESTORE-SFS.sh --full` |
+| **RESTORE-BLOCK-MELLO.sh** | Full system restore from mello | `sudo bash RESTORE-BLOCK-MELLO.sh` |
 | **create-dotfiles-repo.sh** | Create dotfiles repo | `./scripts/create-dotfiles-repo.sh` |
 | **verda-startup-script.sh** | GPU instance setup | Run on Verda instance |
 
@@ -678,6 +682,137 @@ crontab -e
 
 ---
 
+## Restore Scripts
+
+Two restore scripts are available depending on your scenario. Scripts are located in `~/backups/verda/` on mello.
+
+### Which Restore Script to Use?
+
+| Scenario | Script | Time |
+|----------|--------|------|
+| **Daily startup** (SFS has models) | `quick-start.sh` only | ~30 sec |
+| **Fresh SFS** (need models from R2) | `quick-start.sh` then `RESTORE-SFS.sh --full` | ~30 min |
+| **New instance** (need Tailscale/security) | `RESTORE-BLOCK-MELLO.sh` then `quick-start.sh` | ~10 min |
+
+---
+
+### RESTORE-SFS.sh
+**Purpose:** Populate Verda SFS with models from Cloudflare R2 and container from mello
+
+**Location:** `~/backups/verda/RESTORE-SFS.sh` (on mello, transfer to Verda)
+
+**Usage:**
+```bash
+# Transfer to Verda first
+scp ~/backups/verda/RESTORE-SFS.sh root@<verda-ip>:~/
+
+# On Verda (after quick-start.sh has mounted SFS)
+sudo bash RESTORE-SFS.sh --full
+```
+
+**Options:**
+| Flag | Description |
+|------|-------------|
+| `--with-models` | Download models from R2 (~45GB, ~30 min) |
+| `--with-container` | Copy container tarball from mello (~2.6GB) |
+| `--full` | Both models and container (recommended for fresh SFS) |
+| `--skip-models` | Skip model download (use existing) |
+| `--skip-container` | Skip container copy (use existing) |
+
+**What it does:**
+1. Verifies SFS is mounted at /mnt/models
+2. Installs AWS CLI if missing
+3. Downloads models from Cloudflare R2 (if --with-models or --full)
+4. Copies container tarball from mello (if --with-container or --full)
+5. Loads container image into Docker
+
+**Prerequisites:**
+- SFS mounted at /mnt/models (run quick-start.sh first)
+- SSH access to mello (for container copy)
+
+**When to use:**
+- Fresh SFS setup (Jan 31 / first workshop month)
+- Models deleted or corrupted
+- Container image missing from SFS
+
+---
+
+### RESTORE-BLOCK-MELLO.sh
+**Purpose:** Full system restore from mello backup tarballs with security hardening
+
+**Location:** `~/backups/verda/RESTORE-BLOCK-MELLO.sh` (on mello, transfer to Verda)
+
+**Usage:**
+```bash
+# Transfer backup directory to Verda
+scp -r ~/backups/verda/ root@<verda-ip>:~/
+
+# On Verda
+cd ~/verda
+sudo bash RESTORE-BLOCK-MELLO.sh
+```
+
+**What it does:**
+1. **Package Installation** - fail2ban, ufw, redis-tools, zsh, docker, git
+2. **Tailscale Restore** - Restores identity to preserve IP 100.89.38.43
+3. **SSH Host Keys** - Restores server identity
+4. **Security Hardening** - Configures fail2ban, UFW
+5. **User Environment** - Creates dev user, restores .zshrc, oh-my-zsh
+6. **Project Restore** - Restores ComfyUI project files
+
+**After running, authenticate Tailscale:**
+```bash
+sudo tailscale up --ssh=false
+# Visit the URL shown in your browser to authenticate
+# Verify: tailscale ip -4  # Should show 100.89.38.43
+```
+
+**Prerequisites:**
+- Backup tarballs from mello (~/backups/verda/)
+- Fresh Verda instance (or one needing full restore)
+
+**When to use:**
+- New Verda instance that needs Tailscale + security configs
+- System corruption requiring full restore
+- Switching to new GPU provider
+
+---
+
+### quick-start.sh
+**Purpose:** Daily GPU instance startup - mount SFS, load container, start worker
+
+**Location:** `scripts/quick-start.sh` (in repo, or fetch from GitHub)
+
+**Usage:**
+```bash
+# On new Verda instance
+curl -sL https://raw.githubusercontent.com/ahelme/comfy-multi/main/scripts/quick-start.sh | bash -s <sfs-endpoint>
+
+# Example with actual endpoint
+curl -sL https://raw.githubusercontent.com/ahelme/comfy-multi/main/scripts/quick-start.sh | bash -s nfs.fin-01.datacrunch.io:/SFS-Model-Vault-273f8ad9
+```
+
+**What it does:**
+1. Adds mello SSH key for access
+2. Installs NFS client if needed
+3. Mounts SFS at /mnt/models
+4. Loads container image from SFS (docker load)
+5. Creates symlinks for ComfyUI model paths
+6. Starts worker container
+
+**After running, authenticate Tailscale:**
+```bash
+sudo tailscale up --ssh=false
+# Visit the URL shown in your browser to authenticate
+```
+
+**When to use:**
+- Daily GPU instance startup
+- After spot instance termination/recreation
+- SFS already populated with models + container
+
+---
+
 ### create-dotfiles-repo.sh
 **Purpose:** Create a Git repository of your comfy-multi GPU instance dotfiles for reproducible setups
 
@@ -1059,4 +1194,4 @@ cat ~/.ssh/config | grep verda
 
 ---
 
-**Last Updated:** 2026-01-12
+**Last Updated:** 2026-01-16

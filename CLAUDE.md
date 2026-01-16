@@ -332,6 +332,8 @@ sudo ufw status
 - **GPU (Verda) Tailscale IP:** 100.89.38.43
 - **Purpose:** Secure encrypted tunnel for Redis access between VPS and GPU workers
 - **Protocol:** WireGuard (modern, fast, secure)
+- **Authentication:** Run `sudo tailscale up --ssh=false`, visit the URL shown in browser to authenticate
+- **Note:** Use `--ssh=false` to disable Tailscale SSH (we use regular SSH)
 
 ### SSL/TLS
 - **Provider:** Let's Encrypt
