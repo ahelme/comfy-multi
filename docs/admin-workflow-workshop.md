@@ -34,26 +34,36 @@ Verda Dashboard → Storage → Shared File System → Create
 - Note the mount endpoint (e.g., 10.x.x.x:/share)
 ```
 
-### 2. Create GPU Instance
+### 2. Get SFS Mount Endpoint
+
+```
+Verda Dashboard → Storage → Shared File Systems → SFS-Model-Vault
+Copy the mount command - note Verda adds a random ID suffix
+Example: nfs.fin-01.datacrunch.io:/SFS-Model-Vault-273f8ad9
+```
+
+### 3. Create GPU Instance
 
 ```
 Verda Dashboard → Instances → Create
 - Type: A100 80GB or H100 (spot for cost savings)
-- ⚠️ Do NOT attach any storage during creation!
+- Attach SFS: SFS-Model-Vault
+- Add SSH keys: Your key + mello VPS key
+- Add provisioning script: quick-start.sh
 ```
 
-### 3. Mount SFS & Restore
+### 4. Mount SFS & Restore
 
 ```bash
 # SSH to instance
 ssh root@<instance-ip>
 
-# Mount SFS
+# Mount SFS (use YOUR endpoint from Step 2)
 mkdir -p /mnt/models
-mount -t nfs <sfs-endpoint>:/share /mnt/models
+mount -t nfs -o nconnect=16 <sfs-endpoint> /mnt/models
 
 # Add to fstab for persistence
-echo "<sfs-endpoint>:/share /mnt/models nfs defaults 0 0" >> /etc/fstab
+echo "<sfs-endpoint> /mnt/models nfs defaults 0 0" >> /etc/fstab
 
 # Transfer backup from mello
 scp -r mello:~/backups/verda/ ~/
@@ -111,7 +121,7 @@ curl -sL https://raw.githubusercontent.com/ahelme/comfy-multi/main/scripts/quick
 # 2. SSH and mount SFS
 ssh root@<new-instance-ip>
 mkdir -p /mnt/models
-mount -t nfs <sfs-endpoint>:/share /mnt/models
+mount -t nfs <sfs-endpoint> /mnt/models
 
 # 3. Load container (2 seconds!)
 docker load < /mnt/models/worker-image.tar.gz
@@ -177,7 +187,7 @@ apt-get install -y nfs-common
 ping <sfs-endpoint>
 
 # Try manual mount with verbose
-mount -v -t nfs <sfs-endpoint>:/share /mnt/models
+mount -v -t nfs <sfs-endpoint> /mnt/models
 ```
 
 ### Container Image Not Found

@@ -5,7 +5,7 @@
 #   sudo bash quick-start.sh                    # Auto-detect SFS
 #   sudo bash quick-start.sh <sfs-endpoint>     # Manual endpoint
 #
-# Example: sudo bash quick-start.sh nfs.fin-01.datacrunch.io:/SFS-Model-Vault
+# Example: sudo bash quick-start.sh nfs.fin-01.datacrunch.io:/SFS-Model-Vault-273f8ad9
 
 set -e
 
@@ -66,15 +66,40 @@ else
         fi
     fi
 
-    # If still no endpoint, show helpful message
+    # If still no endpoint, add login reminder and show helpful message
     if [ "$SFS_READY" = false ] && [ -z "$SFS_ENDPOINT" ]; then
+        # Add MOTD reminder for next login
+        cat > /etc/motd << 'MOTD'
+
+╔══════════════════════════════════════════════════════════════════╗
+║  ⚠️  SFS NOT MOUNTED - ACTION REQUIRED                           ║
+╠══════════════════════════════════════════════════════════════════╣
+║                                                                  ║
+║  1. Get mount command from Verda Dashboard:                      ║
+║     Storage → Shared File Systems → SFS-Model-Vault              ║
+║                                                                  ║
+║  2. Run quick-start with the endpoint:                           ║
+║     bash /root/quick-start.sh <sfs-endpoint>                     ║
+║                                                                  ║
+║  Example:                                                        ║
+║     bash /root/quick-start.sh nfs.fin-01.datacrunch.io:/SFS-...  ║
+║                                                                  ║
+╚══════════════════════════════════════════════════════════════════╝
+
+MOTD
+
+        # Also save script to /root for easy access
+        cp "$0" /root/quick-start.sh 2>/dev/null || true
+
         echo ""
         echo "  !! SFS not detected. Please provide the endpoint:"
         echo ""
         echo "  Usage: sudo bash quick-start.sh <sfs-endpoint>"
-        echo "  Example: sudo bash quick-start.sh nfs.fin-01.datacrunch.io:/SFS-Model-Vault"
+        echo "  Example: sudo bash quick-start.sh nfs.fin-01.datacrunch.io:/SFS-Model-Vault-273f8ad9"
         echo ""
         echo "  Find your endpoint in Verda Dashboard -> SFS -> Mount command"
+        echo ""
+        echo "  A reminder has been added to /etc/motd (shown on next login)"
         echo ""
         exit 1
     fi
@@ -201,6 +226,11 @@ else
     echo "  Run RESTORE.sh to set up the project"
 fi
 echo ""
+
+# Clear the MOTD reminder since SFS is now mounted
+if [ -f /etc/motd ] && grep -q "SFS NOT MOUNTED" /etc/motd 2>/dev/null; then
+    echo "" > /etc/motd
+fi
 
 echo "================================="
 echo "QUICK-START COMPLETE!"

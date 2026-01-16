@@ -196,19 +196,27 @@ The generated restore script performs:
 
 The SFS contains your system files, user config, and ComfyUI project.
 
-```bash
-# 1. Create mount directory
-sudo mkdir -p /mnt/SFS-3kFzriy5
-
-# 2. Mount the shared filesystem
-sudo mount -t nfs -o nconnect=16 nfs.fin-01.datacrunch.io:/SFS-3kFzriy5-7f7ec672 /mnt/SFS-3kFzriy5
-
-# 3. Add to fstab for persistence (auto-mount on reboot)
-grep -qxF 'nfs.fin-01.datacrunch.io:/SFS-3kFzriy5-7f7ec672 /mnt/SFS-3kFzriy5 nfs defaults,nconnect=16 0 0' /etc/fstab || \
-  echo 'nfs.fin-01.datacrunch.io:/SFS-3kFzriy5-7f7ec672 /mnt/SFS-3kFzriy5 nfs defaults,nconnect=16 0 0' | sudo tee -a /etc/fstab
+**Step 1: Get mount command from Verda Dashboard**
+```
+1. Go to Verda Dashboard → Storage → Shared File Systems
+2. Click on your SFS (e.g., SFS-Model-Vault)
+3. Copy the mount command shown (Verda adds a random ID suffix)
+   Example: sudo mount -t nfs -o nconnect=16 nfs.fin-01.datacrunch.io:/SFS-Model-Vault-273f8ad9 /mnt/SFS-Model-Vault
 ```
 
-**Note:** You can customize the mount point (e.g., `/mnt/sfs` instead of `/mnt/SFS-3kFzriy5`).
+**Step 2: Mount the SFS**
+```bash
+# Create mount directory
+sudo mkdir -p /mnt/models
+
+# Run the mount command from Verda (replace with YOUR endpoint)
+sudo mount -t nfs -o nconnect=16 nfs.fin-01.datacrunch.io:/SFS-Model-Vault-273f8ad9 /mnt/models
+
+# Add to fstab for persistence (optional - replace with YOUR endpoint)
+echo 'nfs.fin-01.datacrunch.io:/SFS-Model-Vault-273f8ad9 /mnt/models nfs defaults,nconnect=16 0 0' | sudo tee -a /etc/fstab
+```
+
+**Note:** Mount point can be customized (e.g., `/mnt/models` or `/mnt/sfs`).
 
 ### Mount Block Storage
 

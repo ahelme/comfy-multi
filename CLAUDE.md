@@ -435,6 +435,150 @@ None yet.
 
 ---
 
+## 🗓️ CLAUDE TO-DO LIST: Pre-Workshop SFS Creation
+
+**When:** Jan 31 (or chosen pre-workshop date)
+**Duration:** ~45 minutes
+**Cost:** ~$3 (V100 spot for setup)
+
+### SSH Keys for Verda
+
+**Mello VPS Key (MUST ADD to Verda provisioning):**
+```
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGiwaT6NQcHe7cYDKB5LrtmyIU0O8iRc7DJUmZJsNkDD dev@vps-for-verda
+```
+
+### Prerequisites Checklist
+
+Before starting, verify:
+- [ ] mello VPS is running (comfy.ahelme.net)
+- [ ] R2 bucket has models + container (`comfy-multi-model-vault-backup`)
+- [ ] R2 credentials are in mello `.env` file
+- [ ] RESTORE.sh is current in `~/backups/verda/`
+- [ ] User's SSH key is ready
+
+### Step-by-Step Process
+
+**Step 1: Create SFS on Verda Dashboard**
+```
+1. Login to Verda Dashboard
+2. Create Shared File System (SFS) - 50GB
+3. Name it: SFS-Model-Vault
+4. Note: Verda adds a random ID suffix automatically
+5. Get mount endpoint from SFS details page:
+   nfs.fin-01.datacrunch.io:/SFS-Model-Vault-273f8ad9
+```
+
+**Step 2: Create GPU Instance**
+```
+1. Create GPU spot instance (V100 16GB is fine for setup - $0.14/hr)
+2. Attach SFS created in Step 1
+3. Add SSH keys:
+   - User's personal key
+   - Mello VPS key (see above)
+4. Add provisioning script: scripts/quick-start.sh (with SFS endpoint as arg)
+5. Note the instance IP
+```
+
+**Step 3: Verify quick-start.sh Ran**
+```bash
+ssh root@<instance-ip>
+
+# Check mello can connect
+grep "vps-for-verda" /root/.ssh/authorized_keys
+
+# Check SFS is mounted
+df -h | grep nfs
+ls -la /mnt/
+```
+
+**Step 4: Transfer and Run RESTORE.sh**
+```bash
+# From mello:
+scp ~/backups/verda/RESTORE.sh root@<instance-ip>:~/
+
+# On Verda instance:
+ssh root@<instance-ip>
+sudo bash RESTORE.sh --with-models
+```
+
+**Step 5: Verify Setup**
+```bash
+# Check Tailscale
+tailscale status
+tailscale ip -4  # Should be 100.89.38.43
+
+# Check models downloaded
+ls -lh /mnt/models/checkpoints/
+ls -lh /mnt/models/text_encoders/
+
+# Check container loaded
+docker images | grep comfyui
+
+# Check worker can connect to mello Redis
+redis-cli -h 100.99.216.71 -a $REDIS_PASSWORD ping
+```
+
+**Step 6: Start Worker & Test**
+```bash
+cd ~/comfy-multi
+docker compose up -d worker-1
+
+# Verify worker is running
+docker ps
+docker logs comfy-multi-worker-1 --tail 50
+```
+
+**Step 7: Cleanup**
+```
+1. Shut down GPU instance (keep SFS!)
+2. SFS now has: models (~45GB) + container (~2.6GB)
+3. Ready for workshop - daily startup is just mount + docker load
+```
+
+### Pre-Populated To-Dos for Claude
+
+Copy these to TodoWrite at session start:
+
+```json
+[
+  {"content": "Verify mello VPS is running", "status": "pending", "activeForm": "Verifying mello VPS"},
+  {"content": "Verify R2 has models + container", "status": "pending", "activeForm": "Checking R2 contents"},
+  {"content": "Create SFS 50GB on Verda", "status": "pending", "activeForm": "Creating SFS on Verda"},
+  {"content": "Create GPU instance with quick-start.sh", "status": "pending", "activeForm": "Creating GPU instance"},
+  {"content": "Verify quick-start.sh ran correctly", "status": "pending", "activeForm": "Verifying quick-start"},
+  {"content": "Transfer RESTORE.sh to Verda", "status": "pending", "activeForm": "Transferring RESTORE.sh"},
+  {"content": "Run RESTORE.sh --with-models", "status": "pending", "activeForm": "Running RESTORE.sh"},
+  {"content": "Verify Tailscale connected", "status": "pending", "activeForm": "Verifying Tailscale"},
+  {"content": "Verify models downloaded to SFS", "status": "pending", "activeForm": "Checking models on SFS"},
+  {"content": "Verify container loaded", "status": "pending", "activeForm": "Checking container"},
+  {"content": "Start worker and test connection", "status": "pending", "activeForm": "Testing worker"},
+  {"content": "Shut down GPU instance (keep SFS)", "status": "pending", "activeForm": "Cleaning up"}
+]
+```
+
+### Troubleshooting
+
+**quick-start.sh didn't run:**
+- Check Verda provisioning logs
+- Run manually: `curl -sL https://raw.githubusercontent.com/ahelme/comfy-multi/main/scripts/quick-start.sh | bash -s <sfs-endpoint>`
+
+**RESTORE.sh fails to download from R2:**
+- Check R2 credentials in script
+- Verify AWS CLI installed: `which aws`
+- Test R2 access: `aws s3 ls s3://comfy-multi-model-vault-backup/ --endpoint-url $R2_ENDPOINT`
+
+**Tailscale won't connect:**
+- Check Tailscale identity backup was restored
+- May need to re-authenticate: `tailscale up`
+
+**Worker can't reach mello Redis:**
+- Verify Tailscale IP: `tailscale ip -4`
+- Check Redis is listening: `redis-cli -h 100.99.216.71 -a $REDIS_PASSWORD ping`
+- Check UFW on mello allows Tailscale
+
+---
+
 ## 📝 Session Checklist
 
 Before each session ends:
