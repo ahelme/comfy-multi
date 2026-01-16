@@ -9,7 +9,7 @@
 
 # ComfyUI Workshop - User Guide
 
-Welcome to the ComfyUI v0.8.2 Multi-User Workshop! This guide will help you get started with creating AI-generated videos using LTX-2, the state-of-the-art 19B parameter video generation model.
+Welcome to the ComfyUI v0.9.2 Multi-User Workshop! This guide will help you get started with creating AI-generated videos using LTX-2, the state-of-the-art 19B parameter video generation model.
 
 ## 📍 Accessing Your Workspace
 

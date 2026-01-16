@@ -61,7 +61,7 @@ Running a video generation workshop with 20 participants requires isolated Comfy
 - 1-3 ComfyUI worker instances on H100
 - Workers pull jobs from central queue
 - Shared model storage (read-only)
-- Support video generation models (Wan, HunyuanVideo, LTX-Video, etc.)
+- Support video generation models (LTX-2 19B primary, expandable)
 
 #### FR4: Storage
 - **Persistent:**
@@ -134,14 +134,12 @@ Running a video generation workshop with 20 participants requires isolated Comfy
 - **Frontend:** ComfyUI web UI (with queue redirect extension)
 - **Admin Dashboard:** Simple HTML/JS or Streamlit
 
-### Video Models (To Be Confirmed)
-- Wan 2.1 (14B) - ~28GB VRAM
-- HunyuanVideo - ~25GB VRAM
-- LTX-Video - ~10GB VRAM
-- AnimateDiff - ~5GB VRAM
-- CogVideoX - ~20GB VRAM
+### Video Models (Confirmed)
+- **LTX-2 19B** (Primary) - ~47GB total storage
+  - Checkpoint: ltx-2-19b-dev-fp8.safetensors (~27GB)
+  - Text Encoder: gemma_3_12B_it.safetensors (~20GB)
 
-**Note:** H100 80GB can hold 2-3 models simultaneously
+**Storage:** Models backed up to Cloudflare R2, loaded to SFS during workshop
 
 ## User Stories
 

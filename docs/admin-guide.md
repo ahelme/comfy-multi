@@ -10,11 +10,11 @@ Welcome! This is the main admin guide for the ComfyUI Multi-User Workshop Platfo
 ```
 Hetzner VPS (comfy.ahelme.net)          Remote GPU (Verda H100)
 Tailscale: 100.99.216.71                Tailscale: 100.89.38.43
-├── Nginx (HTTPS + Basic Auth)          ├── Worker 1 (ComfyUI v0.8.2 + GPU)
+├── Nginx (HTTPS + Basic Auth)          ├── Worker 1 (ComfyUI v0.9.2 + GPU)
 ├── Redis (VPN-only access)             ├── Worker 2 (optional)
 ├── Queue Manager (FastAPI)             ├── Worker 3 (optional)
-├── Admin Dashboard                     └── LTX-2 Models (19B params, 21GB)
-└── 20 User Frontends (CPU, v0.8.2)
+├── Admin Dashboard                     └── LTX-2 Models (19B params, ~47GB)
+└── 20 User Frontends (CPU, v0.9.2)
     ↓ Tailscale VPN (WireGuard encrypted)
 ```
 

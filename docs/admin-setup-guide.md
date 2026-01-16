@@ -71,8 +71,8 @@ sudo tailscale up --ssh=false
 # Visit the URL shown in your browser to authenticate
 # Verify: tailscale ip -4  # Should show 100.89.38.43
 
-# If fresh SFS, download models from R2
-sudo bash RESTORE-SFS.sh --full
+# If fresh SFS, run restore and follow NEXT STEPS for R2 download
+sudo bash RESTORE-SFS.sh
 ```
 
 ### 3. Environment Variables Configuration

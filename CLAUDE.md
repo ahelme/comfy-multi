@@ -222,8 +222,8 @@ test: add integration tests for worker
 
 ### Services
 - **Queue Manager:** Python 3.11+ with FastAPI + WebSocket
-- **Workers:** ComfyUI v0.8.2 with GPU support
-- **Frontends:** ComfyUI v0.8.2 web UI (CPU-only mode)
+- **Workers:** ComfyUI v0.9.2 with GPU support
+- **Frontends:** ComfyUI v0.9.2 web UI (CPU-only mode)
 - **Admin:** HTML/JS dashboard
 
 ### Deployment
@@ -336,9 +336,9 @@ sudo ufw status
 - **Note:** Use `--ssh=false` to disable Tailscale SSH (we use regular SSH)
 
 ### SSL/TLS
-- **Provider:** Let's Encrypt
+- **Provider:** Existing ahelme.net certificate
 - **Domain:** comfy.ahelme.net
-- **Expiry:** 2026-04-10 (auto-renewal enabled)
+- **Expiry:** 2026-04-10
 - **Protocols:** TLSv1.2, TLSv1.3
 
 ### Cloudflare R2 (Model Backup)
@@ -456,7 +456,7 @@ Before starting, verify:
 - [ ] mello VPS is running (comfy.ahelme.net)
 - [ ] R2 bucket has models + container (`comfy-multi-model-vault-backup`)
 - [ ] R2 credentials are in mello `.env` file
-- [ ] RESTORE.sh is current in `~/backups/verda/`
+- [ ] RESTORE-SFS.sh is current in `~/backups/verda/`
 - [ ] User's SSH key is ready
 
 ### Step-by-Step Process
@@ -479,8 +479,8 @@ Copy these to TodoWrite at session start:
   {"content": "Create SFS 50GB on Verda", "status": "pending", "activeForm": "Creating SFS on Verda"},
   {"content": "Create GPU instance with quick-start.sh", "status": "pending", "activeForm": "Creating GPU instance"},
   {"content": "Verify quick-start.sh ran correctly", "status": "pending", "activeForm": "Verifying quick-start"},
-  {"content": "Transfer RESTORE.sh to Verda", "status": "pending", "activeForm": "Transferring RESTORE.sh"},
-  {"content": "Run RESTORE.sh --with-models", "status": "pending", "activeForm": "Running RESTORE.sh"},
+  {"content": "Transfer backup files to Verda", "status": "pending", "activeForm": "Transferring backup files"},
+  {"content": "Run RESTORE-SFS.sh", "status": "pending", "activeForm": "Running RESTORE-SFS.sh"},
   {"content": "Verify Tailscale connected", "status": "pending", "activeForm": "Verifying Tailscale"},
   {"content": "Verify models downloaded to SFS", "status": "pending", "activeForm": "Checking models on SFS"},
   {"content": "Verify container loaded", "status": "pending", "activeForm": "Checking container"},

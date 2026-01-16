@@ -43,9 +43,8 @@ nano .env
 mkdir -p /etc/ssl/comfy/
 # Upload cert.pem and key.pem
 
-# 5. Download models
-cd data/models/shared/checkpoints/
-wget https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0.safetensors
+# 5. Models are pre-loaded on SFS from R2 backup
+# See docs/admin-backup-restore.md for model restore
 
 # 6. Start services
 ./scripts/start.sh
@@ -53,34 +52,33 @@ wget https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/mai
 
 ### Model Downloads
 
-**Required models (minimum):**
-- ✅ SDXL Base 1.0 (~7GB)
-- ✅ SDXL VAE (~350MB)
+**Workshop models (pre-loaded on SFS):**
+- ✅ LTX-2 19B Checkpoint (~27GB) - `ltx-2-19b-dev-fp8.safetensors`
+- ✅ Gemma 3 Text Encoder (~20GB) - `gemma_3_12B_it.safetensors`
 
-**Optional models:**
-- LTX-Video (~10GB) - if doing video generation
-- SDXL Refiner (~7GB) - for higher quality
-- LoRAs for specific styles (~150MB each)
+**Total:** ~47GB (backed up to Cloudflare R2)
 
-**Location:** `data/models/shared/checkpoints/`
+**Location:** `/mnt/models/` (SFS mount)
+
+See [Admin Backup & Restore](./admin-backup-restore.md) for model download from R2.
 
 ### Workflow Preparation
 
-**Create 3-5 workshop workflows:**
+**Create workshop workflows:**
 
-1. **01_intro_text_to_image.json**
-   - Simple SDXL text-to-image
+1. **ltx2_text_to_video.json**
+   - LTX-2 text-to-video generation
    - Pre-filled with example prompt
-   - Steps: 20, CFG: 7
+   - Steps: 20, duration: 4 sec
 
-2. **02_advanced_composition.json**
+2. **ltx2_image_to_video.json**
+   - Image-to-video workflow
+   - Upload starting image
+   - Animate with LTX-2
+
+3. **ltx2_advanced.json** (optional)
    - Multi-stage workflow
    - Demonstrates node connections
-   - Uses refiner
-
-3. **03_video_generation.json** (optional)
-   - Video model workflow
-   - Short duration (2-4 sec)
 
 **Save to:** `data/workflows/`
 

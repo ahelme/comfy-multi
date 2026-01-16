@@ -14,21 +14,13 @@ Quick reference for Verda infrastructure configuration.
 
 ---
 
-## Storage Strategy (Current)
+## Storage Strategy
 
-**Recommended: Shared File System (SFS)**
+**Recommended:** SFS (Shared File System) for models + container
 
-| Storage | Size | Purpose | Cost |
-|---------|------|---------|------|
-| **Verda SFS** | 50GB | Models + Container | ~$14 AUD/month |
-| **Cloudflare R2** | ~45GB | Permanent model backup | ~$1/month |
-| **Hetzner VPS** | - | Configs, scripts, container backup | (existing) |
+See [Admin Backup & Restore](./admin-backup-restore.md) for full storage strategy and costs.
 
-**Why SFS over Block Storage:**
-- No wipe-on-provision risk (NFS-based, network-attached)
-- Mount from any instance instantly
-- Multiple instances can share storage
-- Simple: `mount -t nfs <endpoint>:/share /mnt/models`
+**Key point:** SFS has no wipe-on-provision risk (unlike Block Storage)
 
 ---
 

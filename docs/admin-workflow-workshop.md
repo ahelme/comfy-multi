@@ -20,7 +20,7 @@ Quick reference for setting up and running the workshop infrastructure using Ver
 |---------|---------|------------------|
 | **Verda SFS 50GB** | Models + Container (workshop month only) | ~$14 |
 | **Cloudflare R2** | Permanent backup of models | ~$1 |
-| **Hetzner VPS** | Configs, RESTORE.sh, container backup | (existing) |
+| **Hetzner VPS** | Configs, RESTORE-SFS.sh, container backup | (existing) |
 
 ---
 
@@ -68,14 +68,14 @@ echo "<sfs-endpoint> /mnt/models nfs defaults 0 0" >> /etc/fstab
 # Transfer backup from mello
 scp -r mello:~/backups/verda/ ~/
 
-# Run restore with model download
-cd ~/verda
-sudo bash RESTORE.sh --with-models --build-container
+# Run restore script
+cd /root
+sudo bash RESTORE-SFS.sh
 ```
 
 ### 5. Authenticate Tailscale
 
-After RESTORE.sh runs, Tailscale is installed but needs authentication:
+After RESTORE-SFS.sh runs, Tailscale is installed but needs authentication:
 
 ```bash
 # Authenticate Tailscale (opens browser URL)
@@ -159,9 +159,10 @@ Same as Quick Start - SFS persists independently of instances!
 ### If SFS Needs Recreation
 
 ```bash
-# Use backup from mello
-sudo bash RESTORE.sh --with-models --load-container
-# Takes ~45 min (R2 download)
+# Transfer backup from mello and run restore
+scp -r mello:~/backups/verda/* /root/
+sudo bash /root/RESTORE-SFS.sh
+# Follow NEXT STEPS output for R2 model download (~45 min)
 ```
 
 ---
