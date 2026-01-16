@@ -50,8 +50,8 @@ A multi-user ComfyUI platform for a video generation workshop with 20 participan
 ```
 /home/dev/projects/comfyui/
 ├── prd.md                   # Product Requirements Document
-├── implementation.md        # Implementation plan + success criteria
-├── progress.md              # Session logs + metrics (UPDATE EACH RESPONSE)
+├── implementation-deployment-verda.md  # GPU deployment guide
+├── progress-2.md            # Session logs + metrics (UPDATE EACH RESPONSE)
 ├── CLAUDE.md                # This file - project guide
 ├── README.md                # Public project documentation
 ├── .env                     # Local configuration (gitignored)
@@ -74,12 +74,10 @@ A multi-user ComfyUI platform for a video generation workshop with 20 participan
 
 ### Core Documents
 - [README.md](./README.md) - Public code project overview and dev quickstart
-- [Progress Log](./progress.md) - Session logs, metrics, standup notes
-- [Implementation Plan](./implementation.md) - Architecture & success criteria
+- [Progress Log](./progress-2.md) - Session logs, metrics, standup notes
+- [GPU Deployment](./implementation-deployment-verda.md) - Verda GPU setup
 - [Product Requirements](./prd.md) - Full requirements
-- [Claude Guide](./claude.md) - Development context
-- [Test Report](./TEST_REPORT.md) - Comprehensive test suite analysis
-- [Code Review](./CODE_REVIEW.md) - Quality review findings
+- [Claude Guide](./CLAUDE.md) - Development context (this file)
 
 ### User Documentation 
 - **docs/user-guide.md** - For workshop participants
@@ -284,7 +282,7 @@ REDIS_PASSWORD=changeme
 
 ## 📋 Implementation Phases
 
-==MUST READ: implementation.md==
+==MUST READ: implementation-deployment-verda.md==
 
 ## ✅ Success Criteria
 
@@ -498,8 +496,8 @@ See [Admin Backup & Restore Guide - Troubleshooting](./docs/admin-backup-restore
 ## 📝 Session Checklist
 
 Before each session ends:
-- [ ] Update progress.md with session log
-- [ ] Update implementation.md task checkboxes
+- [ ] Update progress-2.md with session log
+- [ ] Update relevant implementation docs if needed
 - [ ] Commit code changes to git
 - [ ] Update development docs with key changes made (IMPORTANT!) - CLAUDE.md, README.md, linked dev / project docs
 - [ ] Consider any changes made that are relevant to users - if any then scour docs for any details that need changing

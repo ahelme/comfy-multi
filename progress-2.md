@@ -3,7 +3,7 @@
 **Repository:** github.com/ahelme/comfy-multi
 **Domain:** comfy.ahelme.net
 **Doc Created:** 2026-01-04
-**Doc Updated:** 2026-01-16
+**Doc Updated:** 2026-01-16 (Session 11 continued)
 
 ---
 
@@ -96,14 +96,46 @@ Updated 6 docs with Tailscale authentication instructions:
 - Instance may have been terminated or IP changed
 - Need to provision new instance to continue testing
 
+#### Part 9: Documentation Consolidation
+- ✅ Created consolidated `docs/admin-backup-restore.md` as single source of truth
+- ✅ Archived block storage workflow to `docs/archive/`
+- ✅ Updated 8 docs to link to consolidated backup-restore doc
+- ✅ Added Backup & Restore section to admin-guide.md
+- ✅ Commit: `e526c62` - docs consolidation
+
+#### Part 10: Documentation Audit & Fixes
+- ✅ Created `docs-audit.md` with full audit findings
+- ✅ **HIGH PRIORITY FIXES:**
+  - Fixed RESTORE.sh → RESTORE-SFS.sh references (admin-workflow-workshop, admin-setup-guide, CLAUDE.md)
+  - Updated ComfyUI version v0.8.2 → v0.9.2 (CLAUDE.md, admin-guide, user-guide, create-gpu-quick-deploy.sh)
+  - Replaced SDXL model refs with LTX-2 (workshop-runbook.md, prd.md)
+  - Fixed SSL provider contradiction in CLAUDE.md
+  - Fixed model size 21GB → ~47GB in admin-guide.md
+- ✅ **MEDIUM PRIORITY FIXES:**
+  - Simplified storage strategy in admin-verda-setup.md (links to primary doc)
+  - Removed invalid --full flag from RESTORE-SFS.sh call
+- ✅ **LOW PRIORITY FIXES:**
+  - Fixed broken implementation.md links in CLAUDE.md → implementation-deployment-verda.md
+  - Fixed progress.md → progress-2.md references
+  - Removed references to non-existent TEST_REPORT.md, CODE_REVIEW.md
+- ✅ Commit: `3731514` - audit fixes
+
 ### Files Modified
 - ~/backups/verda/RESTORE-SFS.sh (rewritten to match RESTORE-BLOCK-MELLO.sh)
+- docs/admin-backup-restore.md (NEW - consolidated backup/restore doc)
 - docs/admin-workflow-workshop.md
-- docs/implementation-backup-restore.md
+- docs/admin-verda-setup.md
 - docs/admin-setup-guide.md
 - docs/admin-scripts.md
-- README.md
+- docs/admin-guide.md
+- docs/implementation-backup-restore.md
+- docs/user-guide.md
+- docs/workshop-runbook.md
+- docs-audit.md (NEW - audit findings)
 - CLAUDE.md
+- README.md
+- prd.md
+- scripts/create-gpu-quick-deploy.sh
 - progress-2.md
 
 ### Key Learnings
@@ -144,13 +176,14 @@ Updated 6 docs with Tailscale authentication instructions:
 - Redis accessible via Tailscale ✅
 
 ### Pending
-- [ ] User authenticates Tailscale (browser URL)
-- [ ] Test Redis connection from Verda
-- [ ] Start worker container
-- [ ] Upload missing LoRAs/upscaler to R2
+- [ ] Provision new Verda GPU instance with SFS
+- [ ] Run quick-start.sh and RESTORE-SFS.sh
+- [ ] Verify Tailscale IP is 100.89.38.43
+- [ ] Test Redis connection via Tailscale
+- [ ] Start worker and test end-to-end
 
 ### Blockers
-- Tailscale authentication required before Redis test
+- Need new Verda instance (previous one terminated)
 
 ---
 
