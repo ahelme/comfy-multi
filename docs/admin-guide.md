@@ -231,6 +231,21 @@ Choose a guide based on what you need to do:
 
 ---
 
+### [Admin Backup & Restore](./admin-backup-restore.md)
+**When:** Setting up a new Verda instance or restoring from backup
+
+**Contents:**
+- Storage strategy (SFS, R2, mello backups)
+- Backup procedures and what gets backed up
+- Restore scripts (RESTORE-SFS.sh, RESTORE-BLOCK-MELLO.sh)
+- Step-by-step restore instructions
+- Verification checklist
+- Troubleshooting
+
+**Use this for:** Provisioning new Verda instances, restoring from backups, understanding storage workflows.
+
+---
+
 ### [Admin Security Guide](./admin-security.md)
 **When:** During setup and before going live
 

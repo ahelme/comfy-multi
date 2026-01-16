@@ -7,9 +7,14 @@
 
 ---
 
+> **Note:** For operational backup/restore procedures, see **[Admin Backup & Restore](./admin-backup-restore.md)**.
+> This document is the implementation plan and history.
+
+---
+
 # Implementation: Verda Backup, Restore & Serverless Migration
 
-Complete guide for backing up Verda GPU instance, restoring to new storage configuration, and evaluating serverless options.
+Implementation plan and phase tracking for backup/restore infrastructure. For step-by-step operational procedures, see [Admin Backup & Restore](./admin-backup-restore.md).
 
 ---
 

@@ -1187,7 +1187,8 @@ cat ~/.ssh/config | grep verda
 ## Related Documentation
 
 - **[Admin Guide →](./admin-guide.md)** - Main administrator documentation
-- **[Environment Backup →](./admin-gpu-environment-backup.md)** - Detailed backup strategies
+- **[Backup & Restore →](./admin-backup-restore.md)** - Storage strategy and restore procedures
+- **[Environment Backup →](./admin-gpu-environment-backup.md)** - Dotfiles and environment strategies
 - **[Troubleshooting →](./admin-troubleshooting-redis-connection.md)** - Common issues
 - **[Deployment Guide →](../implementation-deployment.md)** - VPS deployment details
 - **[GPU Worker Guide →](../implementation-deployment-verda.md)** - Verda deployment details

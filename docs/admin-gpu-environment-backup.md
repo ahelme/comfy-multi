@@ -397,11 +397,12 @@ VERDA_HOST=dev@verda ./scripts/backup-verda-env.sh
 
 ---
 
-## Next Steps
+## Related Documentation
 
-1. **[← Back to Admin Guide](./admin-guide.md)**
-2. **[GPU Worker Setup →](./admin-setup-guide.md)**
-3. **[Deployment Guide →](../implementation-deployment-verda.md)**
+- **[Admin Guide](./admin-guide.md)** - Main administrator documentation
+- **[Backup & Restore](./admin-backup-restore.md)** - Storage strategy and restore procedures
+- **[GPU Worker Setup](./admin-setup-guide.md)** - Initial GPU instance setup
+- **[Deployment Guide](../implementation-deployment-verda.md)** - Full Verda deployment details
 
 ---
 

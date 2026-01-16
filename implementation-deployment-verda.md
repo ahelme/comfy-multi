@@ -87,7 +87,7 @@ For Verda deployments, use the automated restore workflow:
 
 - **[Workshop Workflow Guide](./docs/admin-workflow-workshop.md)** - Daily startup & full setup
 - **[Scripts Reference](./docs/admin-scripts.md)** - quick-start.sh, RESTORE-SFS.sh, RESTORE-BLOCK-MELLO.sh
-- **[Backup & Restore](./docs/implementation-backup-restore.md)** - Complete restore procedures
+- **[Backup & Restore](./docs/admin-backup-restore.md)** - Storage strategy, backup/restore procedures
 
 Key scripts: `quick-start.sh` (daily), `RESTORE-SFS.sh` (full restore with SFS), `RESTORE-BLOCK-MELLO.sh` (full restore with Block Storage)
 

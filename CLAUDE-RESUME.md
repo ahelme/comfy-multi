@@ -115,11 +115,14 @@ CLAUDE RESUME -
     
 ## CURRENT TO DOs
                                                                               
-  ☐ Update ComfyUI v0.8.2 -> v0.9.2 (building frontend on mello)              
-  ☐ Build worker container on Verda (x86)                                     
-  ☐ Start worker and test Redis connection                                    
-  ☐ Upload missing LoRAs/upscaler to R2                                       
-  ☐ Update progress-2.md with session notes                                   
+  ☐ Create consolidated admin-backup-restore.md doc
+  ☐ Remove duplicate backup/restore info from other docs
+  ☐ Provision new Verda GPU instance with SFS attached
+  ☐ Run quick-start.sh (handles backup file transfer)
+  ☐ Run RESTORE-SFS.sh and verify full system restore
+  ☐ Verify Tailscale IP is 100.89.38.43
+  ☐ Test Redis connection via Tailscale
+  ☐ Start worker and test end-to-end job execution   
   
 
 ## CORE KNOWLEDGE: DEPLOYMENT WORKFLOWS
@@ -149,7 +152,60 @@ CLAUDE RESUME -
   We setup a new block storage for scratch disk.
   
   
-## FINAL STEP
+## NEXT:
   
   Please explain to the user the basic deployment workflow as you understand it.
+  
+## FINAL STEP  (detail on first To Do tasks)
+  
+
+* Please note that user files etc. from mello (Hetzner - this server) are normally restored to the new instance by quick-start.sh which is added during Verda instance provisioning)
+
+
+1. please read this file in FULL: ~/backups/verda/RESTORE-SFS.sh - Full restore for SFS workflow
+
+2. please create a single backup / restore doc here:
+
+admin-backup-restore.md
+
+Use the OLD backup-restore doc as basis for this new doc.
+
+I moved the OLD backup-restore doc here:
+
+admin-backup-restore-block-storage.md
+
+
+3. Ensure this new doc says that quick-start.md performs the restore of files from backup
+
+But note that if it has not worked it can be done manually using:
+
+`scp ~/backups/verda/* root@<ip>:/root/` 
+
+
+4. Remove duplicate restore/backups information from these files and replace with link to docs/admin-backup-restore.md :
+
+  
+  implementation-deployment-verda.md
+  CLAUDE.md
+  README.md
+  docs/implementation-backup-restore.md
+  docs/admin-workflow-workshop.md
+  docs/admin-cpu-testing-guide.md   
+  docs/admin-gpu-environment-backup.md 
+  docs/admin-scripts.md  
+  docs/admin-setup-guide.md   
+  docs/admin-verda-setup.md  
+  docs/admin-workflow-workshop.md 
+  docs/admin-workshop-checklist.md
+  docs/faq.md
+  docs/how-to-guides.md
+  docs/troubleshooting.md
+  docs/workshop-runbook.md
+  
+  
+5. Link to docs/admin-backup-restore.md from the main admin overview doc here:
+
+  docs/admin-guide.md   
+
+(it may already be linked - please check first!)
 
