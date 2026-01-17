@@ -267,8 +267,8 @@ MUST READ: implementation.md
 
 ## Open Questions
 
-1. **Which video models to pre-install?** (TBD with user)
-2. **User naming scheme:** user1-user20, or custom names?
+1. **Which video models to pre-install?** ✅ Decided: LTX-2 (19B params)
+2. **User naming scheme:** ✅ Decided: user001-user020 (3-digit format)
 3. **Job timeout:** Max runtime before auto-cancel?
 4. **Storage limits:** Per-user quota or unlimited?
 5. **Workflow sharing:** Can users share workflows with each other?

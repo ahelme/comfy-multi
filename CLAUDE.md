@@ -320,7 +320,7 @@ sudo ufw status
 
 ### User Authentication
 - **Method:** HTTP Basic Auth (nginx)
-- **Users:** 20 users (user01-user20)
+- **Users:** 20 users (user001-user020)
 - **Credentials File:** `/home/dev/projects/comfyui/USER_CREDENTIALS.txt`
 - **htpasswd File:** `/etc/nginx/comfyui-users.htpasswd`
 - **Encryption:** bcrypt (cost 10)

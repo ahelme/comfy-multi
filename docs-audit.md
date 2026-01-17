@@ -194,6 +194,15 @@ Same R2 details repeated:
 
 ## LOW PRIORITY - Minor Issues
 
+### 0. User Naming Inconsistency ✅ FIXED
+
+**Problem:** htpasswd used user01 format, docs used mix of user01 and user001
+
+**Fix applied:**
+- Updated htpasswd to use user001-user020 format
+- Updated user-guide.md, CLAUDE.md, prd.md
+- All systems now use consistent 3-digit format
+
 ### 1. Archive References
 
 Some docs still reference files in `docs/archive/`:

@@ -31,9 +31,9 @@ You will receive your login credentials:
 3. Click "Sign In" or press Enter
 
 **Examples:**
-- User 1: `https://comfy.ahelme.net/user001/` (Username: user01)
-- User 10: `https://comfy.ahelme.net/user010/` (Username: user10)
-- User 20: `https://comfy.ahelme.net/user020/` (Username: user20)
+- User 1: `https://comfy.ahelme.net/user001/` (Username: user001)
+- User 10: `https://comfy.ahelme.net/user010/` (Username: user010)
+- User 20: `https://comfy.ahelme.net/user020/` (Username: user020)
 
 ## 🎨 Getting Started
 
