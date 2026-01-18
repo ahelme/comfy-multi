@@ -3,7 +3,7 @@
 **Repository:** github.com/ahelme/comfy-multi
 **Domain:** comfy.ahelme.net
 **Doc Created:** 2026-01-04
-**Doc Updated:** 2026-01-18 (Session 13)
+**Doc Updated:** 2026-01-18 (Session 14)
 
 ---
 
@@ -29,8 +29,97 @@
 --- remember to update [COMMIT.log](./COMMIT.log) EVERY time you update this file!!!
 ---
 
+## Progress Report 14 - 2026-01-18 (Phase 14: Backup Automation & File Reorganization)
+**Status:** ✅ Complete
+**Started:** 2026-01-18
+
+### Summary
+Completed backup automation with hourly cron jobs on Verda triggering Mello user file backups. Added third R2 bucket for user files. Reorganized project files (moved CLAUDE-RESUME to .claude/, archived old docs).
+
+### Activities
+
+#### Part 1: Backup Scripts Enhancement (comfymulti-scripts repo)
+- ✅ Added comprehensive error logging to restore scripts
+- ✅ Added backup scripts from public repo
+- ✅ Made --full default, added checksum-based incremental backups
+- ✅ Added hourly backup cron job setup in RESTORE-SFS.sh
+- ✅ Fixed: download backup script from GitHub if not found locally
+- ✅ Archived legacy backup scripts
+- ✅ Created backup-mello.sh for user data backup to R2
+- ✅ Fixed EU endpoint for user-files bucket, added R2 credentials
+- ✅ Renamed backup-local.sh → backup-cron.sh (clearer purpose)
+- ✅ Added automatic Mello user data backup trigger via SSH from Verda cron
+
+#### Part 2: Third R2 Bucket for User Files
+- ✅ Created `comfy-multi-user-files` bucket (Eastern Europe)
+- ✅ Stores: user_data/userXXX/, outputs/userXXX/, inputs/
+- ✅ Purpose: User workflows, settings, outputs, uploads from mello
+
+#### Part 3: Documentation Updates (comfy-multi repo)
+- ✅ Added admin-backup-routines.md with backup schedule overview
+- ✅ Added backup scripts summary table to admin-backup-restore.md
+- ✅ Updated backup routines links and archived old plan
+- ✅ Documented backup-mello.sh in backup routines
+
+#### Part 4: Infrastructure Changes
+- ✅ Replaced docker-compose.override.yml with generated users file (docker-compose.users.yml)
+- ✅ Cleaner separation of user container configuration
+
+#### Part 5: Project File Reorganization
+- ✅ Moved CLAUDE-RESUME.md to .claude/CLAUDE-RESUME-VERDA-INSTANCE.md
+- ✅ Archived docs-audit.md to docs/archive/
+- ✅ Renamed progress-2.md to progress-02.md
+- ✅ Added .claude/DEPLOYMENT-TO-DO.md for deployment checklist
+
+### Commits (comfymulti-scripts repo)
+```
+805d522 feat: rename backup-local.sh to backup-cron.sh and add Mello trigger
+7158635 fix: use EU endpoint for user-files bucket, add R2 credentials
+a77d220 feat: add backup-mello.sh for user data backup to R2
+64815dd chore: archive legacy backup scripts
+f9be9db fix: download backup-local.sh from GitHub if not found locally
+89ddac0 feat: add hourly backup cron job setup
+b026c8b feat: make --full default, add checksum-based incremental backups
+511ddb8 feat: add backup scripts from public repo
+2401839 feat: add comprehensive error logging to restore scripts
+```
+
+### Commits (comfy-multi repo)
+```
+f25394c docs: reorganize project files and update documentation
+d3b4e65 refactor: replace docker-compose.override.yml with generated users file
+5a73e9f docs: add backup-mello.sh to backup routines
+8ee6fa9 docs: add third R2 bucket comfy-multi-user-files
+5e2dd7f docs: add backup routines links and archive old plan
+d28dcd4 docs: add admin-backup-routines.md
+5f45458 docs: add backup scripts summary table to admin-backup-restore.md
+e966457 refactor: move backup/restore scripts to private repo
+add23cd docs: update progress with script audit completion
+```
+
+### Current Backup Architecture
+```
+Verda (hourly cron: backup-cron.sh)
+  ├─→ Backs up Verda configs to SFS
+  └─→ SSH triggers Mello backup-mello.sh
+
+Mello (triggered by Verda or manual)
+  └─→ Backs up user files to R2 (comfy-multi-user-files bucket)
+
+R2 Buckets:
+  ├─ comfy-multi-model-vault-backup (Oceania) - models ~45GB
+  ├─ comfy-multi-cache (EU) - container image, configs
+  └─ comfy-multi-user-files (EU) - user workflows, outputs, uploads
+```
+
+### Pending
+- [ ] Configure block storage (scratch disk) setup in scripts
+- [ ] Test full restore flow with new backup architecture
+
+---
+
 ## Progress Report 13 - 2026-01-18 (Phase 13: Doc Consolidation & Provisioning Workflow)
-**Status:** 🔨 In Progress
+**Status:** ✅ Complete
 **Started:** 2026-01-18
 
 ### Summary
