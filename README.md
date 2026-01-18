@@ -3,7 +3,7 @@
 **Repository:** github.com/ahelme/comfy-multi
 **Domain:** comfy.ahelme.net
 **Doc Created:** 2026-01-02
-**Doc Updated:** 2026-01-15
+**Doc Updated:** 2026-01-18
 
 ---
 
@@ -130,9 +130,13 @@ echo "Your Tailscale IP: $(tailscale ip -4)"
 #### 2. Set Up Model Vault (R2/S3)
 
 ```bash
-# Create Cloudflare R2 bucket (or any S3-compatible storage)
-# Upload your models once:
-aws s3 sync ./models/ s3://your-bucket/ --endpoint-url https://your-r2-endpoint
+# Create two Cloudflare R2 buckets:
+# - Models bucket (Oceania): checkpoints, text_encoders
+# - Cache bucket (EU): container image, configs
+
+# Upload models to Models bucket:
+aws s3 sync ./models/ s3://comfy-multi-model-vault-backup/ \
+  --endpoint-url https://your-r2-endpoint
 ```
 
 #### 3. Set Up GPU Worker (When Needed)
@@ -146,8 +150,9 @@ curl -fsSL https://tailscale.com/install.sh | sh
 sudo tailscale up --ssh=false
 # Visit the URL shown in your browser to authenticate
 
-# Download models from R2
-aws s3 sync s3://your-bucket/ /mnt/models/ --endpoint-url https://your-r2-endpoint
+# Download models from R2 Models bucket
+aws s3 sync s3://comfy-multi-model-vault-backup/ /mnt/models/ \
+  --endpoint-url https://your-r2-endpoint
 
 # Start worker
 cd ~/comfy-multi
@@ -351,9 +356,10 @@ comfy-multi/
 ├── docker-compose.yml       # Service orchestration
 ├── .env.example             # Configuration template
 ├── scripts/
-│   ├── quick-start.sh       # GPU instance bootstrap
-│   ├── backup-verda.sh      # Backup to R2
-│   └── start.sh             # Start VPS services
+│   ├── start.sh             # Start VPS services
+│   ├── stop.sh              # Stop VPS services
+│   └── status.sh            # Check service health
+│   # Backup/restore scripts in private repo: github.com/ahelme/comfymulti-scripts
 ├── nginx/                   # Reverse proxy + SSL
 ├── queue-manager/           # FastAPI job scheduler
 ├── comfyui-worker/          # GPU worker container
@@ -441,8 +447,9 @@ redis-cli -h <vps-tailscale-ip> -a <password> ping
 # Check mount
 ls -la /mnt/models/checkpoints/
 
-# Re-download from R2
-aws s3 sync s3://your-bucket/ /mnt/models/ --endpoint-url $R2_ENDPOINT
+# Re-download from R2 Models bucket
+aws s3 sync s3://comfy-multi-model-vault-backup/ /mnt/models/ \
+  --endpoint-url $R2_ENDPOINT
 ```
 
 ### Queue Not Processing

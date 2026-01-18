@@ -13,8 +13,7 @@ CLAUDE RESUME -
                                                                               
   I have 25+yrs experience product designing and managing open-source web apps,
   though I have no computer science degree, this stemmed from creating web-   
-  apps                                                                        
-  for video-sharing for my non-profit.                                        
+  apps for video-sharing for my non-profit.                                        
                                                                               
   I am:                                                                       
                                                                               
@@ -79,13 +78,8 @@ CLAUDE RESUME -
   • read IN FULL:                                                             
     • CLAUDE.md                                                               
     • README.md
-    • implementation-deployment-verda.md
-    • implementation-backup-restore.md
-    • docs/admin-setup-guide.md
-    • docs/admin-verda-setup.md
-    • docs/admin-workflow-workshop.md  
-    • /home/dev/backups/verda/README-RESTORE.md
-    
+    • admin-backup-restore.md  
+
   • read top 100 lines (more if req.):
     • progress-2.md        
     
@@ -96,27 +90,38 @@ CLAUDE RESUME -
                                                                               
 ## 📋 Critical Files and Locations                                          
                                                                               
-   mello: File/Directory                            │ Purpose                                     
+ mello: File/Directory                              │ Purpose                                     
   ──────────────────────────────────────────────────┼───────────────────────────────────────────  
-    .env                                            │ Configuration (passwords, domain, etc.)     
-    docker-compose.yml                              │ Container orchestration                     
-    /etc/ssl/certs/fullchain.pem                    │ SSL public certificate                      
-    /etc/ssl/private/privkey.pem                    │ SSL private key                             
-    scripts/status.sh                               │ System health check script                  
-    scripts/start.sh                                │ Start all services                          
-    scripts/stop.sh                                 │ Stop all services                           
-    /home/dev/backups/verda/RESTORE-SFS.sh          │ Restore Verda instance using SFS storage    
-    /home/dev/backups/verda/RESTORE-BLOCK-MELLO.sh  │ Restore Verda instance using block storage  
-                                                                                                  
-   verda: File/Directory                            │ Purpose                                     
+  .env                                              │ Configuration (passwords, domain, etc.)     
+  docker-compose.yml                                │ Container orchestration                     
+  /etc/ssl/certs/fullchain.pem                      │ SSL public certificate                      
+  /etc/ssl/private/privkey.pem                      │ SSL private key                             
+  scripts/status.sh                                 │ System health check script                  
+  scripts/start.sh                                  │ Start all services                          
+  scripts/stop.sh                                   │ Stop all services        
+                   
+  ~/projects/comfymulti-scripts/                    │ Backup/Restore/Deploy scripts for Verda GPU Cloud
+  ~/projects/comfymulti-scripts/RESTORE-SFS.sh      │ Restore Verda instance using SFS storage
+  ~/projects/comfymulti-scripts/README-RESTORE.md   │ README for restoring Verda
+
+ *(NOTE: restore scripts have their own private gh repo: https://github.com/ahelme/comfymulti-scripts)*
+                              
+  docs/admin-backup-restore.md                      │ Full docs for deploy/backup/restore  
+                                                                 
+ verda: File/Directory                              │ Purpose                                     
   ──────────────────────────────────────────────────┼────────────────────────────────────────     
-    data/models/shared/                             │ Shared model files                          
-    data/outputs/                                   │ User output files (isolated per user)       
+  data/models/shared/                               │ Shared model files                          
+  data/outputs/                                     │ User output files (isolated per user)       
     
-## CURRENT TO DOs
-                                                                              
-  ☐ Create consolidated admin-backup-restore.md doc
-  ☐ Remove duplicate backup/restore info from other docs
+## CURRENT TO DOs - PLEASE UPDATE YOUR TO DO LIST AS FOLLOWS:
+
+  ☐ Identify backup script/s and move to ~/projects/comfymulti-scripts/ (new repo for scripts)
+  ☐ Full audit of backup scripts - make new .md file in docs/ with list of any issues (COMPARE to quick-start.sh and RESTORE-SFS.sh)
+  ☐ Push changes to private gh repo - https://github.com/ahelme/comfymulti-scripts
+  ☐ Update docs e.g. docs/admin-backup-restore.md and CLAUDE.md with changes to backup scripts (be concise in CLAUDE.md)
+
+## AFTERWARDS:
+                                                                            
   ☐ Provision new Verda GPU instance with SFS attached
   ☐ Run quick-start.sh (handles backup file transfer)
   ☐ Run RESTORE-SFS.sh and verify full system restore
@@ -142,6 +147,7 @@ CLAUDE RESUME -
   
   **DURING 'WORKSHOP MONTH'**
   We restore and keep the SFS on Verda - during periods of regular usage - it is faster than re-downloading models from R2.
+  NOTE: in this case we tx files from SFS to instance root as it is faster 
   BUT we delete the Verda GPU instance to save money.
   
   We can delete the block storage too - its only a scratch disk.
@@ -157,55 +163,5 @@ CLAUDE RESUME -
   Please explain to the user the basic deployment workflow as you understand it.
   
 ## FINAL STEP  (detail on first To Do tasks)
-  
-
-* Please note that user files etc. from mello (Hetzner - this server) are normally restored to the new instance by quick-start.sh which is added during Verda instance provisioning)
-
-
-1. please read this file in FULL: ~/backups/verda/RESTORE-SFS.sh - Full restore for SFS workflow
-
-2. please create a single backup / restore doc here:
-
-admin-backup-restore.md
-
-Use the OLD backup-restore doc as basis for this new doc.
-
-I moved the OLD backup-restore doc here:
-
-admin-backup-restore-block-storage.md
-
-
-3. Ensure this new doc says that quick-start.md performs the restore of files from backup
-
-But note that if it has not worked it can be done manually using:
-
-`scp ~/backups/verda/* root@<ip>:/root/` 
-
-
-4. Remove duplicate restore/backups information from these files and replace with link to docs/admin-backup-restore.md :
-
-  
-  implementation-deployment-verda.md
-  CLAUDE.md
-  README.md
-  docs/implementation-backup-restore.md
-  docs/admin-workflow-workshop.md
-  docs/admin-cpu-testing-guide.md   
-  docs/admin-gpu-environment-backup.md 
-  docs/admin-scripts.md  
-  docs/admin-setup-guide.md   
-  docs/admin-verda-setup.md  
-  docs/admin-workflow-workshop.md 
-  docs/admin-workshop-checklist.md
-  docs/faq.md
-  docs/how-to-guides.md
-  docs/troubleshooting.md
-  docs/workshop-runbook.md
-  
-  
-5. Link to docs/admin-backup-restore.md from the main admin overview doc here:
-
-  docs/admin-guide.md   
-
-(it may already be linked - please check first!)
-
+ 
+Discuss the next To Do before taking action 

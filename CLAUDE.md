@@ -3,7 +3,7 @@
 **Repository:** github.com/ahelme/comfy-multi
 **Domain:** comfy.ahelme.net
 **Doc Created:** 2026-01-02
-**Doc Updated:** 2026-01-17
+**Doc Updated:** 2026-01-18
 
 ---
 
@@ -96,7 +96,7 @@ Ensure these details are listed the top of ALL .md documentation files:
 **Repository:** github.com/ahelme/comfy-multi
 **Domain:** comfy.ahelme.net
 **Doc Created:** 2026-01-02
-**Doc Updated:** 2026-01-17
+**Doc Updated:** 2026-01-18
 
 ==IMPORTANT: Docs MUST be comprehensive yet NO FLUFF - NO extraneous / irrelevant info / value-statements / achievements boasting==
 
@@ -161,7 +161,7 @@ Code Architecture:
 [User Browser]
     ↓ HTTPS
 [Nginx :443] → SSL termination, routing
-    ├─→ /user/1-20 → Frontend containers
+    ├─→ /user001-020/ → Frontend containers
     ├─→ /api → Queue Manager
     └─→ /admin → Admin Dashboard
 
@@ -503,11 +503,12 @@ This preserves the expected IP: **100.89.38.43**
 
 Before starting, verify:
 - [ ] mello VPS is running (comfy.ahelme.net)
-- [ ] R2 bucket contains binary files:
-  - [ ] `checkpoints/*.safetensors` (models)
-  - [ ] `text_encoders/*.safetensors`
-  - [ ] `worker-image.tar.gz` (2.5 GB)
-  - [ ] `verda-config-backup.tar.gz` (14 MB)
+- [ ] R2 **Models bucket** (`comfy-multi-model-vault-backup`) contains:
+  - [ ] `checkpoints/*.safetensors` (~25-50 GB)
+  - [ ] `text_encoders/*.safetensors` (~20 GB)
+- [ ] R2 **Cache bucket** (`comfy-multi-cache`) contains:
+  - [ ] `worker-image.tar.gz` (~2.5 GB)
+  - [ ] `verda-config-backup.tar.gz` (~14 MB)
 - [ ] GitHub repo `ahelme/comfymulti-scripts` contains scripts:
   - [ ] `quick-start.sh`
   - [ ] `RESTORE-SFS.sh`
@@ -574,6 +575,4 @@ If critical issues:
 
 ---
 
-**Repository:** https://github.com/USER/comfyui-workshop (TBD - creating now)
-**Last Updated:** 2026-01-02 by Claude
-**Next Update:** End of current session
+**Last Updated:** 2026-01-18
