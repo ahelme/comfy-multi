@@ -87,6 +87,7 @@ b026c8b feat: make --full default, add checksum-based incremental backups
 
 ### Commits (comfy-multi repo)
 ```
+710c9a0 docs: add block storage issue and latest commit to progress
 39799d6 docs: add Progress Report 14 and update Report 13 status
 f25394c docs: reorganize project files and update documentation
 d3b4e65 refactor: replace docker-compose.override.yml with generated users file
