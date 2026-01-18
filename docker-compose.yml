@@ -5,6 +5,10 @@
 # - Resource limits
 # - Security contexts
 
+# Include generated user frontend services
+include:
+  - docker-compose.users.yml
+
 services:
   # ============================================================================
   # NGINX REVERSE PROXY (SSL Termination & Routing)

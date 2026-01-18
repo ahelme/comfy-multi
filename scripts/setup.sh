@@ -62,10 +62,11 @@ mkdir -p "$PROJECT_DIR/data/outputs"
 mkdir -p "$PROJECT_DIR/data/inputs"
 mkdir -p "$PROJECT_DIR/data/workflows"
 
-# Create user output directories
+# Create user directories (outputs + user_data for workflows/settings)
 for i in $(seq 1 20); do
     USER_ID=$(printf "user%03d" $i)
     mkdir -p "$PROJECT_DIR/data/outputs/$USER_ID"
+    mkdir -p "$PROJECT_DIR/data/user_data/$USER_ID"
 done
 
 echo "✅ Directories created"
