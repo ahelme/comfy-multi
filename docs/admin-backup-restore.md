@@ -4,7 +4,7 @@
 **Repository:** github.com/ahelme/comfy-multi
 **Domain:** comfy.ahelme.net
 **Doc Created:** 2026-01-16
-**Doc Updated:** 2026-01-17
+**Doc Updated:** 2026-01-18
 
 ---
 
@@ -41,6 +41,31 @@ Never download if file already exists. Priority depends on file type:
 If Tailscale starts without the backed-up identity, it gets a **NEW IP address**.
 The restore scripts restore `/var/lib/tailscale/` BEFORE running `tailscale up`.
 This preserves the expected IP: **100.89.38.43**
+
+---
+
+## Backup Scripts Summary
+
+| Script | Runs From | Destination | Trigger | Schedule |
+|--------|-----------|-------------|---------|----------|
+| `backup-local.sh` | Verda | SFS | Cron | Hourly |
+| `backup-verda.sh` | Mello | Mello + R2 | Manual | Before shutdown |
+
+### What Gets Backed Up
+
+| Data | `backup-local.sh` | `backup-verda.sh` | Location |
+|------|:-----------------:|:-----------------:|----------|
+| Tailscale identity | ✅ | ✅ | SFS / Mello |
+| SSH host keys | ✅ | ✅ | SFS / Mello |
+| Fail2ban, UFW configs | ✅ | ✅ | SFS / Mello |
+| Project .env | ✅ | ✅ | SFS / Mello |
+| /home/dev/ | ❌ | ✅ | Mello |
+| ComfyUI project | ❌ | ✅ | Mello |
+| oh-my-zsh custom | ❌ | ✅ | Mello |
+| Models (.safetensors) | ❌ | ✅ (--full) | R2 |
+| Container image | ❌ | ✅ (default) | Mello |
+| User workflows | ❌ | ❌ | [Issue #4](https://github.com/ahelme/comfymulti-scripts/issues/4) |
+| User outputs | ❌ | ❌ | Not backed up |
 
 ---
 
