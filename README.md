@@ -130,9 +130,10 @@ echo "Your Tailscale IP: $(tailscale ip -4)"
 #### 2. Set Up Model Vault (R2/S3)
 
 ```bash
-# Create two Cloudflare R2 buckets:
+# Create three Cloudflare R2 buckets:
 # - Models bucket (Oceania): checkpoints, text_encoders
 # - Cache bucket (EU): container image, configs
+# - User files bucket (EU): user workflows, outputs, uploads
 
 # Upload models to Models bucket:
 aws s3 sync ./models/ s3://comfy-multi-model-vault-backup/ \

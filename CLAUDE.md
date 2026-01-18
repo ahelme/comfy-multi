@@ -339,10 +339,10 @@ sudo ufw status
 - **Expiry:** 2026-04-10
 - **Protocols:** TLSv1.2, TLSv1.3
 
-### Cloudflare R2 (Two Buckets)
+### Cloudflare R2 (Three Buckets)
 - **Provider:** Cloudflare R2 (S3-compatible)
 - **Endpoint:** `https://f1d627b48ef7a4f687d6ac469c8f1dea.r2.cloudflarestorage.com`
-- **Cost:** ~$2/month total (no egress fees)
+- **Cost:** ~$3/month total (no egress fees)
 - **Access:** Via AWS CLI with R2 API credentials
 
 **Models Bucket:** `comfy-multi-model-vault-backup`
@@ -354,6 +354,11 @@ sudo ufw status
 - Location: Eastern Europe (closer to Verda/Finland)
 - Contents: `worker-image.tar.gz` (~2.5GB), `verda-config-backup.tar.gz` (~14MB)
 - Purpose: Container image and config backup
+
+**User Files Bucket:** `comfy-multi-user-files`
+- Location: Eastern Europe (same as mello VPS)
+- Contents: `user_data/userXXX/`, `outputs/userXXX/`, `inputs/`
+- Purpose: User workflows, settings, outputs, uploads from mello
 
 ### Restore Scripts (Private GitHub Repo)
 - **Repo:** `ahelme/comfymulti-scripts` (private)

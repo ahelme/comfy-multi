@@ -87,6 +87,13 @@ This preserves the expected IP: **100.89.38.43**
 | **Worker Container** | `worker-image.tar.gz` | 2.5 GB |
 | **Config Backup** | `verda-config-backup.tar.gz` | 14 MB |
 
+**User Files Bucket:** `comfy-multi-user-files` (Eastern Europe)
+| Data | R2 Path | Size |
+|------|---------|------|
+| **User Workflows** | `user_data/userXXX/` | Variable |
+| **User Outputs** | `outputs/userXXX/` | Variable |
+| **User Inputs** | `inputs/` | Variable |
+
 See workshop model requirements in [admin-guide.md](./admin-guide.md).
 
 **Primary: GitHub** (versioned scripts)
@@ -256,6 +263,9 @@ aws --endpoint-url $R2_ENDPOINT s3 ls s3://comfy-multi-model-vault-backup/ --rec
 
 # Cache bucket (EU)
 aws --endpoint-url $R2_ENDPOINT s3 ls s3://comfy-multi-cache/ --human-readable
+
+# User files bucket (EU)
+aws --endpoint-url $R2_ENDPOINT s3 ls s3://comfy-multi-user-files/ --recursive --human-readable
 ```
 
 ---
@@ -277,6 +287,13 @@ text_encoders/*.safetensors     (model text encoders)
 ```
 worker-image.tar.gz             ~2.5 GB
 verda-config-backup.tar.gz      ~14 MB
+```
+
+**User Files Bucket:** `comfy-multi-user-files` (Eastern Europe)
+```
+user_data/userXXX/              (workflows, settings)
+outputs/userXXX/                (generated files)
+inputs/                         (user uploads)
 ```
 
 **Note:** Scripts (RESTORE-*.sh, quick-start.sh) are in GitHub repo `ahelme/comfymulti-scripts`.
