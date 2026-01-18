@@ -54,14 +54,29 @@ Replaced duplicate restore/deploy sections with pointers to admin-backup-restore
 #### Part 3: GitHub Issues
 - ✅ Issue #3: Update backup scripts for new provisioning workflow + move scripts to private repo
 
+#### Part 4: Script Audit
+- ✅ Audited quick-start.sh and RESTORE-SFS.sh for failure points
+- ✅ Created docs/script-audit-issues.md with findings
+- ✅ Fixed critical bug: `sshd` → `ssh` service name (Ubuntu 24.04)
+
+**Key Findings:**
+- HIGH: `systemctl restart sshd` fails silently on Ubuntu 24.04 (FIXED)
+- HIGH: Hardcoded credentials (documented, acceptable for private repo)
+- MEDIUM: Backup file naming convention is fragile
+
 ### Commits (comfymulti-scripts repo)
 ```
+e41ad4c fix: use 'ssh' service name for Ubuntu 24.04
 625a158 docs: update provisioning workflow for Verda startup script
 ```
 
+### Commits (comfy-multi repo)
+```
+afaab7c docs: add script audit findings
+0b4f089 docs: consolidate restore docs and fix provisioning workflow
+```
+
 ### Pending
-- [ ] Full audit of quick-start.sh and RESTORE-SFS.sh
-- [ ] Create docs/script-audit-issues.md with findings
 - [ ] Test full restore flow on Verda
 
 ---
