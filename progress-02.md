@@ -13,20 +13,17 @@
 
 **Note:** This is a continuation of [progress.md](./progress.md). See that file for Progress Reports 1-6.
 
-==UPDATE [COMMIT.log](./COMMIT.log) EVERY TIME!==
-
 ---
 
 ## Progress Tracker Structure
-1. Progress Reports - to be posted in reverse chronological order (LATEST AT TOP)
+1. Progress Reports 
+   - to be posted in reverse chronological order (LATEST AT TOP)
 2. Risk Register
 
 ---
 
 # Progress Reports
 
----
---- remember to update [COMMIT.log](./COMMIT.log) EVERY time you update this file!!!
 ---
 
 ## Progress Report 14 - 2026-01-18 (Phase 14: Backup Automation & File Reorganization)
@@ -71,6 +68,10 @@ Completed backup automation with hourly cron jobs on Verda triggering Mello user
 - ✅ Renamed progress-2.md to progress-02.md
 - ✅ Added .claude/DEPLOYMENT-TO-DO.md for deployment checklist
 
+#### Part 6: Block Storage Issue
+- ✅ Researched codebase for block storage patterns (quick-start.sh, RESTORE-SFS.sh, docker-compose)
+- ✅ Created GitHub issue #5: Configure block storage (scratch disk) in quick-start.sh
+
 ### Commits (comfymulti-scripts repo)
 ```
 805d522 feat: rename backup-local.sh to backup-cron.sh and add Mello trigger
@@ -86,6 +87,7 @@ b026c8b feat: make --full default, add checksum-based incremental backups
 
 ### Commits (comfy-multi repo)
 ```
+39799d6 docs: add Progress Report 14 and update Report 13 status
 f25394c docs: reorganize project files and update documentation
 d3b4e65 refactor: replace docker-compose.override.yml with generated users file
 5a73e9f docs: add backup-mello.sh to backup routines
@@ -113,7 +115,7 @@ R2 Buckets:
 ```
 
 ### Pending
-- [ ] Configure block storage (scratch disk) setup in scripts
+- [ ] Implement block storage setup in quick-start.sh (Issue #5)
 - [ ] Test full restore flow with new backup architecture
 
 ---
