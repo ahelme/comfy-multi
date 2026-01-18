@@ -52,28 +52,30 @@ This preserves the expected IP: **100.89.38.43**
 |--------|-----------|-------------|---------|----------|
 | `backup-local.sh` | Verda | SFS | Cron | Hourly |
 | `backup-verda.sh` | Mello | Mello + R2 | Manual | Before shutdown |
+| `backup-mello.sh` | Mello | R2 | Manual | Before shutdown |
 
 ### What Gets Backed Up
 
-| Data | `backup-local.sh` | `backup-verda.sh` | Location |
-|------|:-----------------:|:-----------------:|----------|
-| Tailscale identity | ✅ | ✅ | SFS / Mello |
-| SSH host keys | ✅ | ✅ | SFS / Mello |
-| Fail2ban, UFW configs | ✅ | ✅ | SFS / Mello |
-| Project .env | ✅ | ✅ | SFS / Mello |
-| /home/dev/ | ❌ | ✅ | Mello |
-| ComfyUI project | ❌ | ✅ | Mello |
-| oh-my-zsh custom | ❌ | ✅ | Mello |
-| Models (.safetensors) | ❌ | ✅ (--full) | R2 |
-| Container image | ❌ | ✅ (default) | Mello |
-| User workflows | ❌ | ❌ | [Issue #4](https://github.com/ahelme/comfymulti-scripts/issues/4) |
-| User outputs | ❌ | ❌ | Not backed up |
+| Data | `backup-local.sh` | `backup-verda.sh` | `backup-mello.sh` | Location |
+|------|:-----------------:|:-----------------:|:-----------------:|----------|
+| Tailscale identity | ✅ | ✅ | ❌ | SFS / Mello |
+| SSH host keys | ✅ | ✅ | ❌ | SFS / Mello |
+| Fail2ban, UFW configs | ✅ | ✅ | ❌ | SFS / Mello |
+| Project .env | ✅ | ✅ | ❌ | SFS / Mello |
+| /home/dev/ | ❌ | ✅ | ❌ | Mello |
+| ComfyUI project | ❌ | ✅ | ❌ | Mello |
+| oh-my-zsh custom | ❌ | ✅ | ❌ | Mello |
+| Models (.safetensors) | ❌ | ✅ (default) | ❌ | R2 |
+| Container image | ❌ | ✅ (default) | ❌ | Mello + R2 |
+| User workflows | ❌ | ❌ | ✅ | R2 |
+| User outputs | ❌ | ❌ | ✅ | R2 |
+| User inputs | ❌ | ❌ | ✅ | R2 |
 
 ---
 
 ## Backup Locations
 
-**Primary: Cloudflare R2** (two buckets)
+**Primary: Cloudflare R2** (three buckets)
 
 **Models Bucket:** `comfy-multi-model-vault-backup` (Oceania)
 | Data | R2 Path | Size |

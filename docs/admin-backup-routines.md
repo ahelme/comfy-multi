@@ -7,14 +7,17 @@
 
 # Backup Routines
 
-Two backup routines protect Verda data. For full details, see [admin-backup-restore.md](./admin-backup-restore.md).
+Three backup routines protect data. For full details, see [admin-backup-restore.md](./admin-backup-restore.md).
 
 ---
 
 ## A. Manual: Before Verda Shutdown
 
-**When:** Before deleting Verda instance or SFS
+**When:** Before deleting Verda instance or SFS (end of workshop day)
 **Run from:** Mello VPS
+
+### Step 1: Backup Verda → Mello + R2
+
 **Script:** `backup-verda.sh`
 
 ```bash
@@ -34,6 +37,23 @@ cd ~/projects/comfymulti-scripts
 | oh-my-zsh custom | Mello | |
 | Container image | Mello + R2 | ~2.5GB |
 | Models (.safetensors) | R2 | ~45GB (checksum skip if unchanged) |
+
+### Step 2: Backup Mello User Files → R2
+
+**Script:** `backup-mello.sh`
+
+```bash
+cd ~/projects/comfymulti-scripts
+./backup-mello.sh           # Full backup (default)
+./backup-mello.sh --quick   # Skip outputs (user_data + inputs only)
+```
+
+| Data | Destination | Notes |
+|------|-------------|-------|
+| User workflows | R2 | `user_data/userXXX/` |
+| User settings | R2 | `user_data/userXXX/` |
+| User outputs | R2 | `outputs/userXXX/` (checksum skip if unchanged) |
+| User inputs | R2 | `inputs/` |
 
 ---
 
@@ -59,18 +79,18 @@ cd ~/projects/comfymulti-scripts
 
 ## What's NOT Backed Up
 
-| Data | Reason | Issue |
-|------|--------|-------|
-| User workflows | Pending implementation | [#4](https://github.com/ahelme/comfymulti-scripts/issues/4) |
-| User outputs | Ephemeral (scratch disk) | By design |
+| Data | Reason |
+|------|--------|
+| Models on Verda | Already in R2 (restored from there) |
 
 ---
 
 ## Quick Reference
 
-| Script | Location | Trigger |
-|--------|----------|---------|
-| `backup-verda.sh` | Mello: `~/projects/comfymulti-scripts/` | Manual |
-| `backup-local.sh` | Verda: `/usr/local/bin/` | Cron (hourly) |
+| Script | Location | Trigger | Backs Up |
+|--------|----------|---------|----------|
+| `backup-verda.sh` | Mello: `~/projects/comfymulti-scripts/` | Manual | Verda → Mello + R2 |
+| `backup-mello.sh` | Mello: `~/projects/comfymulti-scripts/` | Manual | Mello → R2 |
+| `backup-local.sh` | Verda: `/usr/local/bin/` | Cron (hourly) | Verda → SFS |
 
 For restore procedures, see [admin-backup-restore.md](./admin-backup-restore.md).
