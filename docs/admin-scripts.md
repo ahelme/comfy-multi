@@ -30,7 +30,7 @@ Complete reference for all management and automation scripts in the ComfyUI Work
 | **load-test.sh** | Load testing | `./scripts/load-test.sh` |
 | **backup-verda.sh** | Backup Verda → Mello + R2 | `~/projects/comfymulti-scripts/backup-verda.sh` |
 | **backup-mello.sh** | Backup Mello user files → R2 | `~/projects/comfymulti-scripts/backup-mello.sh` |
-| **backup-local.sh** | Hourly backup on Verda → SFS | Cron (installed by RESTORE-SFS.sh) |
+| **backup-cron.sh** | Hourly backup Verda → SFS + triggers mello | Cron (installed by RESTORE-SFS.sh) |
 | **quick-start.sh** | Daily GPU instance startup | `curl ... \| bash -s <sfs-endpoint>` |
 | **RESTORE-SFS.sh** | Download models/container to SFS | `sudo bash RESTORE-SFS.sh --full` |
 | **RESTORE-BLOCK-MELLO.sh** | Full system restore from mello | `sudo bash RESTORE-BLOCK-MELLO.sh` |

@@ -78,7 +78,7 @@ A multi-user ComfyUI platform for video generation workshops.
 ├── README-RESTORE.md           # Basic backup/restore doc
 ├── quick-start.sh              # Loaded onto GPU cloud in provisioning
 ├── RESTORE-SFS.sh              # Main restore - data from R2
-├── backup-local.sh             # Local backups to SFS from OS volume on Verda
+├── backup-cron.sh              # Hourly backups: Verda→SFS + triggers mello→R2
 ├── backup-mello.sh             # Backs up user files on mello e.g. workflows
 └── backup-verda.sh             # Backs up all data to R2 before instance deleted 
 ```

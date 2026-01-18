@@ -77,11 +77,11 @@ cd ~/projects/comfymulti-scripts
 
 **When:** Every hour while Verda is running
 **Run from:** Verda instance
-**Script:** `backup-local.sh` (installed by RESTORE-SFS.sh)
+**Script:** `backup-cron.sh` (installed by RESTORE-SFS.sh)
 
 ```bash
 # Cron entry (installed automatically)
-0 * * * * /usr/local/bin/backup-local.sh
+0 * * * * /usr/local/bin/backup-cron.sh
 ```
 
 | Data | Destination | Notes |
@@ -90,6 +90,7 @@ cd ~/projects/comfymulti-scripts
 | SSH host keys | SFS | |
 | Fail2ban, UFW configs | SFS | |
 | Project .env | SFS | |
+| *Triggers* `backup-mello.sh` | R2 | Via SSH to mello |
 
 ---
 
@@ -98,6 +99,7 @@ cd ~/projects/comfymulti-scripts
 | Data | Reason |
 |------|--------|
 | Models on Verda | Already in R2 (restored from there) |
+| Block storage (`/mnt/scratch`) | Ephemeral scratch disk for temp files/outputs |
 
 ---
 
@@ -106,7 +108,7 @@ cd ~/projects/comfymulti-scripts
 | Script | Location | Trigger | Backs Up |
 |--------|----------|---------|----------|
 | `backup-verda.sh` | Mello: `~/projects/comfymulti-scripts/` | Manual | Verda → Mello + R2 |
-| `backup-mello.sh` | Mello: `~/projects/comfymulti-scripts/` | Manual | Mello → R2 |
-| `backup-local.sh` | Verda: `/usr/local/bin/` | Cron (hourly) | Verda → SFS |
+| `backup-mello.sh` | Mello: `~/projects/comfymulti-scripts/` | Manual/Cron | Mello → R2 |
+| `backup-cron.sh` | Verda: `/usr/local/bin/` | Cron (hourly) | Verda → SFS + triggers mello |
 
 For restore procedures, see [admin-backup-restore.md](./admin-backup-restore.md).

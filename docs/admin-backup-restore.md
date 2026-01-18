@@ -21,6 +21,7 @@ Quick reference for backing up and restoring the Verda GPU instance.
 | Storage | Purpose | Persistence | Cost |
 |---------|---------|-------------|------|
 | **Verda SFS** | Models + Container (workshop month) | Temporary | ~$14/month |
+| **Verda Block** | Scratch disk for outputs/temp | Ephemeral | ~$1/month |
 | **Cloudflare R2** | Complete backup (models, container, configs) | Permanent | ~$2/month |
 | **Mello VPS** | Working backups, scripts source | Permanent | (existing) |
 
@@ -50,14 +51,14 @@ This preserves the expected IP: **100.89.38.43**
 
 | Script | Runs From | Destination | Trigger | Schedule |
 |--------|-----------|-------------|---------|----------|
-| `backup-local.sh` | Verda | SFS | Cron | Hourly |
+| `backup-cron.sh` | Verda | SFS + triggers mello | Cron | Hourly |
 | `backup-verda.sh` | Mello | Mello + R2 | Manual | Before shutdown |
-| `backup-mello.sh` | Mello | R2 | Manual | Before shutdown |
+| `backup-mello.sh` | Mello | R2 | Manual/Cron | Before shutdown |
 
 ### What Gets Backed Up
 
-| Data | `backup-local.sh` | `backup-verda.sh` | `backup-mello.sh` | Location |
-|------|:-----------------:|:-----------------:|:-----------------:|----------|
+| Data | `backup-cron.sh` | `backup-verda.sh` | `backup-mello.sh` | Location |
+|------|:----------------:|:-----------------:|:-----------------:|----------|
 | Tailscale identity | ✅ | ✅ | ❌ | SFS / Mello |
 | SSH host keys | ✅ | ✅ | ❌ | SFS / Mello |
 | Fail2ban, UFW configs | ✅ | ✅ | ❌ | SFS / Mello |
@@ -70,6 +71,7 @@ This preserves the expected IP: **100.89.38.43**
 | User workflows | ❌ | ❌ | ✅ | R2 |
 | User outputs | ❌ | ❌ | ✅ | R2 |
 | User inputs | ❌ | ❌ | ✅ | R2 |
+| Block storage (`/mnt/scratch`) | ❌ | ❌ | ❌ | *Not backed up* |
 
 ---
 
@@ -156,9 +158,10 @@ Both scripts perform identical system restore (Tailscale, security, user environ
 1. Get latest `quick-start.sh` from **https://github.com/ahelme/comfymulti-scripts** (private repo)
 2. In Verda Console, create GPU instance (A100/H100)
 3. Attach your SFS (create one first if needed - 50GB recommended)
-4. In **"Startup Script"** field, paste `quick-start.sh` contents (no modifications needed)
-5. Add **both SSH keys**: user's Mac key + Mello VPS key
-6. Provision instance
+4. Create and attach Block Storage (10-20GB) for scratch disk
+5. In **"Startup Script"** field, paste `quick-start.sh` contents (no modifications needed)
+6. Add **both SSH keys**: user's Mac key + Mello VPS key
+7. Provision instance
 
 ### Step 2: Run quick-start.sh
 
@@ -174,15 +177,16 @@ bash /root/quick-start.sh <PSEUDOPATH>
 
 **What quick-start.sh does (resumable):**
 1. Mounts SFS at /mnt/sfs using provided PSEUDOPATH
-2. Adds mello SSH key for access
-3. Gets files (checking /root/ → SFS → remote in order):
+2. Mounts block storage at /mnt/scratch (auto-formats if blank)
+3. Adds mello SSH key for access
+4. Gets files (checking /root/ → SFS → remote in order):
    - RESTORE scripts from GitHub (~20KB)
    - Config backup from R2 (~14MB)
    - Container image from R2 (~2.5GB) - background download
-4. Extracts config backup to /root/
-5. Runs RESTORE-SFS.sh automatically (restores Tailscale identity BEFORE starting Tailscale)
-6. Loads container from SFS (or waits for R2 download)
-7. Creates symlinks for ComfyUI
+5. Extracts config backup to /root/
+6. Runs RESTORE-SFS.sh automatically (restores Tailscale identity BEFORE starting Tailscale)
+7. Loads container from SFS (or waits for R2 download)
+8. Creates symlinks: `data/models` → SFS, `data/outputs` → `/mnt/scratch/outputs`
 
 ### Step 3: Authenticate Tailscale (manual)
 
@@ -226,7 +230,9 @@ After restore, verify:
 - [ ] `sudo fail2ban-client status` shows sshd jail active
 - [ ] `echo $SHELL` shows /bin/zsh
 - [ ] oh-my-zsh prompt displays correctly
-- [ ] Models present at /mnt/models/
+- [ ] SFS mounted: `mountpoint /mnt/sfs`
+- [ ] Block storage mounted: `mountpoint /mnt/scratch`
+- [ ] Models present at /mnt/sfs/models/
 - [ ] Container loaded: `docker images | grep comfyui`
 - [ ] Redis connection: `redis-cli -h 100.99.216.71 -p 6379 -a '<password>' ping`
 
@@ -335,6 +341,24 @@ mount -v -t nfs <sfs-endpoint> /mnt/sfs
 ```bash
 curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
 cd /tmp && unzip -o awscliv2.zip && sudo ./aws/install
+```
+
+### Block Storage Not Found
+**Cause:** No block storage attached to instance.
+
+**Solution:**
+1. Go to Verda Dashboard → Storage
+2. Create Block Storage volume (10-20GB)
+3. Attach to instance
+4. Re-run quick-start.sh
+
+### Block Storage Needs Formatting
+**Cause:** Blank volume with no filesystem.
+
+**Solution:** quick-start.sh auto-formats blank volumes. If manual:
+```bash
+sudo mkfs.ext4 /dev/vdb
+sudo mount /dev/vdb /mnt/scratch
 ```
 
 ---
