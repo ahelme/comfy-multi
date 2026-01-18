@@ -11,6 +11,22 @@ Three backup routines protect data. For full details, see [admin-backup-restore.
 
 ---
 
+## Quick Reference: End of Workshop Day
+
+**Run from Mello VPS** before shutting down Verda:
+
+```bash
+cd ~/projects/comfymulti-scripts
+
+# Step 1: Backup Verda → Mello + R2
+./backup-verda.sh
+
+# Step 2: Backup Mello user files → R2
+./backup-mello.sh
+```
+
+---
+
 ## A. Manual: Before Verda Shutdown
 
 **When:** Before deleting Verda instance or SFS (end of workshop day)

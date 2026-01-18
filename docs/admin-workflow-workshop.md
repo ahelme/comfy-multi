@@ -107,12 +107,20 @@ cd ~/comfy-multi
 docker compose up worker-1
 ```
 
-### 7. Backup Container to Mello
+### 7. Run End-of-Day Backups
 
+**From Mello VPS:**
 ```bash
-# From mello
-./scripts/backup-verda.sh --with-container
+cd ~/projects/comfymulti-scripts
+
+# Step 1: Backup Verda → Mello + R2
+./backup-verda.sh
+
+# Step 2: Backup Mello user files → R2
+./backup-mello.sh
 ```
+
+See [Admin Backup Routines](./admin-backup-routines.md) for details.
 
 ---
 

@@ -28,8 +28,9 @@ Complete reference for all management and automation scripts in the ComfyUI Work
 | **setup.sh** | Initial setup | `./scripts/setup.sh` |
 | **test.sh** | Run tests | `./scripts/test.sh` |
 | **load-test.sh** | Load testing | `./scripts/load-test.sh` |
-| **backup-verda-env.sh** | Backup Verda environment | `./scripts/backup-verda-env.sh` |
-| **backup-verda.sh** | Backup Verda configs to mello | `./scripts/backup-verda.sh` |
+| **backup-verda.sh** | Backup Verda → Mello + R2 | `~/projects/comfymulti-scripts/backup-verda.sh` |
+| **backup-mello.sh** | Backup Mello user files → R2 | `~/projects/comfymulti-scripts/backup-mello.sh` |
+| **backup-local.sh** | Hourly backup on Verda → SFS | Cron (installed by RESTORE-SFS.sh) |
 | **quick-start.sh** | Daily GPU instance startup | `curl ... \| bash -s <sfs-endpoint>` |
 | **RESTORE-SFS.sh** | Download models/container to SFS | `sudo bash RESTORE-SFS.sh --full` |
 | **RESTORE-BLOCK-MELLO.sh** | Full system restore from mello | `sudo bash RESTORE-BLOCK-MELLO.sh` |
@@ -600,91 +601,11 @@ Results:
 
 ---
 
-## Environment Backup & Restore
+## Backup & Restore Scripts
 
-### backup-verda-env.sh
-**Purpose:** Create complete backup of Verda GPU worker environment
+**See [Admin Backup Routines](./admin-backup-routines.md)** for backup procedures.
 
-**Usage:**
-```bash
-./scripts/backup-verda-env.sh
-```
-
-**Environment variables:**
-```bash
-VERDA_HOST=dev@verda        # SSH target
-BACKUP_DIR=~/backups/verda  # Local backup storage
-```
-
-**What it does:**
-1. Connects to Verda GPU instance via SSH
-2. Creates tar archive of `/home/dev` directory
-3. Excludes large files (models, cache, outputs)
-4. Downloads backup to VPS
-5. Cleans up remote backup file
-6. Keeps last 5 backups, deletes older ones
-
-**Backup includes:**
-- ✓ Dotfiles (.zshrc, .vimrc, .gitconfig)
-- ✓ Oh-my-zsh configuration and custom themes
-- ✓ SSH keys (~/.ssh/) ⚠️
-- ✓ Shell history
-- ✓ Application configs
-- ✓ Git repositories (without .git/objects)
-
-**Backup excludes:**
-- ✗ Model files (data/models/) - ~20GB
-- ✗ Generated outputs (data/outputs/)
-- ✗ Cache directories (.cache, .npm, .docker)
-- ✗ Package caches (.local/share)
-
-**Output:**
-```
-🔄 Backing up Verda environment...
-   Source: dev@verda:/home/dev
-   Destination: ~/backups/verda/verda-env-backup-20260112-143022.tar.gz
-
-Step 1: Creating backup archive on Verda...
-Step 2: Downloading backup to VPS...
-Step 3: Cleaning up remote backup...
-
-✅ Backup complete!
-   File: ~/backups/verda/verda-env-backup-20260112-143022.tar.gz
-   Size: 127M
-
-To restore on a new machine:
-  scp ~/backups/verda/verda-env-backup-20260112-143022.tar.gz newmachine:/tmp/
-  ssh newmachine 'tar -xzf /tmp/verda-env-backup-20260112-143022.tar.gz -C /home/dev'
-
-Cleaning up old backups (keeping last 5)...
-removed 'verda-env-backup-20260110-120045.tar.gz'
-
-Current backups:
--rw-r--r-- 1 dev dev 127M Jan 12 14:30 verda-env-backup-20260112-143022.tar.gz
--rw-r--r-- 1 dev dev 125M Jan 11 18:22 verda-env-backup-20260111-182245.tar.gz
--rw-r--r-- 1 dev dev 124M Jan 11 09:15 verda-env-backup-20260111-091533.tar.gz
-```
-
-**When to use:**
-- Weekly scheduled backups
-- Before major system changes
-- Before terminating Verda instance
-- Disaster recovery preparation
-
-**Schedule automatic backups:**
-```bash
-# On VPS - add to crontab
-crontab -e
-
-# Backup every Sunday at 2 AM
-0 2 * * 0 /home/dev/projects/comfyui/scripts/backup-verda-env.sh >> /var/log/verda-backup.log 2>&1
-```
-
----
-
-## Restore Scripts
-
-**See [Admin Backup & Restore](./admin-backup-restore.md)** for complete restore procedures and scripts.
+**See [Admin Backup & Restore](./admin-backup-restore.md)** for complete restore procedures.
 
 Scripts are maintained in the private GitHub repo: **https://github.com/ahelme/comfymulti-scripts**
 

@@ -87,6 +87,7 @@ A scalable, multi-user ComfyUI platform with **split CPU/GPU architecture** - ru
 - **Real-time Updates** - WebSocket queue status broadcasting
 - **Admin Dashboard** - Monitor and manage all activity
 - **LTX-2 Video Generation** - 19B parameter video model support
+- **Flux.2 Klein Image Gen/Editing** - fast open-source image (good for video) 
 - **Multi-Provider** - Works with any GPU cloud or local hardware
 
 ---
@@ -173,6 +174,9 @@ REDIS_HOST=<vps-tailscale-ip> docker compose up -d worker-1
 | **Lambda Labs** | ~$2.50/hr | Reliable, good support |
 | **Vast.ai** | ~$1.50/hr | Cheapest, variable quality |
 | **Local GPU** | $0/hr | If you have hardware |
+
+### Serverless Containers for AI inference
+Scalable inference for elastic workshop sizes / demands
 
 ### Storage Options
 
@@ -305,6 +309,7 @@ Daily workflow (30 seconds):
 - Users submit jobs via web interface
 - Queue distributes to GPU workers
 - Monitor via admin dashboard
+- Cron jobs run backup scripts: VPS (user files) & GPU cloud (models, config)
 
 # Evening: Shut down GPU
 1. docker compose down
@@ -355,6 +360,7 @@ R2_BUCKET=your-model-bucket
 ```
 comfy-multi/
 ├── docker-compose.yml       # Service orchestration
+├── docker-compose.users.yml # Isolated user containers
 ├── .env.example             # Configuration template
 ├── scripts/
 │   ├── start.sh             # Start VPS services

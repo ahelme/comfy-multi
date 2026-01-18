@@ -14,28 +14,36 @@
 
 ---
 
-## ⚠️ CRITICAL INSTRUCTIONS - YOU MUST:
+## ⚠️  CRITICAL INSTRUCTIONS - YOU MUST:
 
-1. **USE LATEST STABLE LIBRARIES AS OF 04 JAN 2026** - ✅ COMPLETE - All dependencies using latest stable versions
-2. **MODULAR INFERENCE PROVIDERS** - ✅ COMPLETE - Config file supports Verda, RunPod, Modal, local
-3. **ALWAYS CHECK IF CODE HAS BEEN CREATED FIRST** - NEVER EVER REWRITE CODE IF IT HAS ALREADY BEEN WRITTEN AND WORKS WELL - always check!
+1. **USE LATEST STABLE LIBRARIES AS OF JAN 2026**
+
+2. **ALWAYS CHECK IF CODE HAS BEEN CREATED FIRST** 
+   - **NEVER EVER** REWRITE CODE IF IT HAS ALREADY BEEN WRITTEN
+   - **ALWAYS CHECK** FOR PREVIOUS SOLUTIONS
 
 ## 🎯 Project Quick Reference
 
 ### What are we building?
-A multi-user ComfyUI platform for a video generation workshop with 20 participants - app hosted separately on Hetzner VPS, with inference via a Remote GPU Cloud provider (e.g. Verda, RunPod, etc.) sharing a single H100 GPU.
+A multi-user ComfyUI platform for video generation workshops.
+- Optimised for cost savings:
+  - App hosted separately on Hetzner VPS. 
+  - Inference via a Remote GPU Cloud provider (e.g. Verda, RunPod, etc.)
+  - Storage of models, user files, config, worker etc. on cheap Cloudflare R2.
+- Workshop participants/end-users are professional filmmakers.
 
 ### Key Requirements
 - split architecture - two servers one for CPU, one for GPU
-- 20 isolated ComfyUI web interfaces ✅
-- Central job queue (FIFO/round-robin/priority) ✅
-- 1-3 GPU workers on H100 ✅
-- HTTPS with existing ahelme.net SSL cert ✅
-- HTTP Basic Auth password protection ✅
-- Tailscale VPN for secure Redis connection ✅
-- Persistent user storage ✅
-- Admin dashboard for instructor ✅
-- Real-time health monitoring ✅
+- 20 isolated ComfyUI web interfaces 
+- Central job queue (FIFO/round-robin/priority)
+- 1-3 GPU workers on H100 
+- HTTPS with existing ahelme.net SSL cert
+- HTTP Basic Auth password protection 
+- Tailscale VPN for secure Redis connection 
+- Persistent user storage 
+- Admin dashboard for instructor 
+- Real-time health monitoring 
+- Comprehensive backup routines (scripts on private repo)
 
 ### Quick Links
 - **Production:** https://comfy.ahelme.net/
@@ -49,39 +57,60 @@ A multi-user ComfyUI platform for a video generation workshop with 20 participan
 
 ```
 /home/dev/projects/comfyui/
-├── prd.md                   # Product Requirements Document
 ├── implementation-deployment-verda.md  # GPU deployment guide
-├── progress-2.md            # Session logs + metrics (UPDATE EACH RESPONSE)
-├── CLAUDE.md                # This file - project guide
-├── README.md                # Public project documentation
-├── .env                     # Local configuration (gitignored)
-├── .env.example             # Template configuration
-├── docker-compose.yml       # Main orchestration
-├── docker-compose.dev.yml   # Local dev overrides
-├── nginx/                   # Reverse proxy
-├── queue-manager/           # FastAPI service
-├── comfyui-worker/          # GPU worker
-├── comfyui-frontend/        # User UI containers
-├── admin/                   # Admin dashboard
-├── scripts/                 # Management scripts
-├── data/                    # Persistent volumes
-└── docs/                    # User/admin guides
+├── progress-02.md                      # Session logs + metrics (UPDATE ON COMMITS)
+├── CLAUDE.md                           # This file - project guide
+├── README.md                           # Public project documentation
+├── .env                                # Local configuration (gitignored)
+├── .env.example                        # Template configuration
+├── docker-compose.yml                  # Main orchestration
+├── docker-compose.dev.yml              # Local dev overrides
+├── nginx/                              # Reverse proxy
+├── queue-manager/                      # FastAPI service
+├── comfyui-worker/                     # GPU worker
+├── comfyui-frontend/                   # User UI containers
+├── admin/                              # Admin dashboard
+├── scripts/                            # Management scripts
+├── data/                               # Persistent volumes
+└── docs/                               # User/admin guides
+
+/home/dev/projects/comfymulti-scripts/
+├── README-RESTORE.md           # Basic backup/restore doc
+├── quick-start.sh              # Loaded onto GPU cloud in provisioning
+├── RESTORE-SFS.sh              # Main restore - data from R2
+├── backup-local.sh             # Local backups to SFS from OS volume on Verda
+├── backup-mello.sh             # Backs up user files on mello e.g. workflows
+└── backup-verda.sh             # Backs up all data to R2 before instance deleted 
 ```
 
 ---
+## Project Management
 
+## 📋 Implementation Plan (Phases)
+
+==MUST READ & UPDATE AS PLAN CHANGES==
+-[Implementation Plan](./implementation-deployment-verda.md)
+
+## 📋 Progress Tracking
+- [Progress Log](./progress-02.md) - Session logs, metrics, standup notes
+
+## 📋 Issue Tracking
+- **ComfyMulti Project**: https://github.com/ahelme/comfy-multi/issues
+- **Private Scripts Repo**: https://github.com/ahelme/comfymulti-scripts/issues
+---
 ## 📚 Document Links
 
 ### Core Documents
 - [README.md](./README.md) - Public code project overview and dev quickstart
-- [Progress Log](./progress-2.md) - Session logs, metrics, standup notes
+- [Progress Log](./progress-02.md) - Session logs, metrics, standup notes
+- [Admin Guide](.docs/admin-guide.md) - Admin docs index / overview
 - [GPU Deployment](./implementation-deployment-verda.md) - Verda GPU setup
-- [Product Requirements](./prd.md) - Full requirements
+- [Product Requirements](./archive/prd.md) - Full requirements
 - [Claude Guide](./CLAUDE.md) - Development context (this file)
 
 ### User Documentation 
 - **docs/user-guide.md** - For workshop participants
-- **docs/admin-guide.md** - For instructor
+- **docs/admin-guide.md** - For developer/maintainer/instructor
 - **docs/troubleshooting.md** - Common issues
 
 ### Documentation Format
@@ -98,13 +127,15 @@ Ensure these details are listed the top of ALL .md documentation files:
 **Doc Created:** 2026-01-02
 **Doc Updated:** 2026-01-18
 
-==IMPORTANT: Docs MUST be comprehensive yet NO FLUFF - NO extraneous / irrelevant info / value-statements / achievements boasting==
+==IMPORTANT: Docs MUST be comprehensive yet NO FLUFF== 
+
+==NO extraneous / irrelevant info / value-statements / achievements boasting==
 
 ---
 
-## 🔄 Update Instructions
+## 🔄 Update Progress on Commit: Instructions
 
-### At the END of EVERY response, update `progress.md`:
+### At EVERY GIT COMMIT update `progress-**.md`(progress files numbered - only latest kept):
 
 ```markdown
 ### Session N - YYYY-MM-DD
@@ -115,7 +146,7 @@ Ensure these details are listed the top of ALL .md documentation files:
 - Files created/modified
 
 **Code Created:**
-- List major files with brief description
+- List ALL files with brief description
 
 **Blockers:**
 - Any issues encountered
@@ -123,13 +154,6 @@ Ensure these details are listed the top of ALL .md documentation files:
 **Next Session Goals:**
 - What to do next
 ```
-
-### Keep these metrics current in `progress.md`:
-- Commits List (inc. description)
-- Lines of Code
-- Files Created
-- Sprint Status (🔨 In Progress / ✅ Complete / ⏳ Not Started)
-- Risk Register updates
 
 ---
 
@@ -148,7 +172,7 @@ Ensure these details are listed the top of ALL .md documentation files:
                  │ Network
                  │ (Redis connection)
   ┌──────────────▼──────────────────────────┐
-  │ Remote GPU (e.g. Verda) H100            │
+  │ Remote GPU (Verda) instance/serverless  │
   │  - Worker 1 (ComfyUI + GPU)             │
   │  - Worker 2 (ComfyUI + GPU) [optional]  │
   │  - Worker 3 (ComfyUI + GPU) [optional]  │
@@ -185,6 +209,7 @@ Code Architecture:
   - `main` - production-ready code
   - `dev` - active development
   - Feature branches as needed
+- **Scripts Repo** (PRIVATE!) https://github.com/ahelme/comfymulti-scripts
 
 ### Git Configuration (IMPORTANT)
 **GitHub noreply email (keeps email private):**
@@ -207,16 +232,28 @@ test: add integration tests for worker
 - Before trying risky changes
 - End of each session
 - When tests pass
-
+- ==REMEMBER: UPDATE `progress-**.md` after commits!==
 ---
 
 ## 🛠️ Technology Stack
+
+### Development Machines
+- **dev machine (THIS MACHINE!)**: 'mello' cheap Hetzner VPS - Ubuntu
+- **user's machine**: MBP M4 Pro 48GB RAM
+
+### Production Servers & Storage
+- **main app & user frontends**: 'mello' cheap Hetzner VPS - Ubuntu
+- **AI inference**: 'verda' GPU cloud (renewable energy & EU policy): rented instance / serverless
+
+### Backups
+- **cloud storage**: Cloudflare R2 ( .eu ) - 3x buckets (v. cheap)
+- **local storage**: 'verda' SFS (network drive) & block storage + 'mello'
 
 ### Infrastructure
 - **Container Runtime:** Docker + Docker Compose
 - **Reverse Proxy:** Nginx (SSL termination, routing)
 - **Queue:** Redis 7+ (job queue, pub/sub)
-- **SSL:** Existing ahelme.net certificate
+- **SSL:** Existing ahelme.net certificate via Namecheap
 
 ### Services
 - **Queue Manager:** Python 3.11+ with FastAPI + WebSocket
@@ -225,9 +262,8 @@ test: add integration tests for worker
 - **Admin:** HTML/JS dashboard
 
 ### Deployment
-- **Development:** Docker Compose locally
-- **Production:** Hetzner VPS + Remote GPU (e.g. Verda) H100 instance
-- **GPU:** NVIDIA H100 80GB (shared)
+- **Development:** Docker Compose locally (Hetzner VPS)
+- **Production:** Hetzner VPS + Remote GPU (e.g. Verda) instance/serverless
 
 ### Workshop Models
 
@@ -247,6 +283,9 @@ test: add integration tests for worker
 **Model Sources:**
 - HuggingFace: `Lightricks/LTX-2`
 - HuggingFace: `Comfy-Org/ltx-2`
+
+**NEW: ADDED IMAGE MODEL**
+- **Flux.2 Klein**
 
 ---
 
@@ -272,21 +311,36 @@ QUEUE_MODE=fifo
 REDIS_PASSWORD=changeme
 ```
 
-### SSL Certificate
-- **Domain:** ahelme.net
-- **Location:** User will provide cert paths
-- **Type:** Existing cert (not Let's Encrypt)
-- **Format:** PEM files (fullchain.pem + privkey.pem)
+---
+
+## 📋 Critical Files and Locations                                          
+
+ mello: File/Directory                              │ Purpose
+  ──────────────────────────────────────────────────┼───────────────────────────────────────────
+  .env                                              │ Configuration (passwords, domain, etc.)
+  docker-compose.yml                                │ Container orchestration
+  /etc/ssl/certs/fullchain.pem                      │ SSL public certificate
+  /etc/ssl/private/privkey.pem                      │ SSL private key
+  scripts/status.sh                                 │ System health check script
+  scripts/start.sh                                  │ Start all services
+  scripts/stop.sh                                   │ Stop all services
+
+  ~/projects/comfymulti-scripts/                    │ Backup/Restore/Deploy scripts for Verda GPU Cloud
+  ~/projects/comfymulti-scripts/RESTORE-SFS.sh      │ Restore Verda instance using SFS storage
+  ~/projects/comfymulti-scripts/README-RESTORE.md   │ README for restoring Verda
+
+ *(NOTE: restore scripts have their own private gh repo: https://github.com/ahelme/comfymulti-scripts)*
+
+  docs/admin-backup-restore.md                      │ Full docs for deploy/backup/restore
+
+ verda: File/Directory                              │ Purpose
+  ──────────────────────────────────────────────────┼────────────────────────────────────────
+  data/models/shared/                               │ Shared model files
+  data/outputs/                                     │ User output files (isolated per user)
 
 ---
 
-## 📋 Implementation Phases
-
-==MUST READ: implementation-deployment-verda.md==
-
 ## ✅ Success Criteria
-
-==MUST READ: prd.md==
 
 ### MVP Requirements (Must Have)
 - ✅ 20 isolated user interfaces accessible
@@ -295,6 +349,7 @@ REDIS_PASSWORD=changeme
 - ✅ Outputs persist after restart
 - ✅ Admin can monitor queue
 - ✅ System stable for 8-hour workshop
+- ✅ Deployment tested on Verda GPU instance AND serverless
 
 ---
 
@@ -374,15 +429,12 @@ sudo ufw status
 
 ---
 
-## 🐛 Known Issues / Technical Debt
+## ⚠️  Gotchas
 
-None yet.
+### Cloudflare R2 EU location
+- don't forget the '.eu' domain!
 
----
-
-## ⚠️ Verda GPU Cloud Gotchas
-
-### Storage Options
+### Verda Storage Options
 
 **Recommended: Shared File System (SFS)** - €0.01168/h for 50GB (~$14 AUD/month)
 - Network-attached (NFS), mount from any instance
@@ -395,6 +447,7 @@ None yet.
 - ⚠️ **CRITICAL: Gets WIPED if attached during instance provisioning!**
 - Must use shutdown-attach-boot workflow for existing data
 - Only one instance can use it at a time
+- Good for scratch disk
 
 ### Block Storage Safe Workflow (if using)
 
@@ -425,8 +478,10 @@ None yet.
 - [9elements ComfyUI API](https://9elements.com/blog/hosting-a-comfyui-workflow-via-api/) - Workflow execution
 
 ### Deployment Targets
-- [Verda H100](https://verda.com/h100-sxm5) - GPU cloud provider
 - [Verda Products](https://verda.com/products) - Instance types
+- [Verda Containers](https://verda.com/serverless-containers) - Serverless options - dynamic scaling
+- [Verda Instances](https://docs.verda.com/cpu-and-gpu-instances/set-up-a-gpu-instance) - Setup an instance
+- [Verda Serverless Containers](https://docs.verda.com/containers/overview) - Setup a container 
 
 ### ComfyUI Resources
 - [ComfyUI GitHub](https://github.com/comfyanonymous/ComfyUI)
@@ -437,38 +492,24 @@ None yet.
 
 ## 🎓 Context for Claude
 
-### User Background
-- Running AI/video generation workshop
-- Has Hetzner VPS with ahelme.net SSL cert
-- Wants to use Remote GPU provider (Verda, RunPod, etc.) H100 for GPU compute
-- 20 participants need isolated environments
-- Workshop in ~2 weeks
-
-### Key Decisions Made
-1. **Custom build** chosen over managed services (cost, control, flexibility for any GPU provider)
-2. **Existing SSL cert** will be mounted (not Let's Encrypt)
-3. **Queue modes:** FIFO + round-robin + instructor priority
-4. **Single H100** with 1-3 workers (test then scale)
+1. **Existing SSL cert** will be mounted (not Let's Encrypt)
+2. **Queue modes:** FIFO + round-robin + instructor priority
+3. **Test with Single H100 Instance** with 1-3 workers (test then scale)
+4. **Then try Serverless Containers** for price/performance
 5. **Persistent storage** for all user data
 6. **User model uploads** allowed
 
 ### User Preferences
 - Appreciates thoroughness and detail
 - Values comprehensive and accurate documentation
-- Wants progress tracking (hence progress.md)
+- Wants progress tracking (hence `progress-**.md`)
 - Likes structured approaches
 
----
-
-## 🗓️ CLAUDE TO-DO LIST: Pre-Workshop SFS Creation
-
-**When:** Jan 31 (or chosen pre-workshop date)
-**Duration:** ~45 minutes
-**Cost:** ~$3 (V100 spot for setup)
+## Deployment
 
 ### SSH Keys for Verda
 
-**During Verda provisioning, add BOTH public keys:**
+**During Verda provisioning, add BOTH public keys via Verda console:**
 
 1. **User's Mac key** - for manual SSH access
 2. **Mello VPS key** - for mello to SSH into Verda
@@ -481,22 +522,24 @@ ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGiwaT6NQcHe7cYDKB5LrtmyIU0O8iRc7DJUmZJsNkDD
 **Why this matters for restore scripts:**
 - Mac can SSH into Verda ✓ (Mac has private key)
 - Mello can SSH into Verda ✓ (Mello has private key)
-- Verda CANNOT pull from mello ✗ (Verda has no private key for mello)
+- Verda CANNOT pull from mello ✗ (Verda has no private key for mello until quick-start.sh finishes)
 
-**Therefore:** Restore scripts first check SFS (fast, for workshop month), then fall back to remote:
+### Restore scripts are adaptive
+
+**Core Restore Workflow:** Restore scripts first check SFS (fast, for workshop month), then fall back to remote:
 - **SFS** - First choice (files cached from previous session)
 - **R2** - Binary files (models, container image, config tarball)
 - **GitHub** - Scripts (`ahelme/comfymulti-scripts` private repo)
 
 ### Critical Principles
 
-**1. Check Before Downloading/Restoring**
+**1. Check Before Downloading/Restoring (Scripts Check in This Order)**
 
-| File Type | Check Order | Rationale |
-|-----------|-------------|-----------|
-| **Models** (~45GB) | SFS → R2 | Large, live on SFS |
-| **Config, identity, container** | /root/ → SFS → R2 | Extracted to instance |
-| **Scripts** | /root/ → SFS → GitHub | Small, versioned |
+| File Type                       | Check Order           | Rationale             |
+|---------------------------------|-----------------------|-----------------------|
+| **Models** (~45GB)              | SFS → R2              | Large, live on SFS    |
+| **Config, identity, container** | /root/ → SFS → R2     | Extracted to instance |
+| **Scripts**                     | /root/ → SFS → GitHub | Small, versioned      |
 
 **2. Tailscale Identity Must Be Restored BEFORE Starting Tailscale**
 
@@ -504,51 +547,37 @@ If Tailscale starts without the backed-up identity, it gets a **NEW IP address**
 The restore scripts restore `/var/lib/tailscale/` BEFORE running `tailscale up`.
 This preserves the expected IP: **100.89.38.43**
 
-### Prerequisites Checklist
+### Deployment Prerequisites Checklist
 
 Before starting, verify:
 - [ ] mello VPS is running (comfy.ahelme.net)
-- [ ] R2 **Models bucket** (`comfy-multi-model-vault-backup`) contains:
+- [ ] R2: **Models bucket** (`comfy-multi-model-vault-backup`) contains:
   - [ ] `checkpoints/*.safetensors` (~25-50 GB)
   - [ ] `text_encoders/*.safetensors` (~20 GB)
-- [ ] R2 **Cache bucket** (`comfy-multi-cache`) contains:
+- [ ] R2: **Cache bucket** (`comfy-multi-cache`) contains:
   - [ ] `worker-image.tar.gz` (~2.5 GB)
   - [ ] `verda-config-backup.tar.gz` (~14 MB)
-- [ ] GitHub repo `ahelme/comfymulti-scripts` contains scripts:
+- [ ] GitHub: **Private Scripts Repo** (`ahelme/comfymulti-scripts`) contains scripts:
   - [ ] `quick-start.sh`
   - [ ] `RESTORE-SFS.sh`
-  - [ ] `RESTORE-BLOCK-MELLO.sh`
-- [ ] User's Mac SSH key is ready for Verda provisioning
+- [ ] User's Mac: **SSH Keys and Quick-Start Script** added to Verda console during provisioning
+  - [ ] `dev@vps-for-verda` (Mello's key) & `developer@annahelme.com` (User's key)- paste into console
+  - [ ] `quick-start.sh` (latest version from Github!) - paste into console 
+- [ ] R2: **User files bucket** (`comfy-multi-user-files`)
+  - [ ] available to receive backups
 
-### Step-by-Step Process
+### Step-by-Step Deployment Process
 
 **See [Admin Backup & Restore Guide](./docs/admin-backup-restore.md)** for complete step-by-step instructions including:
-- Provisioning SFS and GPU instance
-- Running quick-start.sh and RESTORE-SFS.sh
-- Downloading models from R2
-- Verification checklist
-- Troubleshooting
+- Provisioning SFS and GPU instance and block storage (scratch disk) on Verda
+- Running quick-start.sh and RESTORE-SFS.sh on Verda
+- Script is downloading models from R2 (unless available on SFS already)
+- Backups cron jobs are running on verda + mello (triggered by RESTORE-SFS.sh)
 
-### Pre-Populated To-Dos for Claude
+### Pre-Populated Deployment To-Dos for Claude
 
-Copy these to TodoWrite at session start:
-
-```json
-[
-  {"content": "Verify mello VPS is running", "status": "pending", "activeForm": "Verifying mello VPS"},
-  {"content": "Verify R2 has models + container", "status": "pending", "activeForm": "Checking R2 contents"},
-  {"content": "Create SFS 50GB on Verda", "status": "pending", "activeForm": "Creating SFS on Verda"},
-  {"content": "Create GPU instance with quick-start.sh", "status": "pending", "activeForm": "Creating GPU instance"},
-  {"content": "Verify quick-start.sh ran correctly", "status": "pending", "activeForm": "Verifying quick-start"},
-  {"content": "Transfer backup files to Verda", "status": "pending", "activeForm": "Transferring backup files"},
-  {"content": "Run RESTORE-SFS.sh", "status": "pending", "activeForm": "Running RESTORE-SFS.sh"},
-  {"content": "Verify Tailscale connected", "status": "pending", "activeForm": "Verifying Tailscale"},
-  {"content": "Verify models downloaded to SFS", "status": "pending", "activeForm": "Checking models on SFS"},
-  {"content": "Verify container loaded", "status": "pending", "activeForm": "Checking container"},
-  {"content": "Start worker and test connection", "status": "pending", "activeForm": "Testing worker"},
-  {"content": "Shut down GPU instance (keep SFS)", "status": "pending", "activeForm": "Cleaning up"}
-]
-```
+Copy these to TodoWrite when deploying:
+`.claude/DEPLOYMENT-TO-DO.md`
 
 ### Troubleshooting
 
@@ -559,24 +588,13 @@ See [Admin Backup & Restore Guide - Troubleshooting](./docs/admin-backup-restore
 ## 📝 Session Checklist
 
 Before each session ends:
-- [ ] Update progress-2.md with session log
-- [ ] Update relevant implementation docs if needed
+- [ ] Update `progress-**.md` with session log
+- [ ] Update relevant implementation doc if needed
 - [ ] Commit code changes to git
 - [ ] Update development docs with key changes made (IMPORTANT!) - CLAUDE.md, README.md, linked dev / project docs
 - [ ] Consider any changes made that are relevant to users - if any then scour docs for any details that need changing
-- [ ] Update metrics (files created, LOC, etc.)
 - [ ] Note any blockers or decisions
 - [ ] Clear next session goals
-
----
-
-## 🚨 Emergency Contacts / Fallbacks
-
-If critical issues:
-1. Check docs/troubleshooting.md
-2. Review GitHub issues in referenced projects
-3. Fallback: Simple mode (manual worker selection)
-4. Last resort: Standalone ComfyUI instances for participants
 
 ---
 

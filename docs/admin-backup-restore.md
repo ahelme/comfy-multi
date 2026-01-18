@@ -118,31 +118,21 @@ See workshop model requirements in [admin-guide.md](./admin-guide.md).
 
 ## Running Backups
 
-### From Mello VPS
+### End of Workshop Day (Manual)
+
+Run from Mello VPS before shutting down Verda:
 
 ```bash
-cd ~/projects/comfyui
+cd ~/projects/comfymulti-scripts
 
-# Config-only backup (fast, ~2 min)
-./scripts/backup-verda.sh
+# Step 1: Backup Verda → Mello + R2
+./backup-verda.sh
 
-# Full backup including models to Cloudflare R2
-./scripts/backup-verda.sh --with-models
+# Step 2: Backup Mello user files → R2
+./backup-mello.sh
 ```
 
-### What Gets Backed Up
-
-| Item | Destination |
-|------|-------------|
-| Tailscale identity | mello (preserves IP 100.89.38.43) |
-| SSH host keys | mello |
-| Fail2ban config | mello |
-| UFW firewall rules | mello |
-| Home directory (.zshrc, .ssh) | mello |
-| oh-my-zsh custom (bullet-train) | mello |
-| ComfyUI project | mello |
-| Worker container image | mello |
-| Models (.safetensors) | Cloudflare R2 (with `--with-models` flag) |
+For detailed backup tables and options, see [admin-backup-routines.md](./admin-backup-routines.md).
 
 ---
 

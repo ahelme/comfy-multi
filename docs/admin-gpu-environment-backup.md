@@ -9,6 +9,8 @@
 
 # GPU Worker Environment Backup & Restore
 
+> **Note:** For the main backup routine (end of workshop day), see [Admin Backup Routines](./admin-backup-routines.md). This document covers dev environment setup and dotfiles.
+
 How to backup and reproduce your customized Verda GPU development environment (zsh, oh-my-zsh, Tailscale, custom themes, etc.) on new machines.
 
 ---
@@ -121,15 +123,14 @@ cd ~/comfy-multi
 
 For disaster recovery or when dotfiles aren't sufficient.
 
-### Create Backup
+> **Note:** The `backup-verda-env.sh` script has been consolidated into `backup-verda.sh`. Use the main backup routine instead:
+> ```bash
+> cd ~/projects/comfymulti-scripts
+> ./backup-verda.sh
+> ```
+> See [Admin Backup Routines](./admin-backup-routines.md) for details.
 
-**From VPS:**
-```bash
-# Run the backup script
-./scripts/backup-verda-env.sh
-
-# Backup saved to: ~/backups/verda/verda-env-backup-YYYYMMDD-HHMMSS.tar.gz
-```
+### Manual Backup (if needed)
 
 **Manual backup:**
 ```bash
