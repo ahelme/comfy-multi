@@ -78,6 +78,13 @@ Completed backup automation with hourly cron jobs on Verda triggering Mello user
 - ✅ Updated symlink: data/outputs -> /mnt/scratch/outputs
 - ✅ Issue #5 marked ready-for-testing
 
+#### Part 7: Backup Documentation Updates
+- ✅ Updated admin-backup-routines.md: script rename, block storage excluded
+- ✅ Updated admin-backup-restore.md: storage strategy, provisioning, verification
+- ✅ Updated admin-scripts.md: script rename
+- ✅ Updated CLAUDE.md: script rename
+- ✅ Created GitHub issue #6: Verify backup scripts with block storage
+
 ### Commits (comfymulti-scripts repo)
 ```
 134980c feat: add block storage (scratch disk) mounting in quick-start.sh
@@ -94,6 +101,8 @@ b026c8b feat: make --full default, add checksum-based incremental backups
 
 ### Commits (comfy-multi repo)
 ```
+f5cc8cc docs: update backup docs for block storage and script rename
+2b987a0 docs: update progress with block storage implementation
 710c9a0 docs: add block storage issue and latest commit to progress
 39799d6 docs: add Progress Report 14 and update Report 13 status
 f25394c docs: reorganize project files and update documentation
@@ -124,6 +133,7 @@ R2 Buckets:
 
 ### Pending
 - [ ] Test block storage implementation on Verda (Issue #5)
+- [ ] Verify backup scripts with block storage (Issue #6)
 - [ ] Test full restore flow with new backup architecture
 
 ---
