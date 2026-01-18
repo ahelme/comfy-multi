@@ -244,6 +244,8 @@ Choose a guide based on what you need to do:
 
 **Use this for:** Provisioning new Verda instances, restoring from backups, understanding storage workflows.
 
+**See also:** [Backup Routines](./admin-backup-routines.md) - concise reference for manual and automatic backups.
+
 ---
 
 ### [Admin Security Guide](./admin-security.md)
@@ -359,6 +361,6 @@ During the workshop, keep these metrics in mind:
 
 ---
 
-**Last Updated:** 2026-01-16
+**Last Updated:** 2026-01-18
 
 For detailed information on any topic, refer to the specific guide linked above. Good luck with your workshop!

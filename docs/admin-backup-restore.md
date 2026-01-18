@@ -12,6 +12,8 @@
 
 Quick reference for backing up and restoring the Verda GPU instance.
 
+**See also:** [Backup Routines](./admin-backup-routines.md) - concise reference for manual and automatic backups.
+
 ---
 
 ## Storage Strategy
@@ -330,6 +332,7 @@ cd /tmp && unzip -o awscliv2.zip && sudo ./aws/install
 
 ## Related Docs
 
+- [Backup Routines](./admin-backup-routines.md) - Concise reference for manual and automatic backups
 - [Workshop Workflow](./admin-workflow-workshop.md) - Daily startup procedures
 - [Scripts Reference](./admin-scripts.md) - All available scripts
 - [Verda Setup](./admin-verda-setup.md) - Verda configuration

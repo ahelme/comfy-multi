@@ -115,10 +115,8 @@ CLAUDE RESUME -
     
 ## CURRENT TO DOs - PLEASE UPDATE YOUR TO DO LIST AS FOLLOWS:
 
-  ☐ Identify backup script/s and move to ~/projects/comfymulti-scripts/ (new repo for scripts)
-  ☐ Full audit of backup scripts - make new .md file in docs/ with list of any issues (COMPARE to quick-start.sh and RESTORE-SFS.sh)
-  ☐ Push changes to private gh repo - https://github.com/ahelme/comfymulti-scripts
-  ☐ Update docs e.g. docs/admin-backup-restore.md and CLAUDE.md with changes to backup scripts (be concise in CLAUDE.md)
+  ☐ Check backup scripts and cron job work sensibly together (detail below)
+  ☐ Create docs/admin-backup-routines.md (see detail below)
 
 ## AFTERWARDS:
                                                                             
@@ -164,4 +162,22 @@ CLAUDE RESUME -
   
 ## FINAL STEP  (detail on first To Do tasks)
  
-Discuss the next To Do before taking action 
+Discuss the next To Do before taking action:
+
+1. Check backup scripts AND cron job work sensibly together:
+- backup-local.sh
+- backup-verda.sh
+- backup-verda-env.sh
+- backup-tailscale-identity.sh
+- [CRON JOB] -> RESTORE-SFS.sh
+
+Reference: docs/admin-backup-restore.md
+
+2. Create ultra-concise docs/admin-backup-routines.md - copy table listing what is (or is NOT) backed up where/when and by which script from docs/admin-backup-restore.md and adapt for two routines:
+
+A. MANUAL: BEFORE VERDA SHUTDOWN - Full Verda Backups 
+B. AUTOMATIC: CRON JOB - Local Backup to SFS
+
+NOTE: DO NOT REPLICATE INFO FROM  docs/admin-backup-restore.md EXCEPT FOR SUMMARY TABLE COPY/ADAPTATION
+      POINT TO docs/admin-backup-restore.md INSTEAD FOR MORE INFORMATION
+ 
