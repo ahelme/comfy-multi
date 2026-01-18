@@ -68,12 +68,19 @@ Completed backup automation with hourly cron jobs on Verda triggering Mello user
 - ✅ Renamed progress-2.md to progress-02.md
 - ✅ Added .claude/DEPLOYMENT-TO-DO.md for deployment checklist
 
-#### Part 6: Block Storage Issue
+#### Part 6: Block Storage Implementation
 - ✅ Researched codebase for block storage patterns (quick-start.sh, RESTORE-SFS.sh, docker-compose)
 - ✅ Created GitHub issue #5: Configure block storage (scratch disk) in quick-start.sh
+- ✅ Implemented block storage mounting in quick-start.sh (Step 3b)
+- ✅ Auto-detect block devices (/dev/vdb, /dev/sdb, etc.)
+- ✅ Auto-format blank volumes as ext4
+- ✅ Fail elegantly with helpful error if no block storage attached
+- ✅ Updated symlink: data/outputs -> /mnt/scratch/outputs
+- ✅ Issue #5 marked ready-for-testing
 
 ### Commits (comfymulti-scripts repo)
 ```
+134980c feat: add block storage (scratch disk) mounting in quick-start.sh
 805d522 feat: rename backup-local.sh to backup-cron.sh and add Mello trigger
 7158635 fix: use EU endpoint for user-files bucket, add R2 credentials
 a77d220 feat: add backup-mello.sh for user data backup to R2
@@ -116,7 +123,7 @@ R2 Buckets:
 ```
 
 ### Pending
-- [ ] Implement block storage setup in quick-start.sh (Issue #5)
+- [ ] Test block storage implementation on Verda (Issue #5)
 - [ ] Test full restore flow with new backup architecture
 
 ---
