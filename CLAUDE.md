@@ -3,7 +3,7 @@
 **Repository:** github.com/ahelme/comfy-multi
 **Domain:** comfy.ahelme.net
 **Doc Created:** 2026-01-02
-**Doc Updated:** 2026-01-14
+**Doc Updated:** 2026-01-17
 
 ---
 
@@ -96,7 +96,7 @@ Ensure these details are listed the top of ALL .md documentation files:
 **Repository:** github.com/ahelme/comfy-multi
 **Domain:** comfy.ahelme.net
 **Doc Created:** 2026-01-02
-**Doc Updated:** 2026-01-14
+**Doc Updated:** 2026-01-17
 
 ==IMPORTANT: Docs MUST be comprehensive yet NO FLUFF - NO extraneous / irrelevant info / value-statements / achievements boasting==
 
@@ -339,14 +339,33 @@ sudo ufw status
 - **Expiry:** 2026-04-10
 - **Protocols:** TLSv1.2, TLSv1.3
 
-### Cloudflare R2 (Model Backup)
+### Cloudflare R2 (Two Buckets)
 - **Provider:** Cloudflare R2 (S3-compatible)
-- **Bucket:** `comfy-multi-model-vault-backup`
 - **Endpoint:** `https://f1d627b48ef7a4f687d6ac469c8f1dea.r2.cloudflarestorage.com`
-- **Location:** Oceania (OC)
-- **Purpose:** Backup storage for LTX-2 models (~45GB)
-- **Cost:** ~$0.68/month (no egress fees)
-- **Access:** Via rclone or AWS CLI with R2 API credentials
+- **Cost:** ~$2/month total (no egress fees)
+- **Access:** Via AWS CLI with R2 API credentials
+
+**Models Bucket:** `comfy-multi-model-vault-backup`
+- Location: Oceania
+- Contents: `checkpoints/*.safetensors`, `text_encoders/*.safetensors`
+- Purpose: Model files only (~45GB)
+
+**Cache Bucket:** `comfy-multi-cache`
+- Location: Eastern Europe (closer to Verda/Finland)
+- Contents: `worker-image.tar.gz` (~2.5GB), `verda-config-backup.tar.gz` (~14MB)
+- Purpose: Container image and config backup
+
+### Restore Scripts (Private GitHub Repo)
+- **Repo:** `ahelme/comfymulti-scripts` (private)
+- **URL:** https://github.com/ahelme/comfymulti-scripts
+- **Local path on mello:** `/home/dev/projects/comfymulti-scripts/`
+- **Purpose:** Version-controlled restore/bootstrap scripts for Verda instances
+- **Contents:**
+  - `quick-start.sh` - Bootstrap script (mounts SFS, downloads from R2/GitHub)
+  - `RESTORE-SFS.sh` - System restore with flag support (`--with-models`, `--with-container`, `--full`)
+  - `RESTORE-BLOCK-MELLO.sh` - Alternative block storage workflow
+  - `README-RESTORE.md` - Quick reference for restore scenarios
+- **Note:** Scripts downloaded from GitHub, binary files (models, container) from R2
 
 ---
 
@@ -364,7 +383,8 @@ None yet.
 - Network-attached (NFS), mount from any instance
 - No provisioning gotchas - just mount and go
 - Multiple instances can share same storage
-- Mount: `mount -t nfs <sfs-endpoint>:/share /mnt/models`
+- Mount: `mount -t nfs <sfs-endpoint>:/share /mnt/sfs`
+- Structure: `/mnt/sfs/models/` (ComfyUI models), `/mnt/sfs/cache/` (container, config, scripts)
 
 **Alternative: Block Storage** - Cheaper but riskier
 - ⚠️ **CRITICAL: Gets WIPED if attached during instance provisioning!**
@@ -443,19 +463,56 @@ None yet.
 
 ### SSH Keys for Verda
 
-**Mello VPS Key (MUST ADD to Verda provisioning):**
+**During Verda provisioning, add BOTH public keys:**
+
+1. **User's Mac key** - for manual SSH access
+2. **Mello VPS key** - for mello to SSH into Verda
+
 ```
+# Mello VPS public key (MUST ADD):
 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGiwaT6NQcHe7cYDKB5LrtmyIU0O8iRc7DJUmZJsNkDD dev@vps-for-verda
 ```
+
+**Why this matters for restore scripts:**
+- Mac can SSH into Verda ✓ (Mac has private key)
+- Mello can SSH into Verda ✓ (Mello has private key)
+- Verda CANNOT pull from mello ✗ (Verda has no private key for mello)
+
+**Therefore:** Restore scripts first check SFS (fast, for workshop month), then fall back to remote:
+- **SFS** - First choice (files cached from previous session)
+- **R2** - Binary files (models, container image, config tarball)
+- **GitHub** - Scripts (`ahelme/comfymulti-scripts` private repo)
+
+### Critical Principles
+
+**1. Check Before Downloading/Restoring**
+
+| File Type | Check Order | Rationale |
+|-----------|-------------|-----------|
+| **Models** (~45GB) | SFS → R2 | Large, live on SFS |
+| **Config, identity, container** | /root/ → SFS → R2 | Extracted to instance |
+| **Scripts** | /root/ → SFS → GitHub | Small, versioned |
+
+**2. Tailscale Identity Must Be Restored BEFORE Starting Tailscale**
+
+If Tailscale starts without the backed-up identity, it gets a **NEW IP address**.
+The restore scripts restore `/var/lib/tailscale/` BEFORE running `tailscale up`.
+This preserves the expected IP: **100.89.38.43**
 
 ### Prerequisites Checklist
 
 Before starting, verify:
 - [ ] mello VPS is running (comfy.ahelme.net)
-- [ ] R2 bucket has models + container (`comfy-multi-model-vault-backup`)
-- [ ] R2 credentials are in mello `.env` file
-- [ ] RESTORE-SFS.sh is current in `~/backups/verda/`
-- [ ] User's SSH key is ready
+- [ ] R2 bucket contains binary files:
+  - [ ] `checkpoints/*.safetensors` (models)
+  - [ ] `text_encoders/*.safetensors`
+  - [ ] `worker-image.tar.gz` (2.5 GB)
+  - [ ] `verda-config-backup.tar.gz` (14 MB)
+- [ ] GitHub repo `ahelme/comfymulti-scripts` contains scripts:
+  - [ ] `quick-start.sh`
+  - [ ] `RESTORE-SFS.sh`
+  - [ ] `RESTORE-BLOCK-MELLO.sh`
+- [ ] User's Mac SSH key is ready for Verda provisioning
 
 ### Step-by-Step Process
 

@@ -26,16 +26,9 @@ See [Admin Backup & Restore](./admin-backup-restore.md) for full storage strateg
 
 ## Quick Start (Daily GPU Instance)
 
-```bash
-# 1. Create GPU spot instance (Verda Dashboard) - NO storage attached
-# 2. SSH in and run quick-start script
-ssh root@<new-instance-ip>
-curl -sL https://raw.githubusercontent.com/ahelme/comfy-multi/main/scripts/quick-start.sh | bash -s <sfs-endpoint>
+**See [Admin Backup & Restore](./admin-backup-restore.md)** for complete provisioning and restore procedures.
 
-# Done! (~30 seconds)
-```
-
-See [Workshop Workflow](./admin-workflow-workshop.md) for full details.
+Summary: Paste `quick-start.sh` into Verda startup script, SSH in, run `bash /root/quick-start.sh <PSEUDOPATH>`.
 
 ---
 

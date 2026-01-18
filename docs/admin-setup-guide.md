@@ -41,39 +41,7 @@ nano .env
 
 ### 2. Remote GPU Instance Setup
 
-**Deploy to Remote GPU (e.g. Verda H100 Instance):**
-
-```bash
-# SSH to GPU instance
-ssh user@your-gpu-instance
-
-# Clone repository
-git clone https://github.com/ahelme/comfy-multi.git
-cd comfy-multi
-
-# Run setup
-./scripts/setup.sh
-
-# Edit configuration - CRITICAL: Set Redis to point to VPS
-nano .env
-
-# Start services
-./scripts/start.sh
-```
-
-**Or use quick-start script (recommended for Verda):**
-```bash
-# Run quick-start to mount SFS and set up basics
-curl -sL https://raw.githubusercontent.com/ahelme/comfy-multi/main/scripts/quick-start.sh | bash -s <sfs-endpoint>
-
-# Authenticate Tailscale (REQUIRED for Redis connection)
-sudo tailscale up --ssh=false
-# Visit the URL shown in your browser to authenticate
-# Verify: tailscale ip -4  # Should show 100.89.38.43
-
-# If fresh SFS, run restore and follow NEXT STEPS for R2 download
-sudo bash RESTORE-SFS.sh
-```
+**See [Admin Backup & Restore](./admin-backup-restore.md)** for complete GPU instance provisioning and restore procedures.
 
 ### 3. Environment Variables Configuration
 

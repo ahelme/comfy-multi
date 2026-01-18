@@ -95,9 +95,12 @@ A scalable, multi-user ComfyUI platform with **split CPU/GPU architecture** - ru
 
 ### Option A: Use Our Quick-Start Script (Recommended)
 
+1. Get latest `quick-start.sh` from **https://github.com/ahelme/comfymulti-scripts** (private repo)
+2. In Verda Console, paste into "Startup Script" field, add both SSH keys, provision
+3. SSH in and run:
 ```bash
-# On a fresh GPU instance
-curl -sL https://raw.githubusercontent.com/ahelme/comfy-multi/main/scripts/quick-start.sh | bash -s <your-sfs-endpoint>
+bash /root/quick-start.sh <PSEUDOPATH>
+# Get PSEUDOPATH from Verda Dashboard: Storage tab → SFS dropdown → PSEUDOPATH
 ```
 
 ### Option B: Manual Setup

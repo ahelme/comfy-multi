@@ -3,7 +3,7 @@
 **Repository:** github.com/ahelme/comfy-multi
 **Domain:** comfy.ahelme.net
 **Doc Created:** 2026-01-04
-**Doc Updated:** 2026-01-16 (Session 11 continued)
+**Doc Updated:** 2026-01-18 (Session 13)
 
 ---
 
@@ -27,6 +27,88 @@
 
 ---
 --- remember to update [COMMIT.log](./COMMIT.log) EVERY time you update this file!!!
+---
+
+## Progress Report 13 - 2026-01-18 (Phase 13: Doc Consolidation & Provisioning Workflow)
+**Status:** 🔨 In Progress
+**Started:** 2026-01-18
+
+### Summary
+Fixed incorrect provisioning workflow in docs (was curl, now Verda startup script). Consolidated duplicate documentation by replacing restore sections with pointers to admin-backup-restore.md.
+
+### Activities
+
+#### Part 1: Provisioning Workflow Fix
+- ✅ Updated README-RESTORE.md with correct Verda Console workflow
+- ✅ Updated admin-backup-restore.md with correct provisioning steps
+- ✅ Updated README.md Quick Start section
+- ✅ Correct workflow: paste quick-start.sh into Verda startup script field, SSH in, run with PSEUDOPATH
+
+#### Part 2: Doc Consolidation (DRY)
+Replaced duplicate restore/deploy sections with pointers to admin-backup-restore.md:
+- ✅ admin-setup-guide.md - replaced GPU section
+- ✅ admin-verda-setup.md - replaced Quick Start section
+- ✅ admin-workflow-workshop.md - replaced Daily Startup section
+- ✅ admin-scripts.md - replaced 130-line Restore Scripts section
+
+#### Part 3: GitHub Issues
+- ✅ Issue #3: Update backup scripts for new provisioning workflow + move scripts to private repo
+
+### Commits (comfymulti-scripts repo)
+```
+625a158 docs: update provisioning workflow for Verda startup script
+```
+
+### Pending
+- [ ] Full audit of quick-start.sh and RESTORE-SFS.sh
+- [ ] Create docs/script-audit-issues.md with findings
+- [ ] Test full restore flow on Verda
+
+---
+
+## Progress Report 12 - 2026-01-17 (Phase 12: Script Versioning & Bug Fixes)
+**Status:** 🔨 In Progress
+**Started:** 2026-01-17
+
+### Summary
+Created private GitHub repo for restore scripts with version control. Fixed multiple bugs in RESTORE-SFS.sh.
+
+### Activities
+
+#### Part 1: Documentation Updates
+- ✅ Added "Critical Principles" to README-RESTORE.md, admin-backup-restore.md, CLAUDE.md
+  - Check before downloading (SFS → /root/ → R2/GitHub)
+  - Tailscale identity must be restored BEFORE starting Tailscale
+
+#### Part 2: Scripts Repo Setup
+- ✅ Created `/home/dev/projects/comfymulti-scripts/` directory
+- ✅ Set up GitHub repo: `ahelme/comfymulti-scripts` (private)
+- ✅ Pushed scripts: quick-start.sh, RESTORE-SFS.sh, RESTORE-BLOCK-MELLO.sh, README-RESTORE.md
+- ✅ Logged issue #1 for RESTORE-BLOCK-MELLO.sh update
+
+#### Part 3: quick-start.sh Improvements
+- ✅ Added GitHub PAT verification (fail-fast if auth fails)
+- ✅ Scripts now downloaded from GitHub (versioned), binary files from R2
+
+#### Part 4: RESTORE-SFS.sh Bug Fixes
+- ✅ Added flag handling: `--with-models`, `--with-container`, `--full`, `--help`
+- ✅ Added Tailscale IP verification (fails if not 100.89.38.43)
+- ✅ Added error logging to `/root/restore-error.log`
+- ✅ Fixed oh-my-zsh install order (was running before dev user created)
+- ✅ Made NEXT STEPS conditional based on flags used
+
+### Commits (comfymulti-scripts repo)
+```
+4bef9cf fix: move oh-my-zsh install after dev user creation
+a5f6c3f feat: add flag handling to RESTORE-SFS.sh
+2f06f34 feat: initial commit of Verda restore scripts
+```
+
+### Pending
+- [ ] Symlink change in scripts (user to specify)
+- [ ] Full scripts review
+- [ ] Test full restore flow on Verda
+
 ---
 
 ## Progress Report 11 - 2026-01-16 (Phase 11: Worker Testing & Documentation)

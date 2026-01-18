@@ -118,39 +118,13 @@ docker compose up worker-1
 
 ## FEB 1-28: Daily Startup (~30 seconds!)
 
-### Quick Start (existing SFS)
+**See [Admin Backup & Restore](./admin-backup-restore.md)** for complete provisioning steps.
 
-**Option A: One-liner with quick-start.sh**
-```bash
-# 1. Create GPU spot instance (Verda Dashboard)
-
-# 2. SSH and run quick-start script
-ssh root@<new-instance-ip>
-curl -sL https://raw.githubusercontent.com/ahelme/comfy-multi/main/scripts/quick-start.sh | bash -s <sfs-endpoint>
-
-# Done! Mello SSH access + SFS mount + container loaded + worker started
-```
-
-**Option B: Manual steps**
-```bash
-# 1. Create GPU spot instance (Verda Dashboard)
-#    - NO storage attached during creation
-
-# 2. SSH and mount SFS
-ssh root@<new-instance-ip>
-mkdir -p /mnt/models
-mount -t nfs <sfs-endpoint> /mnt/models
-
-# 3. Load container (2 seconds!)
-docker load < /mnt/models/worker-image.tar.gz
-
-# 4. Start worker
-su - dev
-cd ~/comfy-multi
-docker compose up -d worker-1
-
-# Done! Total time: ~30 seconds
-```
+**Summary:**
+1. Get `quick-start.sh` from GitHub repo `ahelme/comfymulti-scripts`
+2. Paste into Verda startup script field, add both SSH keys, provision
+3. SSH in, run: `bash /root/quick-start.sh <PSEUDOPATH>`
+4. Authenticate: `sudo tailscale up --ssh=false`
 
 ### If Instance Was Terminated Overnight
 
