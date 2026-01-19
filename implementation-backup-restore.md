@@ -192,77 +192,27 @@ The generated restore script performs:
 
 ### Storage Setup (Verda Console)
 
-1. **Create 50GB SFS** - Ubuntu, ComfyMulti, user config
-2. **Create 40GB Block Storage** - "Model Vault"
+0. **Provision V100 16GB** - $0.14/hr for testing (COMES WITH OWN BLOCK STORAGE FOR OS)
+1. **Shut machine down** - (to attach storage without wipe)
+2. **Create 50GB SFS** - "Model Vault", ComfyMulti, user config
 3. **Create 10GB Block Storage** - "Scratch Disk"
-4. **Provision V100 16GB** - $0.14/hr for testing
+4. **Attach SFS & Block Storage & Start Server**
+5. **Restore with Scripts**
 
-### Mount SFS (Shared File System)
+## Mount SFS and create new block storage
 
-The SFS contains your system files, user config, and ComfyUI project.
-
-**Step 1: Get mount command from Verda Dashboard**
-```
-1. Go to Verda Dashboard → Storage → Shared File Systems
-2. Click on your SFS (e.g., SFS-Model-Vault)
-3. Copy the mount command shown (Verda adds a random ID suffix)
-   Example: sudo mount -t nfs -o nconnect=16 nfs.fin-01.datacrunch.io:/SFS-Model-Vault-273f8ad9 /mnt/SFS-Model-Vault
-```
-
-**Step 2: Mount the SFS**
-```bash
-# Create mount directory
-sudo mkdir -p /mnt/models
-
-# Run the mount command from Verda (replace with YOUR endpoint)
-sudo mount -t nfs -o nconnect=16 nfs.fin-01.datacrunch.io:/SFS-Model-Vault-273f8ad9 /mnt/models
-
-# Add to fstab for persistence (optional - replace with YOUR endpoint)
-echo 'nfs.fin-01.datacrunch.io:/SFS-Model-Vault-273f8ad9 /mnt/models nfs defaults,nconnect=16 0 0' | sudo tee -a /etc/fstab
-```
+SFS network drive is for models, local backups.
+Block storage is for scratch (user uploads/outputs).
 
 **Note:** Mount point can be customized (e.g., `/mnt/models` or `/mnt/sfs`).
 
-### Mount Block Storage
+See: [Deploy/Backup Guide](.docs/admin-backup-restore.md) - Deploy/restore/backups
 
-Block storage is for models and scratch data.
+### Restore Data
 
-```bash
-# As root on new Verda instance
-mkfs.ext4 /dev/vdb  # Model Vault (only run once on NEW volumes!)
-mkfs.ext4 /dev/vdc  # Scratch Disk (only run once on NEW volumes!)
-mkdir -p /mnt/models /mnt/scratch
-mount /dev/vdb /mnt/models
-mount /dev/vdc /mnt/scratch
-chown dev:dev /mnt/models /mnt/scratch
+If SFS needs re-creating or block storage needs restoring from backup (if lost).
 
-# Add to fstab for persistence
-echo '/dev/vdb /mnt/models ext4 defaults 0 0' >> /etc/fstab
-echo '/dev/vdc /mnt/scratch ext4 defaults 0 0' >> /etc/fstab
-```
-
-### Restore Steps
-
-```bash
-# 1. Transfer backup to new instance
-scp -r ~/backups/verda/ root@new-verda:~/
-
-# 2. SSH in and run restore
-ssh root@new-verda
-cd ~/verda
-bash RESTORE.sh
-
-# 3. Authenticate Tailscale (required for Redis connection)
-sudo tailscale up --ssh=false
-# Visit the URL shown (e.g., https://login.tailscale.com/a/abc123) in your browser
-# Verify: tailscale ip -4  # Should show 100.89.38.43
-
-# 4. Create symlinks (as dev user)
-su - dev
-mkdir -p ~/comfy-multi/data
-ln -sf /mnt/models ~/comfy-multi/data/models
-ln -sf /mnt/scratch ~/comfy-multi/data/outputs
-```
+See: [Deploy/Backup Guide](.docs/admin-backup-restore.md) - Deploy/restore/backups
 
 ### Model Restore
 
@@ -270,26 +220,7 @@ ln -sf /mnt/scratch ~/comfy-multi/data/outputs
 
 Models are backed up to Cloudflare R2 for fast restore:
 
-```bash
-# Install AWS CLI (if not present)
-curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
-cd /tmp && unzip -o awscliv2.zip && ./aws/install
-
-# Configure R2 credentials
-mkdir -p ~/.aws
-cat > ~/.aws/credentials << 'EOF'
-[default]
-aws_access_key_id = <R2_ACCESS_KEY_ID>
-aws_secret_access_key = <R2_SECRET_ACCESS_KEY>
-EOF
-
-# Download models from R2 (~45GB, ~15-20 min)
-cd /mnt/models
-R2_ENDPOINT="https://f1d627b48ef7a4f687d6ac469c8f1dea.r2.cloudflarestorage.com"
-R2_BUCKET="comfy-multi-model-vault-backup"
-
-aws s3 sync s3://$R2_BUCKET/ . --endpoint-url $R2_ENDPOINT
-```
+See: [Deploy/Backup Guide](.docs/admin-backup-restore.md) - Deploy/restore/backups
 
 **Option B: Download from HuggingFace (Fallback)**
 
@@ -516,4 +447,5 @@ ls -la ~/comfy-multi/data/
 
 ---
 
+```
 **Last Updated:** 2026-01-14

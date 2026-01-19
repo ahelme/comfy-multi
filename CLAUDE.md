@@ -3,7 +3,7 @@
 **Repository:** github.com/ahelme/comfy-multi
 **Domain:** comfy.ahelme.net
 **Doc Created:** 2026-01-02
-**Doc Updated:** 2026-01-18
+**Doc Updated:** 2026-01-19
 
 ---
 
@@ -25,7 +25,7 @@
 ## 🎯 Project Quick Reference
 
 ### What are we building?
-A multi-user ComfyUI platform for video generation workshops.
+- A multi-user ComfyUI platform for video generation workshops.
 - Optimised for cost savings:
   - App hosted separately on Hetzner VPS. 
   - Inference via a Remote GPU Cloud provider (e.g. Verda, RunPod, etc.)
@@ -36,7 +36,7 @@ A multi-user ComfyUI platform for video generation workshops.
 - split architecture - two servers one for CPU, one for GPU
 - 20 isolated ComfyUI web interfaces 
 - Central job queue (FIFO/round-robin/priority)
-- 1-3 GPU workers on H100 
+- 1-3 GPU workers on H100 OR serverless containers 
 - HTTPS with existing ahelme.net SSL cert
 - HTTP Basic Auth password protection 
 - Tailscale VPN for secure Redis connection 
@@ -57,14 +57,14 @@ A multi-user ComfyUI platform for video generation workshops.
 
 ```
 /home/dev/projects/comfyui/
-├── implementation-deployment-verda.md  # GPU deployment guide
-├── progress-02.md                      # Session logs + metrics (UPDATE ON COMMITS)
+├── implementation-deployment-verda.md  # Implementation plan for deployment phases
+├── progress-**.md                      # Recent session logs (UPDATE ON COMMITS)
 ├── CLAUDE.md                           # This file - project guide
 ├── README.md                           # Public project documentation
 ├── .env                                # Local configuration (gitignored)
 ├── .env.example                        # Template configuration
 ├── docker-compose.yml                  # Main orchestration
-├── docker-compose.dev.yml              # Local dev overrides
+├── docker-compose.user.yml             # User containers on CPU VPS (Heztner)
 ├── nginx/                              # Reverse proxy
 ├── queue-manager/                      # FastAPI service
 ├── comfyui-worker/                     # GPU worker
@@ -86,27 +86,34 @@ A multi-user ComfyUI platform for video generation workshops.
 ---
 ## Project Management
 
-## 📋 Implementation Plan (Phases)
+### 📋 Progress Tracking
+- [Current Progress Log](./progress-02.md) - Session log
+    - ==MUST UPDATE ON COMMIT OF CODE CHANGES==
 
-==MUST READ & UPDATE AS PLAN CHANGES==
--[Implementation Plan](./implementation-deployment-verda.md)
-
-## 📋 Progress Tracking
-- [Progress Log](./progress-02.md) - Session logs, metrics, standup notes
-
-## 📋 Issue Tracking
+### 📋 Issue Tracking
 - **ComfyMulti Project**: https://github.com/ahelme/comfy-multi/issues
 - **Private Scripts Repo**: https://github.com/ahelme/comfymulti-scripts/issues
+
+### 📋 Implementation Plan (Phases)
+
+- [Current Implementation Plan: Deploy/Backup/Restore](./implementation-backup-restore.md)
+    - IMPLEMENTATION PLANS MUST BE CONCISE! DETAILS CHANGE!    
+    - **NO CODE SNIPS**
+    - Replace detail with simple steps 
+    - Provide pointers to single source of truth (docs)
+    - ==MUST UPDATE AS PLAN CHANGES==
+
 ---
+
 ## 📚 Document Links
 
 ### Core Documents
 - [README.md](./README.md) - Public code project overview and dev quickstart
-- [Progress Log](./progress-02.md) - Session logs, metrics, standup notes
+- [Progress Log](./progress-**.md) - Session logs
 - [Admin Guide](.docs/admin-guide.md) - Admin docs index / overview
-- [GPU Deployment](./implementation-deployment-verda.md) - Verda GPU setup
-- [Product Requirements](./archive/prd.md) - Full requirements
-- [Claude Guide](./CLAUDE.md) - Development context (this file)
+- [Deploy/Backup Guide](.docs/admin-backup-restore.md) - Docs: deploy/restore/backups
+- [GPU Deployment](./implementation-backup-restore.md) - Plan: deploy/restore/backup
+- [Claude Guide](./CLAUDE.md) - Development context for custom deployment (this file)
 
 ### User Documentation 
 - **docs/user-guide.md** - For workshop participants
@@ -140,6 +147,11 @@ Ensure these details are listed the top of ALL .md documentation files:
 ```markdown
 ### Session N - YYYY-MM-DD
 
+**Which Implmentation Phase**
+- See current dev plan doc (see below)
+
+**List Git Issues**
+
 **Activities:**
 - What was accomplished in this session
 - Key decisions made
@@ -147,6 +159,11 @@ Ensure these details are listed the top of ALL .md documentation files:
 
 **Code Created:**
 - List ALL files with brief description
+
+**Commit logs**
+- List for both repos:
+  - comfy-multi
+  - comfymulti-scripts (private repo inc. secrets)
 
 **Blockers:**
 - Any issues encountered
@@ -335,9 +352,9 @@ REDIS_PASSWORD=changeme
 
  verda: File/Directory                              │ Purpose
   ──────────────────────────────────────────────────┼────────────────────────────────────────
-  data/models/shared/                               │ Shared model files
-  data/outputs/                                     │ User output files (isolated per user)
-
+  data/models/shared/   (SFS network drive)         │ Shared model files
+  data/outputs/         (block storage: scratch)    │ User output files (isolated per user)
+  data/inputs/          (block storage: scratch)    │ User uploads (isolated per user)
 ---
 
 ## ✅ Success Criteria
@@ -492,7 +509,7 @@ sudo ufw status
 
 ## 🎓 Context for Claude
 
-1. **Existing SSL cert** will be mounted (not Let's Encrypt)
+1. **Existing SSL cert** via Namecheap mounted (not Let's Encrypt)
 2. **Queue modes:** FIFO + round-robin + instructor priority
 3. **Test with Single H100 Instance** with 1-3 workers (test then scale)
 4. **Then try Serverless Containers** for price/performance
@@ -568,16 +585,14 @@ Before starting, verify:
 
 ### Step-by-Step Deployment Process
 
-**See [Admin Backup & Restore Guide](./docs/admin-backup-restore.md)** for complete step-by-step instructions including:
+See [Admin Backup & Restore Guide](./docs/admin-backup-restore.md) for complete step-by-step instructions including:
 - Provisioning SFS and GPU instance and block storage (scratch disk) on Verda
 - Running quick-start.sh and RESTORE-SFS.sh on Verda
 - Script is downloading models from R2 (unless available on SFS already)
 - Backups cron jobs are running on verda + mello (triggered by RESTORE-SFS.sh)
 
-### Pre-Populated Deployment To-Dos for Claude
-
-Copy these to TodoWrite when deploying:
-`.claude/DEPLOYMENT-TO-DO.md`
+### Deployment To-Dos for Claude (pre-populated)
+- Copy these to TodoWrite when deploying: `.claude/DEPLOYMENT-TO-DO.md`
 
 ### Troubleshooting
 
@@ -588,14 +603,14 @@ See [Admin Backup & Restore Guide - Troubleshooting](./docs/admin-backup-restore
 ## 📝 Session Checklist
 
 Before each session ends:
+- [ ] Commit & push code changes to git
 - [ ] Update `progress-**.md` with session log
-- [ ] Update relevant implementation doc if needed
-- [ ] Commit code changes to git
-- [ ] Update development docs with key changes made (IMPORTANT!) - CLAUDE.md, README.md, linked dev / project docs
-- [ ] Consider any changes made that are relevant to users - if any then scour docs for any details that need changing
+- [ ] Update admin/dev docs with key changes made (IMPORTANT!) - CLAUDE.md, README.md, linked dev / project docs
+- [ ] Update current `implementation-*.md` when plan changes (push details to docs - single source of truth)
+- [ ] Consider any changes made that are relevant to users - if any: scour `user-*.md` docs for details that need changing
 - [ ] Note any blockers or decisions
 - [ ] Clear next session goals
 
 ---
 
-**Last Updated:** 2026-01-18
+**Last Updated:** 2026-01-19

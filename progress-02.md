@@ -7,22 +7,37 @@
 
 ---
 
-# Project Progress Tracker (Continued from Session 7)
+# Project Progress Tracker (Continued from docs/archive/progress.md)
 
-**Target:** Workshop in ~2 weeks (mid-January 2026)
-
-**Note:** This is a continuation of [progress.md](./progress.md). See that file for Progress Reports 1-6.
+**Target:** Workshop in ~2 weeks (early February 2026)
 
 ---
 
 ## Progress Tracker Structure
+
 1. Progress Reports 
-   - to be posted in reverse chronological order (LATEST AT TOP)
+   - post in reverse chronological order (LATEST AT TOP)
 2. Risk Register
+   - at end of file
 
 ---
 
 # Progress Reports
+
+---
+
+## Progress Report 15 - 2026-01-19 (Phase 14: Deployment/Backup/Restore - Testing)
+**Status:** Not Started
+
+### Summary
+Full testing of deployment/restore/backup systems - using Verda instance (not serverless).
+
+### Activities
+
+### Commits
+
+### Pending
+
 
 ---
 

@@ -27,10 +27,10 @@ CLAUDE RESUME - COMFY-MULTI (ASSUMES WELCOME HAS BEEN COMPLETED)
     - REPORT: any pending commits/pushes ?
     - REPORT: was progress-02.md up to date?
 
-  - read list of implementation phases (phased dev plan)
-    - **READ lines: 21-35 ONLY**: `./implementation-backup-restore.md`
-    - CURRENT PHASE: | **Phase 11** | Test Single GPU Instance (Restore & Verify) | 🔨 Current |
-    - NOTE: context within overall plan
+  - read list of implementation phases (lines: 21-35 ONLY)
+    - `./implementation-deployment-verda.md` - Phased dev plan 
+    - REPORT: was current phase correct?
+    - SHOULD BE CONCISE! DETAILS MAY CHANGE.
 
 ## CORE KNOWLEDGE: DEPLOYMENT WORKFLOWS
 
@@ -68,10 +68,6 @@ CLAUDE RESUME - COMFY-MULTI (ASSUMES WELCOME HAS BEEN COMPLETED)
 ## NEXT:
   
   Please explain to the user the basic deployment workflow as you understand it.
- 
-  Review issue #7 on private repo (ahelme/comfymulti-scripts/issues/7) via gh cli.
- 
-  Then create & discuss To Dos together before proceeding.
-
-  ASK ANY QUESTIONS RE: UNCLEAR INFO OR STEPS :)
+  
+  Then review To Dos together before proceeding.
 
