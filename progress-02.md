@@ -3,7 +3,7 @@
 **Repository:** github.com/ahelme/comfy-multi
 **Domain:** comfy.ahelme.net
 **Doc Created:** 2026-01-04
-**Doc Updated:** 2026-01-18 (Session 14)
+**Doc Updated:** 2026-01-20 (Session 15)
 
 ---
 
@@ -26,17 +26,56 @@
 
 ---
 
-## Progress Report 15 - 2026-01-19 (Phase 14: Deployment/Backup/Restore - Testing)
-**Status:** Not Started
+## Progress Report 15 - 2026-01-20 (Phase 11: Test Single GPU Instance - Restore & Verify)
+**Status:** 🔨 In Progress
+**Started:** 2026-01-20
 
 ### Summary
-Full testing of deployment/restore/backup systems - using Verda instance (not serverless).
+Testing deployment/restore/backup systems on Verda GPU instance. Fixed quick-start.sh step order for better error recovery.
 
 ### Activities
 
+#### Part 1: Pre-deployment Verification
+- ✅ Verified R2 buckets have required files:
+  - Models bucket: ltx-2-19b-dev-fp8.safetensors (25.2 GB), gemma_3_12B_it.safetensors (18.6 GB)
+  - Cache bucket: worker-image.tar.gz (2.5 GB), verda-config-backup.tar.gz (13.6 MB)
+  - User files bucket: structure ready (inputs/, outputs/, user_data/)
+- ✅ Reviewed GitHub Issue #7 (Master Testing checklist)
+
+#### Part 2: quick-start.sh Fix
+- ✅ Fixed step order for better error recovery:
+  - New Step 0: Copy script to /root (always runs first)
+  - Step 1: Add mello SSH key (before any failure points)
+  - Step 2: Install dependencies (NFS client ready for Step 3)
+  - Step 3: Merged SFS detection + mounting (can fail, but mello can SSH in)
+- ✅ Removed duplicate early-exit logic
+- ✅ Now mello can SSH in even if SFS mounting fails
+
+#### Part 3: Verda Instance Provisioning (in progress)
+- ✅ Created GPU instance on Verda
+- ✅ Created and attached SFS
+- ✅ Created and attached block storage (after shutdown, to avoid wipe)
+- 🔨 Running quick-start.sh with SFS PSEUDOPATH
+
 ### Commits
 
+**comfymulti-scripts repo:**
+```
+8b1dc6a fix: reorder quick-start.sh steps for better error recovery
+```
+
+**comfy-multi repo:**
+```
+a7c98cf docs: reorganize claude context files and update project docs
+```
+
 ### Pending
+- [ ] Complete quick-start.sh run on Verda
+- [ ] Verify Tailscale identity (100.89.38.43)
+- [ ] Verify container loaded and models present
+- [ ] Start worker and test Redis connection
+- [ ] Test backup scripts (cron, verda, mello)
+- [ ] Run idempotency tests (Issue #7 Phase 7)
 
 
 ---
