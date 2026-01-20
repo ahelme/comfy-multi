@@ -131,8 +131,9 @@ See [Admin Backup Routines](./admin-backup-routines.md) for details.
 **Summary:**
 1. Get `quick-start.sh` from GitHub repo `ahelme/comfymulti-scripts`
 2. Paste into Verda startup script field, add both SSH keys, provision
-3. SSH in, run: `bash /root/quick-start.sh <PSEUDOPATH>`
-4. Authenticate: `sudo tailscale up --ssh=false`
+3. SSH in, get MOUNT COMMAND from Verda Dashboard (Storage → SFS dropdown)
+4. Run: `bash /root/quick-start.sh "<MOUNT_COMMAND>"`
+5. Authenticate: `sudo tailscale up --ssh=false`
 
 ### If Instance Was Terminated Overnight
 

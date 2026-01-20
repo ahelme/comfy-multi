@@ -100,8 +100,8 @@ A scalable, multi-user ComfyUI platform with **split CPU/GPU architecture** - ru
 2. In Verda Console, paste into "Startup Script" field, add both SSH keys, provision
 3. SSH in and run:
 ```bash
-bash /root/quick-start.sh <PSEUDOPATH>
-# Get PSEUDOPATH from Verda Dashboard: Storage tab → SFS dropdown → PSEUDOPATH
+# Get MOUNT COMMAND from: Verda Dashboard → Storage → SFS dropdown → MOUNT COMMAND
+bash /root/quick-start.sh "<MOUNT_COMMAND>"
 ```
 
 ### Option B: Manual Setup

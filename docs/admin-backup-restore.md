@@ -168,15 +168,15 @@ Both scripts perform identical system restore (Tailscale, security, user environ
 Instance boots → script runs → can't find SFS → exits with instructions.
 
 1. SSH into instance
-2. Get **PSEUDOPATH** from Verda Dashboard: Storage tab → SFS dropdown → PSEUDOPATH
+2. Get **MOUNT COMMAND** from Verda Dashboard: Storage tab → SFS dropdown → MOUNT COMMAND
 3. Run:
 ```bash
-bash /root/quick-start.sh <PSEUDOPATH>
-# Example: bash /root/quick-start.sh nfs.fin-01.datacrunch.io:/SFS-Model-Vault-273f8ad9
+bash /root/quick-start.sh "<MOUNT_COMMAND>"
+# Example: bash /root/quick-start.sh "sudo mount -t nfs -o nconnect=16 nfs.fin-01.datacrunch.io:/SFS-xxx /mnt/SFS-xxx"
 ```
 
 **What quick-start.sh does (resumable):**
-1. Mounts SFS at /mnt/sfs using provided PSEUDOPATH
+1. Mounts SFS at /mnt/sfs using provided MOUNT COMMAND
 2. Mounts block storage at /mnt/scratch (auto-formats if blank)
 3. Adds mello SSH key for access
 4. Gets files (checking /root/ → SFS → remote in order):

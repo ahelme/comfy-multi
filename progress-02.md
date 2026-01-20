@@ -55,7 +55,7 @@ Testing deployment/restore/backup systems on Verda GPU instance. Fixed quick-sta
 - ✅ Created GPU instance on Verda
 - ✅ Created and attached SFS
 - ✅ Created and attached block storage (after shutdown, to avoid wipe)
-- 🔨 Running quick-start.sh with SFS PSEUDOPATH
+- 🔨 Running quick-start.sh with SFS MOUNT COMMAND
 
 ### Commits
 
@@ -205,7 +205,7 @@ Fixed incorrect provisioning workflow in docs (was curl, now Verda startup scrip
 - ✅ Updated README-RESTORE.md with correct Verda Console workflow
 - ✅ Updated admin-backup-restore.md with correct provisioning steps
 - ✅ Updated README.md Quick Start section
-- ✅ Correct workflow: paste quick-start.sh into Verda startup script field, SSH in, run with PSEUDOPATH
+- ✅ Correct workflow: paste quick-start.sh into Verda startup script field, SSH in, run with MOUNT COMMAND
 
 #### Part 2: Doc Consolidation (DRY)
 Replaced duplicate restore/deploy sections with pointers to admin-backup-restore.md:
