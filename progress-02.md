@@ -3,7 +3,7 @@
 **Repository:** github.com/ahelme/comfy-multi
 **Domain:** comfy.ahelme.net
 **Doc Created:** 2026-01-04
-**Doc Updated:** 2026-01-20 (Session 15)
+**Doc Updated:** 2026-01-21 (Session 15)
 
 ---
 
@@ -26,12 +26,12 @@
 
 ---
 
-## Progress Report 15 - 2026-01-20 (Phase 11: Test Single GPU Instance - Restore & Verify)
+## Progress Report 15 - 2026-01-20/21 (Phase 11: Test Single GPU Instance - Restore & Verify)
 **Status:** 🔨 In Progress
 **Started:** 2026-01-20
 
 ### Summary
-Testing deployment/restore/backup systems on Verda GPU instance. Fixed quick-start.sh step order for better error recovery.
+Testing deployment/restore/backup systems on Verda GPU instance. Fixed quick-start.sh issues discovered during testing: step order, missing unzip dependency, and PSEUDOPATH→MOUNT COMMAND terminology change.
 
 ### Activities
 
@@ -42,7 +42,7 @@ Testing deployment/restore/backup systems on Verda GPU instance. Fixed quick-sta
   - User files bucket: structure ready (inputs/, outputs/, user_data/)
 - ✅ Reviewed GitHub Issue #7 (Master Testing checklist)
 
-#### Part 2: quick-start.sh Fix
+#### Part 2: quick-start.sh Fixes
 - ✅ Fixed step order for better error recovery:
   - New Step 0: Copy script to /root (always runs first)
   - Step 1: Add mello SSH key (before any failure points)
@@ -50,27 +50,72 @@ Testing deployment/restore/backup systems on Verda GPU instance. Fixed quick-sta
   - Step 3: Merged SFS detection + mounting (can fail, but mello can SSH in)
 - ✅ Removed duplicate early-exit logic
 - ✅ Now mello can SSH in even if SFS mounting fails
+- ✅ Added unzip to dependencies (required for AWS CLI install)
 
-#### Part 3: Verda Instance Provisioning (in progress)
+#### Part 3: PSEUDOPATH → MOUNT COMMAND Refactor
+- ✅ Changed terminology across both codebases:
+  - Verda Dashboard shows "MOUNT COMMAND" not "PSEUDOPATH"
+  - User provides full mount command: `sudo mount -t nfs -o nconnect=16 host:/path /mount`
+  - Script parses NFS endpoint (host:/path) from command
+  - Script stores BOTH full command (future-proof) and extracted endpoint
+- ✅ Updated scripts: quick-start.sh, RESTORE-SFS.sh, backup-verda.sh, README-RESTORE.md
+- ✅ Updated docs: README.md, admin-backup-restore.md, admin-verda-setup.md, admin-workflow-workshop.md
+
+#### Part 4: Verda Instance Provisioning
 - ✅ Created GPU instance on Verda
 - ✅ Created and attached SFS
 - ✅ Created and attached block storage (after shutdown, to avoid wipe)
-- 🔨 Running quick-start.sh with SFS MOUNT COMMAND
+- ✅ First quick-start.sh run failed elegantly (SFS not attached - expected)
+- 🔨 Continuing testing with fresh instance (2026-01-21)
+
+#### Part 5: SFS Troubleshooting (2026-01-21)
+- ❌ Old SFS `SFS-Model-Vault-273f8ad9` unreachable (100% packet loss to NFS server)
+- ❌ Second SFS `SFS-Model-Vault-Jan-16-2gLo6pB9` also didn't work
+- ✅ Created fresh SFS: **`SFS-Model-Vault-22-Jan-01-4xR2NHBi`** (current testing SFS)
+- 🔨 Testing mount with new SFS
 
 ### Commits
 
 **comfymulti-scripts repo:**
 ```
+5da09be feat: change PSEUDOPATH to MOUNT COMMAND across all scripts and docs
+788d997 fix: add unzip to dependencies for AWS CLI install
 8b1dc6a fix: reorder quick-start.sh steps for better error recovery
 ```
 
 **comfy-multi repo:**
 ```
+65b9ad0 docs: change PSEUDOPATH to MOUNT COMMAND in all documentation
+c27527a docs: update progress with Phase 11 testing session
 a7c98cf docs: reorganize claude context files and update project docs
 ```
 
-### Pending
-- [ ] Complete quick-start.sh run on Verda
+#### Part 6: Script Refactoring (2026-01-21/22)
+**GitHub Issue:** [#8 Refactor scripts](https://github.com/ahelme/comfymulti-scripts/issues/8)
+**Branch:** `dev-verda-instance-setup-restore`
+
+**Decision: Option A - Linux keyring + .env.scripts**
+- Secrets loaded into kernel keyring (not plain text on disk)
+- Systemd service reloads on reboot via SSH to mello
+- Tested successfully with `test-keyring.sh`
+
+**Created:**
+- `.env.scripts.example` - template (committed)
+- `secrets/.env.scripts` - real values (gitignored)
+- `load-keyring.sh` - SSH→mello→keyring→delete temp
+- `keyring-helper.sh` - functions for other scripts
+- `comfy-keyring.service` - systemd for reboot
+
+**Pending:**
+- Refactor `setup-verda.sh` to use keyring
+- Create `restore-verda-instance.sh`
+- Archive old scripts, update README
+
+### Testing Checklist
+**GitHub Issue:** [#7 Master Testing: Full Deployment/Restore/Backup System Test](https://github.com/ahelme/comfymulti-scripts/issues/7)
+
+- [ ] Complete quick-start.sh run on Verda with MOUNT COMMAND
+- [ ] Verify storage mounting (SFS + block storage)
 - [ ] Verify Tailscale identity (100.89.38.43)
 - [ ] Verify container loaded and models present
 - [ ] Start worker and test Redis connection
