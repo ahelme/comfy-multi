@@ -3,7 +3,7 @@
 **Repository:** github.com/ahelme/comfy-multi
 **Domain:** comfy.ahelme.net
 **Doc Created:** 2026-01-04
-**Doc Updated:** 2026-01-21 (Session 15)
+**Doc Updated:** 2026-01-22 (Session 16)
 
 ---
 
@@ -99,17 +99,69 @@ a7c98cf docs: reorganize claude context files and update project docs
 - Systemd service reloads on reboot via SSH to mello
 - Tested successfully with `test-keyring.sh`
 
-**Created:**
+**Created (Session 15):**
 - `.env.scripts.example` - template (committed)
 - `secrets/.env.scripts` - real values (gitignored)
 - `load-keyring.sh` - SSH→mello→keyring→delete temp
 - `keyring-helper.sh` - functions for other scripts
 - `comfy-keyring.service` - systemd for reboot
 
-**Pending:**
-- Refactor `setup-verda.sh` to use keyring
-- Create `restore-verda-instance.sh`
-- Archive old scripts, update README
+#### Part 7: Script Implementation & Expert Review (2026-01-22 - Session 16)
+
+**Completed:**
+- ✅ Created `setup-verda.sh` (v0.2.0) - full keyring integration, 16 steps
+- ✅ Created `restore-verda-instance.sh` (v0.1.0) - restore-only, uses keyring-helper.sh
+- ✅ Fixed missing `inputs/` directory (user uploads) in storage setup
+- ✅ Fixed MODELS_PATH logic (was redundant, now handles legacy flat structure)
+- ✅ Added `.zshrc` sourcing in `.profile` (was missing from migration)
+- ✅ Added `keyctl` to dependency checks
+- ✅ Added server-config export to `/home/dev/projects/comfyui/.claude/server-config`
+- ✅ Archived old scripts: `quick-start.sh`, `RESTORE-SFS.sh`, `setup-verda-draft.sh`
+- ✅ Updated `README-RESTORE.md` with new script names and keyring docs
+- ✅ Expert reviews posted to GitHub Issue #8 (3 comments)
+
+**New Script Structure:**
+```
+comfymulti-scripts/
+├── setup-verda.sh            # Entry point (installs, mounts, keyring, restore)
+├── restore-verda-instance.sh # Restore configs only (called by setup)
+├── keyring-helper.sh         # get_secret(), init_keyring(), export_secrets()
+├── load-keyring.sh           # SSH to mello, reload keyring on reboot
+├── comfy-keyring.service     # Systemd service for reboot persistence
+├── .env.scripts.example      # Template for secrets
+├── secrets/.env.scripts      # Real secrets (gitignored, on mello)
+└── archive/                  # Legacy scripts
+```
+
+**Storage Structure (with inputs/):**
+```
+/mnt/scratch/           → outputs/, inputs/, temp/
+/home/dev/comfy-multi/data/
+  ├── models  → /mnt/sfs/models
+  ├── outputs → /mnt/scratch/outputs
+  └── inputs  → /mnt/scratch/inputs   # NEW
+```
+
+**Issues Logged (GitHub #8):**
+- inputs/ directory was missing
+- nfs-common installed after SFS mount attempt (reordered)
+- MODELS_PATH logic was redundant
+- RESTORE-SFS.sh bypassed keyring (now archived)
+
+#### Part 8: Final Pre-Deployment Fixes (2026-01-22)
+
+**Expert review found 3 blockers + bugs - all fixed:**
+
+| Issue | Severity | Fix |
+|-------|----------|-----|
+| GH_BRANCH mismatch (scripts vs .env) | BLOCKER | Changed to `main` with comment |
+| SERVER_CONFIG_DIR wrong path | BLOCKER | Changed to `/home/dev/comfy-multi/.claude/` |
+| grep -P not POSIX compatible | BLOCKER | Changed to `grep -oE` |
+| fail2ban-server vs fail2ban-client | BUG | Changed to `fail2ban-client` |
+| Dev user shell inconsistent | BUG | Both now use `/usr/bin/zsh` |
+| SSH key download not validated | WARN | Added validation + error handling |
+
+**Scripts now ready for testing.**
 
 ### Testing Checklist
 **GitHub Issue:** [#7 Master Testing: Full Deployment/Restore/Backup System Test](https://github.com/ahelme/comfymulti-scripts/issues/7)
