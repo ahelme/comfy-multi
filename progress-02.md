@@ -163,6 +163,32 @@ comfymulti-scripts/
 
 **Scripts now ready for testing.**
 
+#### Part 9: Testing on Verda & Final Fixes (2026-01-26)
+
+**Testing issues found and fixed:**
+
+| Issue | Root Cause | Fix | Commit |
+|-------|------------|-----|--------|
+| 404: Not Found on .env.scripts | File gitignored, not in repo | Removed from .gitignore, pushed to GitHub | f12223d |
+| zsh warning | User created with zsh before installed | Use bash initially, change to zsh after install | 8615e91 |
+| SSH key download failed | Tried to download from GitHub, keys don't exist there | **Removed SSH setup from Step 3** - restored by backup in Step 14 | 77bcb52 |
+
+**Key insight:**
+- Verda SSH keys (authorized_keys + identity) are in `verda-config-backup.tar.gz`
+- Extracted in Step 6, properly restored by `restore-verda-instance.sh` in Step 14
+- No need to download from GitHub or generate new keys
+
+**Git history:**
+```
+77bcb52 fix: remove dev user SSH setup from Step 3
+48d28c6 Revert "feat: embed Verda SSH identity keys in .env.scripts"
+46becba feat: embed Verda SSH identity keys in .env.scripts (reverted)
+8615e91 fix: dev user shell and SSH key validation
+f12223d feat: add .env.scripts to private repo for bootstrap
+```
+
+**Script ready for re-test on Verda.**
+
 ### Testing Checklist
 **GitHub Issue:** [#7 Master Testing: Full Deployment/Restore/Backup System Test](https://github.com/ahelme/comfymulti-scripts/issues/7)
 
