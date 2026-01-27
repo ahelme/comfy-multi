@@ -20,7 +20,7 @@ Quick reference for setting up and running the workshop infrastructure using Ver
 |---------|---------|------------------|
 | **Verda SFS 50GB** | Models + Container (workshop month only) | ~$14 |
 | **Cloudflare R2** | Permanent backup of models | ~$1 |
-| **Hetzner VPS** | Configs, RESTORE-SFS.sh, container backup | (existing) |
+| **Hetzner VPS** | Configs, setup-verda-solo-script.sh, container backup | (existing) |
 
 ---
 
@@ -49,7 +49,7 @@ Verda Dashboard → Instances → Create
 - Type: A100 80GB or H100 (spot for cost savings)
 - Attach SFS: SFS-Model-Vault
 - Add SSH keys: Your key + mello VPS key
-- Add provisioning script: quick-start.sh
+- Add provisioning script: setup-verda-solo-script.sh
 ```
 
 ### 4. Mount SFS & Restore
@@ -70,12 +70,12 @@ scp -r mello:~/backups/verda/ ~/
 
 # Run restore script
 cd /root
-sudo bash RESTORE-SFS.sh
+sudo bash setup-verda-solo-script.sh
 ```
 
 ### 5. Authenticate Tailscale
 
-After RESTORE-SFS.sh runs, Tailscale is installed but needs authentication:
+After setup-verda-solo-script.sh runs, Tailscale is installed but needs authentication:
 
 ```bash
 # Authenticate Tailscale (opens browser URL)
@@ -129,10 +129,10 @@ See [Admin Backup Routines](./admin-backup-routines.md) for details.
 **See [Admin Backup & Restore](./admin-backup-restore.md)** for complete provisioning steps.
 
 **Summary:**
-1. Get `quick-start.sh` from GitHub repo `ahelme/comfymulti-scripts`
+1. Get `setup-verda-solo-script.sh` from GitHub repo `ahelme/comfymulti-scripts`
 2. Paste into Verda startup script field, add both SSH keys, provision
 3. SSH in, get MOUNT COMMAND from Verda Dashboard (Storage → SFS dropdown)
-4. Run: `bash /root/quick-start.sh "<MOUNT_COMMAND>"`
+4. Run: `bash /root/setup-verda-solo-script.sh "<MOUNT_COMMAND>"`
 5. Authenticate: `sudo tailscale up --ssh=false`
 
 ### If Instance Was Terminated Overnight
@@ -144,7 +144,7 @@ Same as Quick Start - SFS persists independently of instances!
 ```bash
 # Transfer backup from mello and run restore
 scp -r mello:~/backups/verda/* /root/
-sudo bash /root/RESTORE-SFS.sh
+sudo bash /root/setup-verda-solo-script.sh
 # Follow NEXT STEPS output for R2 model download (~45 min)
 ```
 

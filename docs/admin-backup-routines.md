@@ -77,7 +77,7 @@ cd ~/projects/comfymulti-scripts
 
 **When:** Every hour while Verda is running
 **Run from:** Verda instance
-**Script:** `backup-cron.sh` (installed by RESTORE-SFS.sh)
+**Script:** `backup-cron.sh` (installed by setup-verda-solo-script.sh)
 
 ```bash
 # Cron entry (installed automatically)

@@ -28,7 +28,7 @@ See [Admin Backup & Restore](./admin-backup-restore.md) for full storage strateg
 
 **See [Admin Backup & Restore](./admin-backup-restore.md)** for complete provisioning and restore procedures.
 
-Summary: Paste `quick-start.sh` into Verda startup script, SSH in, get MOUNT COMMAND from Verda Dashboard (Storage → SFS dropdown), run `bash /root/quick-start.sh "<MOUNT_COMMAND>"`.
+Summary: Paste `setup-verda-solo-script.sh` into Verda startup script, SSH in, get MOUNT COMMAND from Verda Dashboard (Storage → SFS dropdown), run `bash /root/setup-verda-solo-script.sh "<MOUNT_COMMAND>"`.
 
 ---
 

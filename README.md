@@ -96,12 +96,12 @@ A scalable, multi-user ComfyUI platform with **split CPU/GPU architecture** - ru
 
 ### Option A: Use Our Quick-Start Script (Recommended)
 
-1. Get latest `quick-start.sh` from **https://github.com/ahelme/comfymulti-scripts** (private repo)
+1. Get latest `setup-verda-solo-script.sh` from **https://github.com/ahelme/comfymulti-scripts** (private repo)
 2. In Verda Console, paste into "Startup Script" field, add both SSH keys, provision
 3. SSH in and run:
 ```bash
 # Get MOUNT COMMAND from: Verda Dashboard → Storage → SFS dropdown → MOUNT COMMAND
-bash /root/quick-start.sh "<MOUNT_COMMAND>"
+bash /root/setup-verda-solo-script.sh "<MOUNT_COMMAND>"
 ```
 
 ### Option B: Manual Setup

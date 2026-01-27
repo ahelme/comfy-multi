@@ -75,12 +75,12 @@
 └── docs/                               # User/admin guides
 
 /home/dev/projects/comfymulti-scripts/
-├── README-RESTORE.md           # Basic backup/restore doc
-├── quick-start.sh              # Loaded onto GPU cloud in provisioning
-├── RESTORE-SFS.sh              # Main restore - data from R2
-├── backup-cron.sh              # Hourly backups: Verda→SFS + triggers mello→R2
-├── backup-mello.sh             # Backs up user files on mello e.g. workflows
-└── backup-verda.sh             # Backs up all data to R2 before instance deleted 
+├── README-RESTORE.md              # Basic backup/restore doc
+├── setup-verda-solo-script.sh     # Single consolidated setup/restore script
+├── backup-cron.sh                 # Hourly backups: Verda→SFS + triggers mello→R2
+├── backup-mello.sh                # Backs up user files on mello e.g. workflows
+├── backup-verda.sh                # Backs up all data to R2 before instance deleted
+└── archive/                       # Legacy scripts (quick-start.sh, RESTORE-SFS.sh) 
 ```
 
 ---
@@ -342,9 +342,9 @@ REDIS_PASSWORD=changeme
   scripts/start.sh                                  │ Start all services
   scripts/stop.sh                                   │ Stop all services
 
-  ~/projects/comfymulti-scripts/                    │ Backup/Restore/Deploy scripts for Verda GPU Cloud
-  ~/projects/comfymulti-scripts/RESTORE-SFS.sh      │ Restore Verda instance using SFS storage
-  ~/projects/comfymulti-scripts/README-RESTORE.md   │ README for restoring Verda
+  ~/projects/comfymulti-scripts/                       │ Backup/Restore/Deploy scripts for Verda GPU Cloud
+  ~/projects/comfymulti-scripts/setup-verda-solo-script.sh │ Single setup/restore script for Verda
+  ~/projects/comfymulti-scripts/README-RESTORE.md      │ README for restoring Verda
 
  *(NOTE: restore scripts have their own private gh repo: https://github.com/ahelme/comfymulti-scripts)*
 
@@ -436,13 +436,13 @@ sudo ufw status
 - **Repo:** `ahelme/comfymulti-scripts` (private)
 - **URL:** https://github.com/ahelme/comfymulti-scripts
 - **Local path on mello:** `/home/dev/projects/comfymulti-scripts/`
-- **Purpose:** Version-controlled restore/bootstrap scripts for Verda instances
+- **Purpose:** Version-controlled setup/restore scripts for Verda instances
 - **Contents:**
-  - `quick-start.sh` - Bootstrap script (mounts SFS, downloads from R2/GitHub)
-  - `RESTORE-SFS.sh` - System restore with flag support (`--with-models`, `--with-container`, `--full`)
-  - `RESTORE-BLOCK-MELLO.sh` - Alternative block storage workflow
+  - `setup-verda-solo-script.sh` - Single consolidated setup/restore script
+  - `backup-cron.sh`, `backup-mello.sh`, `backup-verda.sh` - Backup scripts
   - `README-RESTORE.md` - Quick reference for restore scenarios
-- **Note:** Scripts downloaded from GitHub, binary files (models, container) from R2
+  - `archive/` - Legacy scripts (quick-start.sh, RESTORE-SFS.sh, etc.)
+- **Note:** Script downloads binary files (models, container) from R2 or SFS cache
 
 ---
 
@@ -539,7 +539,7 @@ ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGiwaT6NQcHe7cYDKB5LrtmyIU0O8iRc7DJUmZJsNkDD
 **Why this matters for restore scripts:**
 - Mac can SSH into Verda ✓ (Mac has private key)
 - Mello can SSH into Verda ✓ (Mello has private key)
-- Verda CANNOT pull from mello ✗ (Verda has no private key for mello until quick-start.sh finishes)
+- Verda CANNOT pull from mello ✗ (Verda has no private key for mello until setup script finishes)
 
 ### Restore scripts are adaptive
 
@@ -574,12 +574,11 @@ Before starting, verify:
 - [ ] R2: **Cache bucket** (`comfy-multi-cache`) contains:
   - [ ] `worker-image.tar.gz` (~2.5 GB)
   - [ ] `verda-config-backup.tar.gz` (~14 MB)
-- [ ] GitHub: **Private Scripts Repo** (`ahelme/comfymulti-scripts`) contains scripts:
-  - [ ] `quick-start.sh`
-  - [ ] `RESTORE-SFS.sh`
-- [ ] User's Mac: **SSH Keys and Quick-Start Script** added to Verda console during provisioning
-  - [ ] `dev@vps-for-verda` (Mello's key) & `developer@annahelme.com` (User's key)- paste into console
-  - [ ] `quick-start.sh` (latest version from Github!) - paste into console 
+- [ ] GitHub: **Private Scripts Repo** (`ahelme/comfymulti-scripts`) contains:
+  - [ ] `setup-verda-solo-script.sh`
+- [ ] User's Mac: **SSH Keys and Setup Script** added to Verda console during provisioning
+  - [ ] `dev@vps-for-verda` (Mello's key) & `developer@annahelme.com` (User's key) - paste into console
+  - [ ] `setup-verda-solo-script.sh` (latest version from GitHub!) - paste into console 
 - [ ] R2: **User files bucket** (`comfy-multi-user-files`)
   - [ ] available to receive backups
 
@@ -587,9 +586,9 @@ Before starting, verify:
 
 See [Admin Backup & Restore Guide](./docs/admin-backup-restore.md) for complete step-by-step instructions including:
 - Provisioning SFS and GPU instance and block storage (scratch disk) on Verda
-- Running quick-start.sh and RESTORE-SFS.sh on Verda
-- Script is downloading models from R2 (unless available on SFS already)
-- Backups cron jobs are running on verda + mello (triggered by RESTORE-SFS.sh)
+- Running setup-verda-solo-script.sh on Verda (runs automatically on first boot)
+- Script downloads models from R2 (unless available on SFS already)
+- Backup cron jobs are set up automatically by the script
 
 ### Deployment To-Dos for Claude (pre-populated)
 - Copy these to TodoWrite when deploying: `.claude/DEPLOYMENT-TO-DO.md`

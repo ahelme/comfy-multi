@@ -6,7 +6,7 @@ Quick reference for which restore script to use.
 
 | Script | Purpose | When to Use |
 |--------|---------|-------------|
-| RESTORE-SFS.sh | Populate SFS with models + container | Fresh SFS, models missing |
+| setup-verda-solo-script.sh | Populate SFS with models + container | Fresh SFS, models missing |
 | RESTORE-BLOCK-MELLO.sh | Full system restore from mello backups | Need Tailscale/security/user config |
 
 ## Scenarios
@@ -14,14 +14,14 @@ Quick reference for which restore script to use.
 ### A: Daily Startup (most common)
 SFS already has models + container
 ```
-bash /root/quick-start.sh <sfs-endpoint>
+bash /root/setup-verda-solo-script.sh <sfs-endpoint>
 ```
 
 ### B: Fresh SFS Setup (Jan 31 / first time)
 Empty SFS, need models from R2
 ```
-bash /root/quick-start.sh <sfs-endpoint>
-bash /root/RESTORE-SFS.sh --full
+bash /root/setup-verda-solo-script.sh <sfs-endpoint>
+bash /root/setup-verda-solo-script.sh --full
 ```
 
 ### C: New Instance, Existing SFS
@@ -29,10 +29,10 @@ Need Tailscale + security configs
 ```
 scp -r dev@comfy.ahelme.net:~/backups/verda/ ~/
 cd ~/verda && bash RESTORE-BLOCK-MELLO.sh
-bash /root/quick-start.sh <sfs-endpoint>
+bash /root/setup-verda-solo-script.sh <sfs-endpoint>
 ```
 
-## RESTORE-SFS.sh Options
+## setup-verda-solo-script.sh Options
 
 ```
 --with-models      Download models from R2 (~45GB, ~30 min)
@@ -44,9 +44,9 @@ bash /root/quick-start.sh <sfs-endpoint>
 
 | Need | Script | Time |
 |------|--------|------|
-| Mount SFS + start worker | quick-start.sh | ~30 sec |
-| Download models from R2 | RESTORE-SFS.sh --with-models | ~30 min |
-| Copy container from mello | RESTORE-SFS.sh --with-container | ~2 min |
+| Mount SFS + start worker | setup-verda-solo-script.sh | ~30 sec |
+| Download models from R2 | setup-verda-solo-script.sh --with-models | ~30 min |
+| Copy container from mello | setup-verda-solo-script.sh --with-container | ~2 min |
 | Full system restore | RESTORE-BLOCK-MELLO.sh | ~5 min |
 
 ## R2 Model Storage

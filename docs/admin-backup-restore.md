@@ -140,16 +140,17 @@ For detailed backup tables and options, see [admin-backup-routines.md](./admin-b
 
 ---
 
-## Restore Scripts
+## Restore Script
 
-Two restore scripts in `~/backups/verda/` on mello:
+The private repo contains a single consolidated setup/restore script:
 
-| Script | Storage | When to Use |
+| Script | Purpose | When to Use |
 |--------|---------|-------------|
-| **RESTORE-SFS.sh** | SFS (Shared File System) | Workshop month (recommended) |
-| **RESTORE-BLOCK-MELLO.sh** | Block Storage | Alternative workflow |
+| **setup-verda-solo-script.sh** | Full instance setup and restore | New Verda GPU instances |
 
-Both scripts perform identical system restore (Tailscale, security, user environment). Only difference is storage type in NEXT STEPS.
+**Location:** `ahelme/comfymulti-scripts` (private GitHub repo)
+
+**Archived scripts:** `quick-start.sh`, `RESTORE-SFS.sh` - legacy two-part workflow (see `archive/` folder)
 
 ---
 
@@ -157,49 +158,101 @@ Both scripts perform identical system restore (Tailscale, security, user environ
 
 ### Step 1: Provision Instance
 
-1. Get latest `quick-start.sh` from **https://github.com/ahelme/comfymulti-scripts** (private repo)
+1. Get latest `setup-verda-solo-script.sh` from **https://github.com/ahelme/comfymulti-scripts** (private repo)
 2. In Verda Console, create GPU instance (A100/H100)
 3. Attach your SFS (create one first if needed - 50GB recommended)
 4. Create and attach Block Storage (10-20GB) for scratch disk
-5. In **"Startup Script"** field, paste `quick-start.sh` contents (no modifications needed)
-6. Add **both SSH keys**: user's Mac key + Mello VPS key
+5. In **"Startup Script"** field, paste `setup-verda-solo-script.sh` contents
+6. Add **both SSH keys**: user's Mac key + Mello VPS key (`dev@vps-for-verda`)
 7. Provision instance
 
-### Step 2: Run quick-start.sh
+### Step 2: Script Runs Automatically
 
-Instance boots → script runs → can't find SFS → exits with instructions.
+The script runs on first boot and performs the following steps:
 
-1. SSH into instance
-2. Get **MOUNT COMMAND** from Verda Dashboard: Storage tab → SFS dropdown → MOUNT COMMAND
-3. Run:
-```bash
-bash /root/quick-start.sh "<MOUNT_COMMAND>"
-# Example: bash /root/quick-start.sh "sudo mount -t nfs -o nconnect=16 nfs.fin-01.datacrunch.io:/SFS-xxx /mnt/SFS-xxx"
-```
+**1. Save SFS MOUNT COMMAND & NFS ENDPOINT**
+- Extracts mount command from provisioning environment
+- Critical step completed first (fail early if missing)
 
-**What quick-start.sh does (resumable):**
-1. Mounts SFS at /mnt/sfs using provided MOUNT COMMAND
-2. Mounts block storage at /mnt/scratch (auto-formats if blank)
-3. Adds mello SSH key for access
-4. Gets files (checking /root/ → SFS → remote in order):
-   - RESTORE scripts from GitHub (~20KB)
-   - Config backup from R2 (~14MB)
-   - Container image from R2 (~2.5GB) - background download
-5. Extracts config backup to /root/
-6. Runs RESTORE-SFS.sh automatically (restores Tailscale identity BEFORE starting Tailscale)
-7. Loads container from SFS (or waits for R2 download)
-8. Creates symlinks: `data/models` → SFS, `data/outputs` → `/mnt/scratch/outputs`
+**2. Ubuntu Pro Authentication** (if available)
+- Enables security updates
+- Completed early so not forgotten
 
-### Step 3: Authenticate Tailscale (manual)
+**3. Update OS & Install Dependencies**
+- Updates package repositories
+- Installs: fail2ban, ufw, redis-tools, zsh, git, curl, wget, nfs-common, unzip, keyutils
+- Changes dev user shell to zsh
+- Installs/updates AWS CLI and sets R2 credentials
+- Installs/updates Docker
+- Installs/updates Tailscale
 
-RESTORE-SFS.sh verifies Tailscale IP is 100.89.38.43 before prompting. If wrong, it aborts with an error (logged to `/root/restore-error.log`).
+**4. Mount SFS Network Disk**
+- Mounts SFS at `/mnt/sfs`
+- Creates directory structure: `models/`, `cache/`
+- Starts model downloads if needed (parallel with other steps)
 
-When prompted, authenticate Tailscale:
+**5. Mount Block Storage (Scratch Disk)**
+- Auto-formats if blank
+- Mounts at `/mnt/scratch`
+- Creates subdirectories: `outputs/`, `inputs/`, `temp/`
+
+**6. Get Docker GPU Worker Container**
+- Downloads container image from R2 or SFS cache (~2.5GB)
+- Runs in background while other steps continue
+
+**7. Configure Tailscale & Restore Identity**
+- Restores Tailscale identity from backup (critical!)
+- Stops tailscaled, restores `/var/lib/tailscale/`, starts tailscaled
+- Disables SSH over Tailscale
+- Verifies IP matches expected: **100.89.38.43**
+
+**8. Restore Root SSH Keys**
+- Restores SSH host keys from SFS backup
+- Note: Public keys (mello + user Mac) added during provisioning
+
+**9. Security Hardening (UFW Firewall)**
+- Enables UFW firewall
+- Allows only: SSH (22), Tailscale (41641/udp)
+- Redis accessed via Tailscale only (no public port)
+
+**10. Create Dev User on Verda**
+- Creates `dev` user if doesn't exist
+- Sets password from script variables
+- Adds to sudoers with NOPASSWD (workshop simplicity)
+
+**11. Restore ComfyMulti Project**
+- Clones or restores project to `/home/dev/comfy-multi/`
+- Restores `.env` and config files
+
+**12. Get Dev Home & Config**
+- Restores dev user dotfiles: oh-my-zsh, Bullettrain theme, aliases, Claude Code config
+- Restores from most recent backup tarball
+
+**13. Setup Hourly Backup Cron**
+- Gets backup script from GitHub
+- Creates cron job for hourly backups to SFS
+
+**14. Wait for Container Download & Load**
+- Waits for background download if still running
+- Loads container image into Docker
+- Caches to SFS for future instances
+
+**15. Create Symlinks**
+- `data/models` → `/mnt/sfs/models`
+- `data/outputs` → `/mnt/scratch/outputs`
+- `data/inputs` → `/mnt/scratch/inputs`
+- Fixes ownership to dev user
+
+### Step 3: Authenticate Tailscale (Manual)
+
+After script completes, you'll need to authenticate Tailscale:
 
 ```bash
 sudo tailscale up --ssh=false
 # Visit the URL shown in your browser to authenticate
 ```
+
+**Note:** Script verifies Tailscale IP is **100.89.38.43** before prompting. If wrong, it aborts with error (logged to `/root/setup-error.log`).
 
 ### Step 4: Verify & Start Worker
 

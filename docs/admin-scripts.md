@@ -30,9 +30,9 @@ Complete reference for all management and automation scripts in the ComfyUI Work
 | **load-test.sh** | Load testing | `./scripts/load-test.sh` |
 | **backup-verda.sh** | Backup Verda → Mello + R2 | `~/projects/comfymulti-scripts/backup-verda.sh` |
 | **backup-mello.sh** | Backup Mello user files → R2 | `~/projects/comfymulti-scripts/backup-mello.sh` |
-| **backup-cron.sh** | Hourly backup Verda → SFS + triggers mello | Cron (installed by RESTORE-SFS.sh) |
-| **quick-start.sh** | Daily GPU instance startup | `curl ... \| bash -s <sfs-endpoint>` |
-| **RESTORE-SFS.sh** | Download models/container to SFS | `sudo bash RESTORE-SFS.sh --full` |
+| **backup-cron.sh** | Hourly backup Verda → SFS + triggers mello | Cron (installed by setup-verda-solo-script.sh) |
+| **setup-verda-solo-script.sh** | Daily GPU instance startup | `curl ... \| bash -s <sfs-endpoint>` |
+| **setup-verda-solo-script.sh** | Download models/container to SFS | `sudo bash setup-verda-solo-script.sh --full` |
 | **RESTORE-BLOCK-MELLO.sh** | Full system restore from mello | `sudo bash RESTORE-BLOCK-MELLO.sh` |
 | **create-dotfiles-repo.sh** | Create dotfiles repo | `./scripts/create-dotfiles-repo.sh` |
 | **verda-startup-script.sh** | GPU instance setup | Run on Verda instance |
@@ -611,8 +611,8 @@ Scripts are maintained in the private GitHub repo: **https://github.com/ahelme/c
 
 | Script | Purpose |
 |--------|---------|
-| `quick-start.sh` | Bootstrap new instance (paste into Verda startup script) |
-| `RESTORE-SFS.sh` | System restore + optional models/container |
+| `setup-verda-solo-script.sh` | Bootstrap new instance (paste into Verda startup script) |
+| `setup-verda-solo-script.sh` | System restore + optional models/container |
 
 ---
 
