@@ -105,6 +105,10 @@ ls -lh /mnt/models/worker-image.tar.gz
 su - dev
 cd ~/comfy-multi
 docker compose up worker-1
+
+# If worker looks good, restart in detached mode and set restart policy
+docker compose up -d worker-1
+sudo docker update --restart=unless-stopped $(sudo docker ps -q --filter "name=comfy")
 ```
 
 ### 7. Run End-of-Day Backups
@@ -218,7 +222,7 @@ aws --endpoint-url https://...r2.cloudflarestorage.com \
 |------|---------|
 | Mount SFS | `mount -t nfs <endpoint>:/share /mnt/models` |
 | Load container | `docker load < /mnt/models/worker-image.tar.gz` |
-| Start worker | `cd ~/comfy-multi && docker compose up -d worker-1` |
+| Start worker | `cd ~/comfy-multi && docker compose up -d worker-1 && sudo docker update --restart=unless-stopped $(sudo docker ps -q)` |
 | Check models | `ls -lh /mnt/models/checkpoints/` |
 | Check Redis | `redis-cli -h $REDIS_HOST -a $REDIS_PASSWORD ping` |
 

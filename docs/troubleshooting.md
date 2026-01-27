@@ -3,7 +3,7 @@
 **Repository:** github.com/ahelme/comfy-multi
 **Domain:** comfy.ahelme.net
 **Doc Created:** 2026-01-02
-**Doc Updated:** 2026-01-11
+**Doc Updated:** 2026-01-27
 
 ---
 
@@ -533,6 +533,31 @@ docker stats comfy-worker-1 --no-stream
 ---
 
 ## 🆘 Emergency Procedures
+
+### CRITICAL: Server Completely Unresponsive
+
+**If VPS/server stops responding and you cannot SSH or access services:**
+
+1. **Hard Reset** the server via hosting provider dashboard (Hetzner Cloud Console, etc.)
+2. **SSH in immediately** after reboot
+3. **Stop ComfyUI containers** to prevent resource exhaustion:
+   ```bash
+   sudo docker stop $(sudo docker ps -q --filter "name=comfy")
+   ```
+
+This prevents all ComfyUI containers from auto-starting and consuming resources before you can diagnose the issue.
+
+**Then investigate:**
+```bash
+# Check disk space (common cause)
+df -h
+
+# Check memory
+free -h
+
+# Check what was consuming resources before reboot
+journalctl -b -1 | grep -i "oom\|killed"
+```
 
 ### Complete System Restart
 

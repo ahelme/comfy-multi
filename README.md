@@ -3,7 +3,7 @@
 **Repository:** github.com/ahelme/comfy-multi
 **Domain:** comfy.ahelme.net
 **Doc Created:** 2026-01-02
-**Doc Updated:** 2026-01-18
+**Doc Updated:** 2026-01-27
 
 ---
 
@@ -437,6 +437,15 @@ See [Serverless Research](./docs/research-serverless-gpu.md) for auto-scaling co
 ---
 
 ## Troubleshooting
+
+### CRITICAL: Server Unresponsive Emergency Fix
+
+**If server stops responding:**
+1. Hard Reset the server via hosting provider dashboard
+2. SSH in ASAP after reboot
+3. Run: `sudo docker stop $(sudo docker ps -q --filter "name=comfy")`
+
+This stops all ComfyUI containers to prevent resource exhaustion on startup.
 
 ### GPU Worker Won't Connect
 

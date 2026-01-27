@@ -3,7 +3,7 @@
 **Repository:** github.com/ahelme/comfy-multi
 **Domain:** comfy.ahelme.net
 **Doc Created:** 2026-01-02
-**Doc Updated:** 2026-01-19
+**Doc Updated:** 2026-01-27
 
 ---
 
@@ -447,6 +447,14 @@ sudo ufw status
 ---
 
 ## ⚠️  Gotchas
+
+### CRITICAL: Server Unresponsive Emergency Fix
+**If server stops responding:**
+1. Hard Reset the server via hosting provider dashboard
+2. SSH in ASAP after reboot
+3. Run: `sudo docker stop $(sudo docker ps -q --filter "name=comfy")`
+
+This stops all ComfyUI containers to prevent resource exhaustion on startup.
 
 ### Cloudflare R2 EU location
 - don't forget the '.eu' domain!

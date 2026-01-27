@@ -3,7 +3,7 @@
 **Repository:** github.com/ahelme/comfy-multi
 **Domain:** comfy.ahelme.net
 **Doc Created:** 2026-01-04
-**Doc Updated:** 2026-01-22 (Session 16)
+**Doc Updated:** 2026-01-27 (Session 17)
 
 ---
 
@@ -15,7 +15,7 @@
 
 ## Progress Tracker Structure
 
-1. Progress Reports 
+1. Progress Reports
    - post in reverse chronological order (LATEST AT TOP)
 2. Risk Register
    - at end of file
@@ -23,6 +23,97 @@
 ---
 
 # Progress Reports
+
+---
+
+## Progress Report 16 - 2026-01-27 (Documentation & Infrastructure Updates)
+**Status:** ✅ Complete
+**Started:** 2026-01-27
+
+### Summary
+Added critical emergency troubleshooting documentation and ensured all Docker containers have proper restart policies configured.
+
+**Context:** Claude's previous session caused a runaway CPU spike that crashed the server while debugging a 502 nginx error. This emergency documentation ensures recovery procedures are available, and serves as a reminder to be cautious with docker commands - don't restart multiple containers rapidly.
+
+### Activities
+
+#### Part 1: Emergency Troubleshooting Documentation
+- ✅ Added critical emergency fix for unresponsive server across all documentation
+- ✅ Updated CLAUDE.md Gotchas section with emergency procedure
+- ✅ Updated README.md Troubleshooting section with emergency procedure
+- ✅ Updated docs/admin-troubleshooting.md Emergency Procedures section
+- ✅ Updated docs/troubleshooting.md Emergency Procedures section
+
+**Emergency Fix (when server stops responding):**
+```bash
+1. Hard Reset via hosting provider dashboard
+2. SSH in ASAP after reboot
+3. Run: sudo docker stop $(sudo docker ps -q --filter "name=comfy")
+```
+
+This prevents all ComfyUI containers from auto-starting and consuming resources before diagnosing the issue.
+
+#### Part 2: Docker Restart Policy Implementation
+- ✅ Updated scripts/start.sh to set restart=unless-stopped on all containers
+- ✅ Verified docker-compose.yml already has restart: unless-stopped for all services
+- ✅ Verified docker-compose.users.yml has restart: unless-stopped for all users
+- ✅ Updated comfymulti-scripts/setup-verda-solo-script.sh NEXT STEPS with restart policy
+- ✅ Updated comfymulti-scripts/README-RESTORE.md with restart policy commands
+- ✅ Updated docs/admin-backup-restore.md with restart policy command
+- ✅ Updated docs/admin-workflow-workshop.md with restart policy commands
+
+**Restart Policy Ensures:**
+- Containers automatically restart after server reboot
+- Unless manually stopped (unless-stopped policy)
+- Applied to all comfy* containers via docker update command
+
+### Files Modified
+
+**Main Project (comfy-multi):**
+- CLAUDE.md - Emergency fix + date update (2026-01-27)
+- README.md - Emergency fix + date update (2026-01-27)
+- docs/admin-troubleshooting.md - Emergency fix + date update
+- docs/troubleshooting.md - Emergency fix + date update
+- scripts/start.sh - Added docker update command for restart policy
+- docs/admin-backup-restore.md - Added restart policy after worker startup
+- docs/admin-workflow-workshop.md - Added restart policy to test section and quick reference
+- progress-02.md - This file
+
+**Private Scripts Repo (comfymulti-scripts):**
+- setup-verda-solo-script.sh - Added restart policy to NEXT STEPS
+- README-RESTORE.md - Added restart policy commands to startup and quick reference
+
+### Commits (comfy-multi repo)
+```
+[pending] docs: add emergency troubleshooting and docker restart policies
+```
+
+### Commits (comfymulti-scripts repo)
+```
+[pending] docs: add docker restart policy to setup and restore docs
+```
+
+### Key Improvements
+
+**Operational Resilience:**
+- Emergency procedure documented for server failures
+- Clear steps to prevent resource exhaustion on reboot
+- Diagnostic commands added (df -h, free -h, journalctl)
+
+**Container Management:**
+- All containers now auto-restart on server reboot
+- Consistent restart policy across VPS and GPU instances
+- Easy to disable (manual stop persists through reboot)
+
+**Documentation Coverage:**
+- Emergency fix in 4 documentation files
+- Restart policy in 4 scripts/docs
+- Cross-referenced for easy discovery
+
+### Next Session Goals
+1. Test emergency procedure on development instance
+2. Verify restart policy works after reboot
+3. Continue Phase 11 testing on Verda
 
 ---
 
@@ -187,7 +278,45 @@ comfymulti-scripts/
 f12223d feat: add .env.scripts to private repo for bootstrap
 ```
 
-**Script ready for re-test on Verda.**
+**Refactoring - separation of concerns (2026-01-26):**
+
+After discovering SSH keys exist in backup tarball (no need to download), extracted borked keyring and auth setup into separate files for independent fixing:
+
+| File | Purpose | Lines Extracted | Status |
+|------|---------|-----------------|--------|
+| `setup-verda-server-env-keyring.sh` | Steps 0-2: Keyring creation, env loading from GitHub | 172-455 | ⚠️ Needs fixing |
+| `setup-verda-keys-dev-user.sh` | Step 3: SSH keys (root), dev user creation | 456-519 | ⚠️ Needs fixing |
+| `setup-verda.sh` | Main script (simplified) | Now starts at Step 1 | ✅ Clean |
+
+**Changes to setup-verda.sh:**
+- Removed lines 172-519 (keyring + auth logic moved out)
+- Renumbered: "SFS MOUNT COMMAND" section is now "Step 1" (was embedded in early code)
+- Next step is now "Step 2: Mount Disks" (previously Step 4)
+- Main script no longer contains borked server keyring/auth code
+
+**Commits:**
+```
+514fc81 refactor: extract keyring and auth setup from main script
+656390f Remove keyring commands, add dev user and update comments and step numbering in setup-verda.sh
+```
+
+**Commit 656390f changes:**
+- Removed scattered keyring commands from setup-verda.sh:
+  - `keyctl add user "SFS_MOUNT"` (line removed)
+  - `keyctl add user "SCRATCH_MOUNT"` (line removed)
+- Added better headings: Step 2 (Mount Block Storage)
+- Re-added dev user creation in Step 9 (without SSH keys for now)
+- Added Step 10 (Get Dev Home Config) - checks for backup, uses get_cache_file
+
+**⚠️ SEVERE PROBLEMS REMAIN:**
+- Order is NOT sensible yet
+- Possible redundancies with `restore-verda-instance.sh`
+- Scripts still need comprehensive review and testing
+
+**Why this refactoring:**
+- Main script had mixed concerns (mount + secrets + auth all tangled)
+- Extracted components can be fixed and reused independently when working
+- Setup-verda.sh now starts clean with mount command (clearer entry point)
 
 ### Testing Checklist
 **GitHub Issue:** [#7 Master Testing: Full Deployment/Restore/Backup System Test](https://github.com/ahelme/comfymulti-scripts/issues/7)

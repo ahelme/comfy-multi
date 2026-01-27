@@ -268,6 +268,9 @@ su - dev
 cd ~/comfy-multi
 docker compose up -d worker-1
 
+# Set restart policy (ensures auto-start on reboot)
+sudo docker update --restart=unless-stopped $(sudo docker ps -q --filter "name=comfy")
+
 # Verify Redis connection to mello
 redis-cli -h 100.99.216.71 -p 6379 -a '<password>' ping
 # Should return: PONG

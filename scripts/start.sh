@@ -70,6 +70,10 @@ echo ""
 echo "🐳 Starting Docker containers..."
 docker-compose up -d
 
+# Ensure all containers have restart policy set
+echo "🔄 Setting restart policy on containers..."
+sudo docker update --restart=unless-stopped $(sudo docker ps -q --filter "name=comfy") 2>/dev/null || true
+
 echo ""
 echo "⏳ Waiting for services to be healthy..."
 sleep 5

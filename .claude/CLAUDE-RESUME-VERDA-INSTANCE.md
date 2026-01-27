@@ -66,12 +66,11 @@ CLAUDE RESUME - COMFY-MULTI (ASSUMES WELCOME HAS BEEN COMPLETED)
     - but leave SFS (models) and block storage (scratch disk) running.
 
 ## NEXT:
+  Review issue #8 on private repo (ahelme/comfymulti-scripts/issues/7) via gh cli.
   
-  Please explain to the user the basic deployment workflow as you understand it.
+  Please explain to the user the new setup-verda.sh (installed on provisioning, secrets loaded from .env.scripts via gh PAT, secrets added to linux keyring , restore-verda-instance.sh deployment system as you understand it!
  
-  Review issue #7 on private repo (ahelme/comfymulti-scripts/issues/7) via gh cli.
- 
-  Then create & discuss To Dos together before proceeding.
+  Then ask questions, clarify and discuss To Dos together before proceeding.
 
   ASK ANY QUESTIONS RE: UNCLEAR INFO OR STEPS :)
 
