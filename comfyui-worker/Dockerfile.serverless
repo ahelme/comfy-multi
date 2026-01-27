@@ -1,0 +1,67 @@
+FROM nvidia/cuda:12.1.0-cudnn8-runtime-ubuntu22.04
+
+# Set environment variables
+ENV DEBIAN_FRONTEND=noninteractive \
+    PYTHONUNBUFFERED=1 \
+    COMFYUI_VERSION=v0.9.2 \
+    SERVERLESS_MODE=true
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    python3.10 \
+    python3-pip \
+    git \
+    wget \
+    curl \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create working directory
+WORKDIR /app
+
+# Clone ComfyUI v0.9.2
+RUN git clone --branch v0.9.2 --depth 1 https://github.com/comfyanonymous/ComfyUI.git /comfyui
+
+# Install ComfyUI dependencies
+WORKDIR /comfyui
+RUN pip3 install --no-cache-dir -r requirements.txt
+
+# Install worker dependencies
+WORKDIR /app
+COPY requirements.txt /app/requirements.txt
+RUN pip3 install --no-cache-dir -r /app/requirements.txt
+
+# Install health server dependencies
+RUN pip3 install --no-cache-dir fastapi uvicorn[standard]
+
+# Copy worker scripts
+COPY worker.py /app/worker.py
+COPY health_server.py /app/health_server.py
+COPY start-worker-serverless.sh /app/start-worker.sh
+RUN chmod +x /app/start-worker.sh /app/worker.py /app/health_server.py
+
+# Create directories for models and outputs
+RUN mkdir -p /comfyui/models \
+    /comfyui/output \
+    /comfyui/input \
+    /outputs \
+    /inputs \
+    /var/log
+
+# Create non-root user
+RUN useradd -m -u 1000 comfyuser && \
+    chown -R comfyuser:comfyuser /comfyui /app /outputs /inputs /var/log
+
+USER comfyuser
+
+# Expose ports
+EXPOSE 8188  # ComfyUI
+EXPOSE 8000  # Health endpoint
+
+# Health check (for Verda liveness probes)
+HEALTHCHECK --interval=30s --timeout=10s --start-period=120s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+# Start worker in serverless mode
+CMD ["/app/start-worker.sh"]

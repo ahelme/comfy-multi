@@ -113,6 +113,8 @@
 - [Admin Guide](.docs/admin-guide.md) - Admin docs index / overview
 - [Deploy/Backup Guide](.docs/admin-backup-restore.md) - Docs: deploy/restore/backups
 - [GPU Deployment](./implementation-backup-restore.md) - Plan: deploy/restore/backup
+- [Verda Serverless](./docs/admin-verda-serverless.md) - Serverless containers guide
+- [Provider Switching](./docs/admin-provider-switching.md) - Switch between inference providers
 - [Claude Guide](./CLAUDE.md) - Development context for custom deployment (this file)
 
 ### User Documentation 

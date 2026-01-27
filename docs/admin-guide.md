@@ -250,6 +250,38 @@ Choose a guide based on what you need to do:
 
 ---
 
+### [Verda Serverless Containers](./admin-verda-serverless.md)
+**When:** Want auto-scaling, pay-per-use inference (alternative to dedicated instances)
+
+**Contents:**
+- Serverless vs Instance comparison
+- Architecture and scaling behavior
+- Deployment steps (build, push, deploy)
+- Configuration and environment variables
+- Monitoring and cost optimization
+- Troubleshooting serverless-specific issues
+
+**Use this for:** Deploying serverless containers, understanding auto-scaling, optimizing costs for variable workloads.
+
+**See also:** [Provider Switching](./admin-provider-switching.md) - switch between instance and serverless modes.
+
+---
+
+### [Provider Switching Guide](./admin-provider-switching.md)
+**When:** Switching between GPU providers or deployment modes
+
+**Contents:**
+- Supported providers (verda-instance, verda-serverless, local)
+- When to use each mode
+- Switching procedures (no conflicts)
+- Hybrid mode (instance + serverless simultaneously)
+- Cost and performance comparison
+- Verification and troubleshooting
+
+**Use this for:** Toggling between inference providers, running hybrid deployments, choosing the right mode for your workload.
+
+---
+
 ### [Admin Security Guide](./admin-security.md)
 **When:** During setup and before going live
 

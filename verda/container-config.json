@@ -1,0 +1,82 @@
+{
+  "name": "comfyui-worker-serverless",
+  "description": "ComfyUI Worker for Multi-User Workshop Platform - Serverless Mode",
+  "image": {
+    "registry": "ghcr.io",
+    "repository": "ahelme/comfyui-worker-serverless",
+    "tag": "latest"
+  },
+  "resources": {
+    "gpu": {
+      "type": "H100",
+      "count": 1
+    },
+    "cpu": 4,
+    "memory": "32Gi"
+  },
+  "scaling": {
+    "min_replicas": 0,
+    "max_replicas": 5,
+    "scale_to_zero_delay": "5m",
+    "autoscaling": {
+      "enabled": true,
+      "metric": "queue_depth",
+      "target_value": 1
+    }
+  },
+  "ports": [
+    {
+      "container_port": 8000,
+      "protocol": "http",
+      "path": "/health"
+    }
+  ],
+  "health_check": {
+    "path": "/health",
+    "port": 8000,
+    "interval": 30,
+    "timeout": 10,
+    "healthy_threshold": 2,
+    "unhealthy_threshold": 3,
+    "initial_delay": 120
+  },
+  "environment": {
+    "SERVERLESS_MODE": "true",
+    "SERVERLESS_MAX_IDLE_POLLS": "10",
+    "SERVERLESS_JOB_LIMIT": "1",
+    "INFERENCE_PROVIDER": "verda-serverless",
+    "WORKER_POLL_INTERVAL": "2",
+    "HEALTH_PORT": "8000",
+    "COMFYUI_TIMEOUT": "300",
+    "HTTP_CLIENT_TIMEOUT": "30",
+    "LOG_FORMAT": "json"
+  },
+  "volumes": [
+    {
+      "name": "models",
+      "type": "sfs",
+      "mount_path": "/models",
+      "read_only": true
+    },
+    {
+      "name": "outputs",
+      "type": "sfs",
+      "mount_path": "/outputs",
+      "read_only": false
+    }
+  ],
+  "secrets": {
+    "QUEUE_MANAGER_URL": {
+      "description": "Queue Manager endpoint URL (from Hetzner VPS)",
+      "required": true,
+      "example": "https://comfy.ahelme.net/api"
+    }
+  },
+  "notes": [
+    "Container auto-scales based on queue depth",
+    "Scales to zero when idle to minimize costs",
+    "Each container processes 1 job then exits",
+    "Models cached on SFS for fast cold starts",
+    "Health endpoint monitored by Verda platform"
+  ]
+}

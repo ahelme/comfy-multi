@@ -1,0 +1,80 @@
+# Docker Compose for ComfyUI Worker - Serverless Mode
+# Used for local testing of serverless configuration before deploying to Verda
+#
+# Usage:
+#   docker-compose -f docker-compose.serverless.yml build
+#   docker-compose -f docker-compose.serverless.yml up -d
+#
+# Environment variables are read from .env file
+
+services:
+  worker-serverless:
+    build:
+      context: ./comfyui-worker
+      dockerfile: Dockerfile.serverless
+    container_name: comfy-worker-serverless
+    ports:
+      - "8000:8000"  # Health endpoint
+    environment:
+      # Worker Identity
+      - WORKER_ID=${WORKER_ID:-worker-serverless-1}
+
+      # Queue Manager Connection
+      - QUEUE_MANAGER_URL=${QUEUE_MANAGER_URL:-http://queue-manager:3000}
+
+      # ComfyUI Configuration
+      - COMFYUI_URL=http://localhost:8188
+      - COMFYUI_TIMEOUT=${COMFYUI_TIMEOUT:-300}
+
+      # Serverless Mode Configuration
+      - SERVERLESS_MODE=true
+      - SERVERLESS_MAX_IDLE_POLLS=${SERVERLESS_MAX_IDLE_POLLS:-10}
+      - SERVERLESS_JOB_LIMIT=${SERVERLESS_JOB_LIMIT:-1}
+      - INFERENCE_PROVIDER=verda-serverless
+
+      # Health Server
+      - HEALTH_PORT=8000
+
+      # Timeouts
+      - HTTP_CLIENT_TIMEOUT=${HTTP_CLIENT_TIMEOUT:-30}
+      - WORKER_POLL_INTERVAL=${WORKER_POLL_INTERVAL:-2}
+
+      # Logging
+      - LOG_FORMAT=${LOG_FORMAT:-text}
+
+    volumes:
+      - ${MODELS_PATH:-./data/models}/shared:/models:ro
+      - ${OUTPUTS_PATH:-./data/outputs}:/outputs
+      - ${INPUTS_PATH:-./data/inputs}:/inputs:ro
+      - ${WORKFLOWS_PATH:-./data/workflows}:/workflows:ro
+
+    networks:
+      - comfy-network
+
+    # No restart policy for serverless - container exits intentionally
+    restart: "no"
+
+    # Resource limits (adjust based on Verda instance type)
+    cpus: 4.0
+    mem_limit: ${WORKER_GPU_MEMORY_LIMIT:-70G}
+
+    # GPU allocation (for local testing with GPU)
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+    # Health check for container orchestration
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+
+networks:
+  comfy-network:
+    external: true

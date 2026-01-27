@@ -59,6 +59,12 @@ OUTPUTS_PATH = os.getenv("OUTPUTS_PATH", "/outputs")
 COMFYUI_TIMEOUT = int(os.getenv("COMFYUI_TIMEOUT", "300"))  # 5 minutes for ComfyUI requests
 HTTP_CLIENT_TIMEOUT = int(os.getenv("HTTP_CLIENT_TIMEOUT", "30"))  # 30 seconds for queue manager
 
+# Serverless mode configuration
+SERVERLESS_MODE = os.getenv("SERVERLESS_MODE", "false").lower() == "true"
+SERVERLESS_MAX_IDLE_POLLS = int(os.getenv("SERVERLESS_MAX_IDLE_POLLS", "10"))  # Exit after N empty polls
+SERVERLESS_JOB_LIMIT = int(os.getenv("SERVERLESS_JOB_LIMIT", "0"))  # Max jobs before exit (0=unlimited)
+INFERENCE_PROVIDER = os.getenv("INFERENCE_PROVIDER", "local")  # local, verda-instance, verda-serverless
+
 # Graceful shutdown flag
 shutdown_requested = False
 
@@ -152,7 +158,17 @@ class Worker:
         self.jobs_failed = 0
         self.start_time = datetime.now(timezone.utc)
 
+        # Serverless mode tracking
+        self.serverless_mode = SERVERLESS_MODE
+        self.idle_poll_count = 0
+        self.max_idle_polls = SERVERLESS_MAX_IDLE_POLLS
+        self.job_limit = SERVERLESS_JOB_LIMIT
+        self.provider = INFERENCE_PROVIDER
+
         logger.info(f"Worker {self.worker_id} initialized (http_timeout={HTTP_CLIENT_TIMEOUT}s)")
+        logger.info(f"Provider: {self.provider}, Serverless Mode: {self.serverless_mode}")
+        if self.serverless_mode:
+            logger.info(f"Serverless config: max_idle_polls={self.max_idle_polls}, job_limit={self.job_limit}")
 
     def get_next_job(self) -> Optional[Dict[str, Any]]:
         """Get next job from queue manager"""
@@ -254,15 +270,31 @@ class Worker:
 
         while not shutdown_requested:
             try:
+                # Check serverless job limit
+                if self.serverless_mode and self.job_limit > 0:
+                    if self.jobs_completed >= self.job_limit:
+                        logger.info(f"Serverless job limit reached ({self.jobs_completed}/{self.job_limit}), exiting")
+                        break
+
                 # Get next job
                 job = self.get_next_job()
 
                 if job:
+                    # Reset idle counter on job found
+                    self.idle_poll_count = 0
+
                     # Process job
                     self.process_job(job)
                 else:
-                    # No jobs available, wait before polling again
-                    logger.debug(f"No jobs available, sleeping for {POLL_INTERVAL}s")
+                    # No jobs available
+                    self.idle_poll_count += 1
+                    logger.debug(f"No jobs available, sleeping for {POLL_INTERVAL}s (idle polls: {self.idle_poll_count})")
+
+                    # Check serverless idle timeout
+                    if self.serverless_mode and self.idle_poll_count >= self.max_idle_polls:
+                        logger.info(f"Serverless idle timeout reached ({self.idle_poll_count} empty polls), exiting")
+                        break
+
                     time.sleep(POLL_INTERVAL)
 
             except KeyboardInterrupt:
