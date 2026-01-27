@@ -103,6 +103,8 @@ redis-cli -h comfy.ahelme.net -p 6379 -a $REDIS_PASSWORD ping
 | File/Directory | Purpose |
 |----------------|---------|
 | `.env` | Configuration (passwords, domain, etc.) |
+| `USER_CREDENTIALS.txt` | Plain-text user credentials (gitignored, see Security Guide) |
+| `/etc/nginx/comfyui-users.htpasswd` | Encrypted user passwords for HTTP Basic Auth |
 | `docker-compose.yml` | Container orchestration |
 | `/etc/ssl/certs/fullchain.pem` | SSL public certificate |
 | `/etc/ssl/private/privkey.pem` | SSL private key |

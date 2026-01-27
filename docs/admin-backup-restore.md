@@ -63,6 +63,8 @@ This preserves the expected IP: **100.89.38.43**
 | SSH host keys | ✅ | ✅ | ❌ | SFS / Mello |
 | Fail2ban, UFW configs | ✅ | ✅ | ❌ | SFS / Mello |
 | Project .env | ✅ | ✅ | ❌ | SFS / Mello |
+| User credentials | ❌ | ❌ | ✅ | Private repo |
+| Nginx htpasswd | ❌ | ❌ | ✅ | Mello VPS only |
 | /home/dev/ | ❌ | ✅ | ❌ | Mello |
 | ComfyUI project | ❌ | ✅ | ❌ | Mello |
 | oh-my-zsh custom | ❌ | ✅ | ❌ | Mello |

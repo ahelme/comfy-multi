@@ -83,12 +83,38 @@ ADMIN_PASSWORD=<new-secure-password>
 docker-compose restart queue-manager
 ```
 
-### User Passwords (if implementing authentication)
+### User Passwords (HTTP Basic Auth)
 
-If you add user authentication:
-- Hash passwords with bcrypt or Argon2 (never plaintext)
-- Salt each password individually
-- Use strong password requirements (12+ characters, mixed case, numbers, symbols)
+**Credentials Storage:**
+- **Plain-text:** `/home/dev/projects/comfyui/USER_CREDENTIALS.txt` (gitignored, backed up to private repo)
+- **Encrypted:** `/etc/nginx/comfyui-users.htpasswd` (bcrypt cost 10)
+
+**Format:** `username:password` (one per line)
+
+**Viewing credentials:**
+```bash
+cat /home/dev/projects/comfyui/USER_CREDENTIALS.txt
+```
+
+**Testing a user login:**
+```bash
+# Verify password for user001
+sudo htpasswd -v /etc/nginx/comfyui-users.htpasswd user001
+# Enter password when prompted
+```
+
+**Regenerating all user passwords:**
+```bash
+# This will create new passwords and update htpasswd file
+# See scripts/regenerate-user-passwords.sh
+./scripts/regenerate-user-passwords.sh
+```
+
+**Security notes:**
+- Passwords are 24 characters with mixed case, digits, and symbols
+- Hashed with bcrypt (cost factor 10) for nginx
+- Plain-text file is gitignored and backed up to private repo only
+- htpasswd file is readable by root and www-data only (chmod 640)
 
 ---
 
