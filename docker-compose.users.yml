@@ -17,6 +17,9 @@ services:
     environment:
       - USER_ID=user001
       - QUEUE_MANAGER_URL=http://queue-manager:3000
+    depends_on:
+      queue-manager:
+        condition: service_healthy
     volumes:
       - ${OUTPUTS_PATH}:/outputs
       - ${INPUTS_PATH}:/inputs
@@ -164,6 +167,9 @@ services:
     environment:
       - USER_ID=user006
       - QUEUE_MANAGER_URL=http://queue-manager:3000
+    depends_on:
+      queue-manager:
+        condition: service_healthy
     volumes:
       - ${OUTPUTS_PATH}:/outputs
       - ${INPUTS_PATH}:/inputs
@@ -311,6 +317,9 @@ services:
     environment:
       - USER_ID=user011
       - QUEUE_MANAGER_URL=http://queue-manager:3000
+    depends_on:
+      queue-manager:
+        condition: service_healthy
     volumes:
       - ${OUTPUTS_PATH}:/outputs
       - ${INPUTS_PATH}:/inputs
@@ -458,6 +467,9 @@ services:
     environment:
       - USER_ID=user016
       - QUEUE_MANAGER_URL=http://queue-manager:3000
+    depends_on:
+      queue-manager:
+        condition: service_healthy
     volumes:
       - ${OUTPUTS_PATH}:/outputs
       - ${INPUTS_PATH}:/inputs

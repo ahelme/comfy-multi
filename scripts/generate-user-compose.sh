@@ -62,8 +62,16 @@ for i in $(seq 1 $NUM_USERS); do
       - QUEUE_MANAGER_URL=http://queue-manager:3000
 EOF
 
-    # Add depends_on for non-batch-leaders
-    if [ -n "$PREV_USER" ]; then
+    # Add depends_on
+    if [ $IS_BATCH_LEADER -eq 1 ]; then
+        # Batch leaders depend on queue-manager
+        cat >> "$OUTPUT_FILE" << EOF
+    depends_on:
+      queue-manager:
+        condition: service_healthy
+EOF
+    elif [ -n "$PREV_USER" ]; then
+        # Batch members depend on previous user
         cat >> "$OUTPUT_FILE" << EOF
     depends_on:
       $PREV_USER:

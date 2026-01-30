@@ -11,11 +11,15 @@ FROM python:3.11-slim
 
 # Install system dependencies
 # Note: Using libgl1 instead of libgl1-mesa-glx for newer Debian/Ubuntu compatibility
+# libgomp1: Required for torchaudio and audio node imports (OpenMP support)
+# curl: Required for Docker health checks
 RUN apt-get update && apt-get install -y \
     git \
     wget \
+    curl \
     libgl1 \
     libglib2.0-0 \
+    libgomp1 \
     && rm -rf /var/lib/apt/lists/*
 
 # Create working directory
