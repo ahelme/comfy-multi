@@ -3,7 +3,7 @@
 **Repository:** github.com/ahelme/comfy-multi
 **Domain:** comfy.ahelme.net
 **Doc Created:** 2026-01-02
-**Doc Updated:** 2026-01-27
+**Doc Updated:** 2026-01-30
 
 ---
 
@@ -255,11 +255,16 @@ test: add integration tests for worker
 ## 🛠️ Technology Stack
 
 ### Development Machines
-- **dev machine (THIS MACHINE!)**: 'mello' cheap Hetzner VPS - Ubuntu
+- **dev machine (THIS MACHINE!)**: 'mello' Hetzner VPS CAX31 - Ubuntu
+  - Ampere® 8 vCPU, 16GB RAM, 80GB SSD
+  - €12.49/month
+  - Storage kept at 80GB for downscaling flexibility (Volumes & object storage available for extra space)
 - **user's machine**: MBP M4 Pro 48GB RAM
 
 ### Production Servers & Storage
-- **main app & user frontends**: 'mello' cheap Hetzner VPS - Ubuntu
+- **main app & user frontends**: 'mello' Hetzner VPS CAX31 - Ubuntu
+  - Ampere® 8 vCPU, 16GB RAM, 80GB SSD
+  - €12.49/month
 - **AI inference**: 'verda' GPU cloud (renewable energy & EU policy): rented instance / serverless
 
 ### Backups

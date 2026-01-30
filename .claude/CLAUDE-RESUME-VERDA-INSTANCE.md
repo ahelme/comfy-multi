@@ -53,7 +53,9 @@ CLAUDE RESUME - COMFY-MULTI (ASSUMES WELCOME HAS BEEN COMPLETED)
  
   **START OF WORKSHOP DAY**
   We restore Verda worker/config from SFS to instance root - so fast! 
-  
+ 
+  WE MAY CHOOSE TO RUN A CHEAP CPU INSTANCE & USE SERVERLESS INFERENCE - OR WE MAY CHOOSE TO CREATE AN e.g. H100.
+ 
   Hrly cron job backs up verda OS volume files -> SFS volume & mello users files -> R2
  
   **END OF WORKSHOP DAY**
@@ -66,11 +68,12 @@ CLAUDE RESUME - COMFY-MULTI (ASSUMES WELCOME HAS BEEN COMPLETED)
     - but leave SFS (models) and block storage (scratch disk) running.
 
 ## NEXT:
-  Review issue #8 on private repo (ahelme/comfymulti-scripts/issues/7) via gh cli.
-  
-  Please explain to the user the new setup-verda.sh (installed on provisioning, secrets loaded from .env.scripts via gh PAT, secrets added to linux keyring , restore-verda-instance.sh deployment system as you understand it!
- 
-  Then ask questions, clarify and discuss To Dos together before proceeding.
+
+  Please explain to the user the basic deployment workflow as you understand it.
+
+  Review issue #13 in THIS REPO - READ IN FULL
+
+  Then create & discuss To Dos together before proceeding.
 
   ASK ANY QUESTIONS RE: UNCLEAR INFO OR STEPS :)
 
