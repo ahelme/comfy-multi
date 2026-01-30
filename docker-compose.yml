@@ -31,6 +31,7 @@ services:
       - ${SSL_CERT_PATH}:/etc/nginx/ssl/cert.pem:ro
       - ${SSL_KEY_PATH}:/etc/nginx/ssl/key.pem:ro
       - ${OUTPUTS_PATH}:/var/www/outputs:ro
+      - ${WORKFLOWS_PATH}:/var/www/workflows:ro
     environment:
       - DOMAIN=${DOMAIN}
       - NUM_USERS=${NUM_USERS:-20}

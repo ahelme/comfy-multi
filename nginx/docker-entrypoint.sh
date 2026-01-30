@@ -44,6 +44,13 @@ location /${USER_ID}/ {
     proxy_read_timeout 86400;
     proxy_send_timeout 86400;
 }
+
+# Static workflow serving
+location /${USER_ID}/user_workflows/ {
+    alias /var/www/workflows/;
+    add_header Content-Type application/json;
+    add_header Cache-Control "no-cache, must-revalidate";
+}
 EOF
 done
 

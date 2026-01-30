@@ -64,9 +64,9 @@ USER comfyuser
 # Expose ComfyUI port
 EXPOSE 8188
 
-# Health check
+# Health check (REQUIRED for reliable 20-container batched startup)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
-    CMD python -c "import requests; requests.get('http://localhost:8188/', timeout=5)"
+    CMD curl -f http://localhost:8188/ || exit 1
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["python", "main.py", "--listen", "0.0.0.0", "--port", "8188", "--cpu"]
