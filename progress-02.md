@@ -207,24 +207,103 @@ ac45d8a fix: complete ComfyUI v0.9.2 userdata migration (Issue #21)
 - 🟡 Default workflow not auto-loading (Task #1 - may be resolved by templates.json)
 - 🟡 Only user001 tested (Task #2 - need full 20-user deployment)
 
+### Part 7: Issue #15 Investigation (Userdata API Blocked)
+
+User reported cannot load or save workflows despite files existing. Investigation revealed:
+
+**Issue Symptoms:**
+- `GET /api/userdata/workflows/flux2_klein_9b_text_to_image.json` → 404
+- `POST /api/userdata/workflows/Unsaved%20Workflow.json` → 405 Method Not Allowed
+- Workflows visible in menu but cannot load into canvas
+- Cannot save any workflows
+
+**Investigation Results:**
+```bash
+# Files exist ✅
+docker exec comfy-user001 ls /comfyui/user/default/workflows/flux2_klein_9b_text_to_image.json
+# -rw-r--r-- 72304 bytes
+
+# Nginx has no userdata route ❌
+grep "api/userdata" /etc/nginx/sites-available/comfy.ahelme.net
+# No route found
+
+# Direct API test fails ❌
+curl http://localhost:8188/api/userdata/workflows/flux2_klein_9b_text_to_image.json
+# Returns HTML instead of JSON
+```
+
+**Root Cause Hypothesis:**
+- ComfyUI v0.9.2 userdata API **not enabled** or **requires configuration**
+- Frontend expects API, but backend not responding
+- Possible: API disabled in CPU-only mode (`--cpu` flag)
+- Possible: Authentication required for API access
+- Possible: Userdata API is new feature not fully implemented
+
+**Posted comprehensive investigation to Issue #15**
+
+### Part 8: Issue #22 Created (Worker Upgrade)
+
+Created issue to upgrade GPU worker container to v0.9.2:
+- Frontend at v0.9.2, worker likely at v0.8.2
+- Version mismatch can cause compatibility issues
+- Worker needs same migration as frontend (userdata structure)
+- Blocks full end-to-end testing
+
+### Task Management Updates
+
+**New Tasks Created:**
+- Task #6: Investigate and fix userdata API not responding (Issue #15) - **BLOCKER**
+- Task #7: Upgrade ComfyUI worker container to v0.9.2 (Issue #22)
+
+**Task #1 Updated:**
+- Marked as **BLOCKED** by Task #6 (userdata API issue)
+- Cannot test default workflow until API works
+
+**Current Task Status:**
+- ✅ Completed: Tasks #3, #4, #5
+- 🟡 Pending: Tasks #1 (blocked), #2, #6 (blocker), #7
+
+### Blockers
+
+**Critical (Blocking Workshop):**
+- 🔴 **Task #6 / Issue #15:** Userdata API not responding - CANNOT LOAD/SAVE WORKFLOWS
+  - Files exist but API endpoints return 404/405
+  - May require server configuration or v0.9.2 setup
+  - Blocks all workflow testing
+
+**Medium (Blocking Full Testing):**
+- 🟡 **Task #7 / Issue #22:** Worker upgrade to v0.9.2
+  - Version mismatch between frontend and worker
+  - Blocks end-to-end GPU job testing
+
+**Low (Quality of Life):**
+- 🟡 Task #1: Default workflow (blocked by #6)
+- 🟡 Task #2: Deploy to all 20 users (waiting for API fix)
+
 ### Next Session Goals
 
-1. **Browser test migration fixes:**
-   - Verify comfy.templates.json loads (no 404)
-   - Verify workflows/.index.json loads (no 404)
-   - Check if default workflow now loads (Flux2 Klein)
-   - Document any remaining errors
+1. **Fix userdata API (CRITICAL - Task #6):**
+   - Research ComfyUI v0.9.2 userdata API documentation
+   - Check if CPU mode disables userdata API
+   - Inspect server.py for route handlers
+   - Test alternative API paths
+   - Enable/configure userdata API in server
 
-2. **Deploy to all 20 users:**
-   - Rebuild frontend image with updated entrypoint
-   - Deploy to all user containers
+2. **If API fixed, test workflows:**
+   - Load workflow from menu into canvas
+   - Save workflow (test POST endpoint)
+   - Verify default workflow loads
+   - Test all 5 template workflows
+
+3. **Worker upgrade (Task #7):**
+   - Update comfyui-worker/Dockerfile to v0.9.2
+   - Apply userdata migration lessons
+   - Test on Verda GPU instance
+
+4. **Deploy to all 20 users (Task #2):**
+   - After API confirmed working
    - Test batched startup
    - Verify workflows for multiple users
-
-3. **Close completed issues:**
-   - Issue #21 if migration successful
-   - Update Issue #19 with remaining errors
-   - Update Issue #15 if default workflow works
 
 ### Lessons Learned
 
@@ -233,6 +312,8 @@ ac45d8a fix: complete ComfyUI v0.9.2 userdata migration (Issue #21)
 3. **API 404s often indicate structural issues** - Missing files/directories, not routing
 4. **Userdata structure matters in v0.9.2** - Templates and indexes improve organization
 5. **Default workflow can be marked in metadata** - May resolve auto-load without custom extensions
+6. **Frontend expectations ≠ Backend implementation** - v0.9.2 frontend expects userdata API but may need backend config
+7. **Files existing ≠ API working** - Filesystem and HTTP API are separate concerns
 
 ---
 
