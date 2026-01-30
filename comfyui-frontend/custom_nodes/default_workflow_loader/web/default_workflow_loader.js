@@ -31,16 +31,18 @@ app.registerExtension({
                     console.log("[DefaultWorkflowLoader] No existing workflow found, loading default:", DEFAULT_WORKFLOW);
 
                     // Load the default workflow
+                    // Note: Path is /user_workflows/ which is a symlink to /workflows in container
                     const response = await fetch(`/user_workflows/${DEFAULT_WORKFLOW}`);
                     if (response.ok) {
                         const workflowData = await response.json();
                         await app.loadGraphData(workflowData);
-                        console.log("[DefaultWorkflowLoader] Successfully loaded default workflow");
+                        console.log("[DefaultWorkflowLoader] Successfully loaded default workflow:", DEFAULT_WORKFLOW);
 
                         // Mark as loaded in this session
                         sessionStorage.setItem(STORAGE_KEY, "true");
                     } else {
                         console.warn("[DefaultWorkflowLoader] Failed to fetch default workflow:", response.status);
+                        console.warn("[DefaultWorkflowLoader] Attempted URL:", `/user_workflows/${DEFAULT_WORKFLOW}`);
                     }
                 } else {
                     console.log("[DefaultWorkflowLoader] Existing workflow found, skipping default load");

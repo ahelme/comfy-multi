@@ -34,6 +34,9 @@ RUN pip install --no-cache-dir \
 # Install remaining ComfyUI requirements
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Install missing dependencies (not in ComfyUI v0.9.2 requirements.txt)
+RUN pip install --no-cache-dir requests
+
 # Copy custom nodes
 COPY custom_nodes /comfyui/custom_nodes
 

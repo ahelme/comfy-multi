@@ -26,6 +26,192 @@
 
 ---
 
+## Progress Report 17 - 2026-01-30 (Batched Container Startup & User Architecture)
+**Status:** 🔨 In Progress
+**Started:** 2026-01-30
+
+### Summary
+Implemented hybrid batched container startup using dependency chains + health checks, documented comprehensive user files architecture, and resolved per-user Docker image confusion.
+
+### Implementation Phase
+**Phase:** Phase 11 - Test Single GPU Instance (Restore & Verify)
+**Current Focus:** Testing backup/restore system (never fully worked yet) + container orchestration fixes
+**Note:** Backup/restore system is critical before workshop but still has issues
+
+### ⚠️ Pending Critical Issues
+
+**Main Repo (comfy-multi):**
+- **Issue #14** 🔴 Verda instance storage full - worker build failed (blocks GPU testing)
+- **Issue #15** ✅ Set Flux2 Klein as default workflow (implemented, testing blocked by health checks)
+- **Issue #16** 🟡 ComfyUI version reporting incorrect (needs investigation)
+- **Issue #17** ✅ Implement hybrid batched container startup (implemented, testing blocked by health checks)
+- **Current:** 🔴 Health checks failing (missing libgomp.so.1 library)
+
+**Private Scripts Repo (comfymulti-scripts):**
+- **Issue #7** 🔴 Master Testing: Full Deployment/Restore/Backup System Test (NEVER FULLY WORKED)
+- **Issue #11** 🔴 Change mello backup script to backup users' custom nodes & workflows (required for new architecture)
+
+**Status Legend:** 🔴 Blocker | 🟡 Important | ✅ Complete
+
+### GitHub Issues Created This Session
+- **Issue #14** - Verda instance storage full (worker build failed)
+- **Issue #15** - Set Flux2 Klein as default workflow (implemented)
+- **Issue #16** - ComfyUI version reporting incorrect (needs investigation)
+- **Issue #17** - Implement hybrid batched container startup (implemented)
+
+### Activities
+
+#### Part 1: User Files Architecture Design
+- ✅ Investigated ComfyUI workflow configuration (Issue #13 from previous session)
+- ✅ Created comprehensive user files architecture document (`docs/architecture-user-files.md`)
+- ✅ Decided storage strategy for all user file types:
+  - **Persistent on mello:** Settings, DB, custom workflows, custom nodes (backed up to R2)
+  - **Ephemeral on Verda block storage:** Uploads, outputs (NOT backed up)
+  - **Shared on mello:** Template workflows (LTX-2, Flux2 Klein)
+- ✅ Created directory structure: `data/user_data/userXXX/comfyui/custom_nodes/` for all 20 users
+
+#### Part 2: Hybrid Batched Startup (Issue #17)
+- ✅ Researched Docker Compose best practices (2026):
+  - `depends_on` + health checks recommended over wrapper scripts
+  - Profiles can run in parallel
+  - **User's brilliant idea:** Skip profiles entirely, use dependency chains!
+- ✅ Created comprehensive analysis (`docs/architecture-container-startup-analysis.md`)
+- ✅ Updated `scripts/generate-user-compose.sh` with batched startup logic:
+  - 4 batch leaders (user001, user006, user011, user016) start in parallel
+  - Within each batch: sequential startup with health checks
+  - Total startup time: ~2-3 minutes (vs 10-15 minutes sequential)
+- ✅ Regenerated `docker-compose.users.yml` with:
+  - Health checks on all containers (curl http://localhost:8188/)
+  - Dependency chains (`user002` depends on `user001` healthy, etc.)
+  - Custom nodes volume mounts per user
+  - No profiles needed - pure dependency magic!
+
+#### Part 3: Default Workflow Loader (Issue #15)
+- ✅ Created custom ComfyUI extension: `comfyui-frontend/custom_nodes/default_workflow_loader/`
+  - `__init__.py` - Extension registration
+  - `web/default_workflow_loader.js` - Auto-loads Flux2 Klein on first visit
+  - `README.md` - Documentation
+- ✅ JavaScript extension uses ComfyUI's native `app.registerExtension()` API
+- ✅ Loads `flux2_klein_9b_text_to_image.json` automatically on first visit
+- ✅ Other 4 workflows available via Load menu
+
+#### Part 4: Mello Server Upgrade
+- ✅ Updated CLAUDE.md with new mello specs:
+  - **Server:** Hetzner VPS CAX31
+  - **CPU:** Ampere® 8 vCPU (upgraded)
+  - **RAM:** 16GB (upgraded)
+  - **Storage:** 80GB SSD (kept for downscaling flexibility)
+  - **Cost:** €12.49/month
+- ✅ Added detailed folder hierarchy showing:
+  - Per-user structure (`comfyui.db`, `default/`, `comfyui/custom_nodes/`)
+  - Shared workflows (all 5 listed)
+  - Model directory structure
+  - Inputs/outputs marked as ephemeral
+
+#### Part 5: Docker Image Issues & Resolution
+- ✅ Discovered old per-user images problem:
+  - `docker-compose.users.yml` had `build:` sections (now changed to `image:`)
+  - Created 20 separate cached images: `comfyui-user001:latest` through `comfyui-user020:latest`
+  - Containers were using OLD images instead of fresh `comfy-multi-frontend:latest`
+- ✅ Fixed `scripts/generate-user-compose.sh` to use `image:` instead of `build:`
+- ✅ Cleaned up all old per-user images (stopped containers, removed images)
+- ✅ Rebuilt `comfy-multi-frontend:latest` with:
+  - ComfyUI v0.9.2
+  - default_workflow_loader custom node
+  - Custom nodes volume mounts
+  - Health checks
+  - `requests` module (missing dependency)
+
+#### Part 6: Current Blocker (Health Check Failures)
+- ⚠️ Containers start but fail health checks after ~71 seconds
+- ⚠️ Issue: Missing `libgomp.so.1` library (audio nodes import error)
+- ⚠️ ComfyUI starts successfully ("Starting server" message) but health check times out
+- ⏳ **Next:** Fix libgomp.so.1 dependency, test batched startup
+
+### Files Created
+
+**Main Project (comfy-multi):**
+- `docs/architecture-user-files.md` - Comprehensive user files architecture (300+ lines)
+- `docs/architecture-container-startup-analysis.md` - Container startup strategy analysis (400+ lines)
+- `comfyui-frontend/custom_nodes/default_workflow_loader/__init__.py`
+- `comfyui-frontend/custom_nodes/default_workflow_loader/web/default_workflow_loader.js`
+- `comfyui-frontend/custom_nodes/default_workflow_loader/README.md`
+- `data/user_data/user001-user020/comfyui/custom_nodes/` - Directory structure
+
+### Files Modified
+
+**Main Project (comfy-multi):**
+- `CLAUDE.md` - Mello server specs (CAX31), detailed folder hierarchy, updated date (2026-01-30)
+- `scripts/generate-user-compose.sh` - Batched startup logic with health checks
+- `docker-compose.users.yml` - Regenerated with dependency chains and health checks
+- `comfyui-frontend/Dockerfile` - Added requests module, reverted user_workflows mkdir
+- `.claude/CLAUDE-RESUME-VERDA-INSTANCE.md` - Reverted to previous version
+- `docs/storage-hierarchy.md` - Added (from previous session)
+- `docs/workflows.md` - Added (from previous session)
+- `implementation-serverless-options.md` - Added (from previous session)
+
+### Commits (comfy-multi repo)
+```
+a46a0be feat: add default workflow loader extension (Flux2 Klein)
+27f867d docs: update mello server specs and revert resume file
+[pending] feat: implement batched container startup with health checks (Issue #17)
+[pending] docs: comprehensive user files architecture
+[pending] fix: add missing libgomp.so.1 dependency for audio nodes
+```
+
+### Key Technical Decisions
+
+**1. User Files Storage Architecture:**
+- Custom nodes: Persistent on mello, volume-mounted per user
+- Uploads/outputs: Ephemeral on Verda block storage (deleted daily)
+- Workflows: Both shared templates (mello) and user-saved (mello)
+
+**2. Container Startup Strategy:**
+- Rejected: All at once (resource exhaustion), wrapper scripts (not native), profiles (unnecessary complexity)
+- **Accepted:** Dependency chains without profiles (simplest, native, elegant)
+- 4 parallel batch leaders, sequential within batches, health checks
+
+**3. Per-User Images:**
+- Initially had `build:` in docker-compose.users.yml (created 20 separate images)
+- Changed to `image: comfy-multi-frontend:latest` (single shared image)
+- Volume-mount custom nodes instead of baking into images
+
+### Blockers
+
+**Current Blocker:**
+- Health checks failing due to missing `libgomp.so.1` system library
+- Audio nodes failing to import (torchaudio dependency)
+- ComfyUI server starts but health check curl times out
+
+**Resolution Plan:**
+- Add `libgomp` to Dockerfile system dependencies
+- Rebuild image and test batched startup
+- Verify Flux2 Klein workflow loads by default
+
+### Next Session Goals
+
+1. **Fix health check failures:**
+   - Add libgomp.so.1 to Dockerfile
+   - Rebuild and test batched startup
+2. **Test workflow loading:**
+   - Verify Flux2 Klein loads by default
+   - Test other workflows available via Load menu
+3. **Test batched startup performance:**
+   - Measure actual startup time for 4 batches
+   - Verify health checks work correctly
+4. **Update progress and commit:**
+   - Commit all batched startup changes
+   - Update GitHub issues
+   - Push to both repos
+
+### Lessons Learned
+
+1. **Check Docker image usage before rebuilding** - Old per-user images were cached and being used instead of fresh builds
+2. **User's hybrid approach brilliance** - Skipping profiles entirely and using pure dependency chains is simpler and more elegant
+3. **System dependencies matter** - Missing libgomp.so.1 breaks audio nodes even though we don't use them (CPU-only mode)
+
+---
+
 ## Progress Report 16 - 2026-01-27 (Documentation & Infrastructure Updates)
 **Status:** ✅ Complete
 **Started:** 2026-01-27
