@@ -42,10 +42,10 @@ Implemented hybrid batched container startup using dependency chains + health ch
 
 **Main Repo (comfy-multi):**
 - **Issue #14** 🔴 Verda instance storage full - worker build failed (blocks GPU testing)
-- **Issue #15** ✅ Set Flux2 Klein as default workflow (implemented, testing blocked by health checks)
-- **Issue #16** 🟡 ComfyUI version reporting incorrect (needs investigation)
-- **Issue #17** ✅ Implement hybrid batched container startup (implemented, testing blocked by health checks)
-- **Current:** 🔴 Health checks failing (missing libgomp.so.1 library)
+- **Issue #15** 🟡 Set Flux2 Klein as default workflow (implemented, NOT WORKING - workflows folder empty in UI)
+- **Issue #16** ✅ ComfyUI version reporting incorrect (CLOSED - v0.9.2 properly pinned)
+- **Issue #17** ✅ Implement hybrid batched container startup (WORKING - 1min 14sec for 5 containers)
+- **Current:** 🔴 Default workflow not loading + workflows folder empty in UI
 
 **Private Scripts Repo (comfymulti-scripts):**
 - **Issue #7** 🔴 Master Testing: Full Deployment/Restore/Backup System Test (NEVER FULLY WORKED)
@@ -122,11 +122,50 @@ Implemented hybrid batched container startup using dependency chains + health ch
   - Health checks
   - `requests` module (missing dependency)
 
-#### Part 6: Current Blocker (Health Check Failures)
-- ⚠️ Containers start but fail health checks after ~71 seconds
-- ⚠️ Issue: Missing `libgomp.so.1` library (audio nodes import error)
-- ⚠️ ComfyUI starts successfully ("Starting server" message) but health check times out
-- ⏳ **Next:** Fix libgomp.so.1 dependency, test batched startup
+#### Part 6: Docker Image Fixes (Health Checks)
+- ✅ Fixed missing `libgomp.so.1` library (added to Dockerfile)
+- ✅ Fixed missing `curl` command (required for health checks)
+- ✅ Fixed missing `requests` Python module (ComfyUI dependency)
+- ✅ Health checks now passing successfully
+- ✅ All containers reporting healthy status
+
+#### Part 7: Queue Manager Dependencies
+- ✅ Added `depends_on: queue-manager` to all 4 batch leaders
+- ✅ Ensures queue-manager is healthy before any users start
+- ✅ Clean startup order: queue-manager → batch leaders → batch members
+
+#### Part 8: Testing Results (PARTIAL SUCCESS)
+
+**✅ What's Working:**
+- Batched startup with health checks (1min 14sec for 5 containers)
+- Queue Manager dependency chain works perfectly
+- ComfyUI v0.9.2 starts successfully
+- Custom nodes load (default_workflow_loader, queue_redirect)
+- All containers report healthy
+- Health check curl endpoint responding
+
+**❌ What's NOT Working:**
+- Workflows folder empty in ComfyUI UI
+- Default workflow (Flux2 Klein) not loading automatically
+- No workflows visible in Load menu
+- Root cause: Unknown - needs investigation
+
+**Testing Evidence:**
+```
+Container comfy-user001 logs:
+✓ ComfyUI version: 0.9.2
+✓ ComfyUI frontend version: 1.36.14
+✓ Starting server
+✓ To see the GUI go to: http://0.0.0.0:8188
+✓ Import times for custom nodes:
+   0.0 seconds: /comfyui/custom_nodes/queue_redirect
+   0.0 seconds: /comfyui/custom_nodes/default_workflow_loader
+
+User browser testing:
+✗ Workflows folder empty in UI
+✗ No default workflow loaded
+✗ Load menu shows no workflows
+```
 
 ### Files Created
 
@@ -154,9 +193,9 @@ Implemented hybrid batched container startup using dependency chains + health ch
 ```
 a46a0be feat: add default workflow loader extension (Flux2 Klein)
 27f867d docs: update mello server specs and revert resume file
-[pending] feat: implement batched container startup with health checks (Issue #17)
-[pending] docs: comprehensive user files architecture
-[pending] fix: add missing libgomp.so.1 dependency for audio nodes
+751cb7c feat: implement batched container startup and user files architecture (Issue #17, #15)
+f774aa7 feat: add queue-manager dependency to batch leaders + fix health checks
+[pending] Update progress-02.md with testing results
 ```
 
 ### Key Technical Decisions
@@ -178,31 +217,45 @@ a46a0be feat: add default workflow loader extension (Flux2 Klein)
 
 ### Blockers
 
-**Current Blocker:**
-- Health checks failing due to missing `libgomp.so.1` system library
-- Audio nodes failing to import (torchaudio dependency)
-- ComfyUI server starts but health check curl times out
+**Previous Blockers (RESOLVED):**
+- ~~Health checks failing~~ ✅ Fixed (libgomp1, curl, requests added)
+- ~~Per-user images confusion~~ ✅ Fixed (single shared image)
+- ~~Queue manager startup order~~ ✅ Fixed (dependency chains)
 
-**Resolution Plan:**
-- Add `libgomp` to Dockerfile system dependencies
-- Rebuild image and test batched startup
-- Verify Flux2 Klein workflow loads by default
+**Current Blockers:**
+- 🔴 Workflows folder empty in ComfyUI UI (Issue #15 blocked)
+- 🔴 Default workflow not loading automatically
+- 🔴 Root cause unknown - needs investigation
+
+**Possible Causes:**
+- Workflow files not accessible from container?
+- Volume mount path incorrect?
+- ComfyUI not reading from /workflows or /user_workflows?
+- JavaScript extension not executing?
+- Browser caching issue?
 
 ### Next Session Goals
 
-1. **Fix health check failures:**
-   - Add libgomp.so.1 to Dockerfile
-   - Rebuild and test batched startup
-2. **Test workflow loading:**
-   - Verify Flux2 Klein loads by default
-   - Test other workflows available via Load menu
-3. **Test batched startup performance:**
-   - Measure actual startup time for 4 batches
-   - Verify health checks work correctly
-4. **Update progress and commit:**
-   - Commit all batched startup changes
-   - Update GitHub issues
-   - Push to both repos
+1. **Fix workflow loading issue (CRITICAL):**
+   - Debug why workflows folder empty in UI
+   - Verify volume mounts and file accessibility
+   - Check docker-entrypoint.sh symlink logic
+   - Test default workflow loader JavaScript
+
+2. **Complete batched startup testing:**
+   - Test all 4 batches (20 containers total)
+   - Measure full startup time
+   - Verify queue-manager dependency works
+
+3. **Address remaining issues:**
+   - Issue #14: Verda storage full (blocks GPU testing)
+   - Issue #7: Master backup/restore testing (private repo)
+   - Issue #11: Update mello backup script for custom nodes
+
+4. **Documentation:**
+   - Update GitHub issues with progress
+   - Document workflow loading investigation
+   - Update admin guides if needed
 
 ### Lessons Learned
 
