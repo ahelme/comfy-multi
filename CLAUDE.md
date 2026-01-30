@@ -3,7 +3,7 @@
 **Repository:** github.com/ahelme/comfy-multi
 **Domain:** comfy.ahelme.net
 **Doc Created:** 2026-01-02
-**Doc Updated:** 2026-01-30
+**Doc Updated:** 2026-01-30 (Session 18: ComfyUI v0.9.2 workflow path fix)
 
 ---
 
@@ -534,6 +534,34 @@ This stops all ComfyUI containers to prevent resource exhaustion on startup.
 **Commands:**
 - Start: `docker compose up -d` (includes docker-compose.users.yml automatically)
 - Regenerate: `./scripts/generate-user-compose.sh` (updates docker-compose.users.yml)
+
+### ComfyUI v0.9.2 Workflow Storage (CRITICAL!)
+
+**Workflow Location:**
+- Workflows MUST be in: `/comfyui/user/default/workflows/`
+- NOT in: `/comfyui/input/` or `/comfyui/input/templates/`
+- Served via ComfyUI's userdata API: `/api/userdata?dir=workflows`
+
+**How It Works:**
+- ComfyUI v0.9.2 uses a userdata API for workflow management
+- Browser requests: `GET /api/userdata?dir=workflows`
+- ComfyUI reads from: `/comfyui/user/default/workflows/*.json`
+- Load menu automatically discovers workflows in this location
+
+**Deployment:**
+- docker-entrypoint.sh copies workflows from `/workflows` volume to `/comfyui/user/default/workflows/`
+- Runs on every container startup
+- All 5 template workflows appear in Load menu automatically
+
+**Don't Need:**
+- ❌ Nginx static file serving for workflows (v0.9.2 has built-in API)
+- ❌ Custom JavaScript extensions that try to fetch workflows manually
+- ❌ Symlinking workflows to other locations
+
+**Symptoms if wrong:**
+- Workflows folder empty in ComfyUI Load menu
+- Browser console errors: `404 /api/userdata?dir=workflows`
+- Default workflow loads SD v1.5 instead of Flux2 Klein
 
 ### Cloudflare R2 EU location
 - don't forget the '.eu' domain!
