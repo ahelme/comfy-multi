@@ -18,11 +18,11 @@ if [ -d "/workflows" ]; then
     ln -sf /workflows /comfyui/user_workflows
 fi
 
-# Copy template workflows to input directory for Load menu
+# Copy template workflows to user directory for ComfyUI v0.9.2
 if [ -d "/workflows" ]; then
-    mkdir -p /comfyui/input/templates
-    cp -f /workflows/*.json /comfyui/input/templates/ 2>/dev/null || true
-    echo "✓ Workflows copied to input/templates/"
+    mkdir -p /comfyui/user/default/workflows
+    cp -f /workflows/*.json /comfyui/user/default/workflows/ 2>/dev/null || true
+    echo "✓ Workflows copied to user/default/workflows/"
 fi
 
 # Link shared models (read-only)
