@@ -3,7 +3,7 @@
 **Repository:** github.com/ahelme/comfy-multi
 **Domain:** comfy.ahelme.net
 **Doc Created:** 2026-01-04
-**Doc Updated:** 2026-01-27 (Session 17)
+**Doc Updated:** 2026-01-30 (Session 18)
 
 ---
 
@@ -23,6 +23,167 @@
 ---
 
 # Progress Reports
+
+---
+
+## Progress Report 18 - 2026-01-30 (ComfyUI v0.9.2 Workflow Path Fix & Extension Cleanup)
+**Status:** ✅ Major Progress
+**Started:** 2026-01-30
+
+### Summary
+Fixed workflow loading by discovering ComfyUI v0.9.2's correct userdata API path. Workflows now appear in Load menu. Removed incompatible custom extensions.
+
+### Implementation Phase
+**Phase:** Phase 11 - Test Single GPU Instance (Restore & Verify)
+**Current Focus:** ComfyUI v0.9.2 compatibility + workflow management
+
+### GitHub Issues Created/Updated
+- **Issue #19** 🟡 ComfyUI v0.9.2 frontend errors and missing endpoints (created - low priority)
+- **Issue #15** 🟡 Set Flux2 Klein as default workflow (partially resolved - workflows visible, default needs work)
+
+### Activities
+
+#### Part 1: ComfyUI v0.9.2 Workflow Path Discovery
+- ❌ Initial approach: Tried nginx static file serving for workflows
+  - Added nginx location blocks to serve `/user_workflows/`
+  - Broke the entire site - nginx routing interference
+  - **Reverted immediately** - user reported blank page, nothing loading
+- ❌ Second approach: Copied workflows to `/comfyui/input/templates/`
+  - Based on incorrect assumption about v0.9.2 architecture
+  - Workflows not discovered by ComfyUI Load menu
+- ✅ Correct approach: ComfyUI v0.9.2 uses userdata API
+  - Browser console revealed: `404 /api/userdata?dir=workflows`
+  - Workflows must be in: `/comfyui/user/default/workflows/`
+  - Served via built-in API, not static files
+  - Updated docker-entrypoint.sh to copy to correct location
+  - **SUCCESS:** Workflows now visible in Load menu!
+
+#### Part 2: Extension Compatibility Issues
+- Discovered custom extensions incompatible with ComfyUI v0.9.2:
+  - `default_workflow_loader` - Tried to import non-existent `/scripts/app.js`
+  - `queue_redirect` - Tried to import non-existent `/scripts/api.js`
+  - v0.9.2 uses bundled frontend, old extension API doesn't exist
+- ✅ Removed both incompatible extensions
+- Result: Cleaner browser console, no extension loading errors
+
+#### Part 3: Documentation Updates
+- ✅ Added critical gotcha to CLAUDE.md: "ComfyUI v0.9.2 Workflow Storage"
+  - Explained userdata API vs static file serving
+  - Documented correct path: `/comfyui/user/default/workflows/`
+  - Listed symptoms of incorrect workflow location
+  - Noted nginx serving is unnecessary for v0.9.2
+- ✅ Updated CLAUDE.md timestamp: Session 18
+
+#### Part 4: Issue Tracking & Task Management
+- ✅ Created Issue #19: Documented remaining non-critical frontend errors
+  - CSS MIME type warnings (cosmetic)
+  - Missing static assets (favicon, icons)
+  - Missing userdata endpoints (subgraphs, templates)
+  - Manifest 401 error (PWA install)
+- ✅ Created Tasks for remaining work:
+  - Task #1: Set Flux2 Klein 9B as default workflow
+  - Task #2: Rebuild and deploy to all 20 users
+  - Task #3: Investigate comfy.templates.json requirement
+
+### Files Modified
+
+**Main Project (comfy-multi):**
+- `comfyui-frontend/docker-entrypoint.sh` - Fixed workflow copy path (input/templates → user/default/workflows)
+- `comfyui-frontend/custom_nodes/` - Removed incompatible extensions (default_workflow_loader, queue_redirect)
+- `CLAUDE.md` - Added ComfyUI v0.9.2 workflow storage gotcha + timestamp update
+- `progress-02.md` - This file (Session 18 added)
+
+**Host System:**
+- `/etc/nginx/sites-available/comfy.ahelme.net` - Added then reverted workflow serving location block
+
+### Commits (comfy-multi repo)
+```
+316d0b2 fix: correct workflow storage path for ComfyUI v0.9.2 (Issue #15)
+3190e3e docs: add ComfyUI v0.9.2 workflow storage gotcha to CLAUDE.md
+dd4babf refactor: remove ComfyUI v0.9.2-incompatible custom extensions
+[pending] docs: update progress-02.md with Session 18
+```
+
+### Key Technical Learnings
+
+**ComfyUI v0.9.2 Architecture Changes:**
+- Frontend completely rewritten with bundled JavaScript modules
+- Workflows managed via userdata API, not static files
+- Extension system incompatible with previous versions
+- `/scripts/app.js` and `/scripts/api.js` no longer exist as standalone files
+- Userdata directory: `/comfyui/user/default/` for per-user data
+
+**Workflow Discovery:**
+- API endpoint: `GET /api/userdata?dir=workflows`
+- Storage path: `/comfyui/user/default/workflows/*.json`
+- Index file: `/comfyui/user/default/workflows/.index.json` (optional)
+- Templates: `/comfyui/user/default/comfy.templates.json` (optional)
+
+**What Doesn't Work Anymore:**
+- Custom JavaScript extensions using old API (import from /scripts/)
+- Static nginx serving for workflows (unnecessary)
+- Volume mounting workflows to /input/ directory
+
+### Testing Results
+
+**✅ What's Working:**
+- ComfyUI interface loads successfully
+- All 5 workflows visible in Load menu
+- Users can load and execute workflows
+- Health checks passing (curl-based)
+- Container startup reliable
+
+**⚠️ Partial Success:**
+- Workflows discoverable ✓
+- Default workflow NOT loading (still SD v1.5 "Unsaved workflow")
+- Need to set Flux2 Klein 9B as default
+
+**❌ Not Working (Non-Critical):**
+- Default workflow auto-load
+- comfy.templates.json (404 - may be optional)
+- Subgraphs API (404 - optional feature)
+- PWA manifest (401 behind auth)
+- Custom extensions (removed as incompatible)
+
+### Blockers
+
+**Previous Blockers (RESOLVED):**
+- ~~Nginx routing broke site~~ ✅ Reverted immediately
+- ~~Workflows not in correct path~~ ✅ Fixed - now in user/default/workflows/
+- ~~Extension errors cluttering console~~ ✅ Removed incompatible extensions
+
+**Current Blockers:**
+- 🟡 Default workflow not Flux2 Klein (Task #1 created)
+- 🟡 Only user001 tested, need to deploy to all 20 users (Task #2 created)
+- 🟡 comfy.templates.json investigation needed (Task #3 created)
+
+### Next Session Goals
+
+1. **Investigate default workflow setting:**
+   - Research how v0.9.2 sets default workflow
+   - Check if comfy.templates.json is needed
+   - Modify settings or workflow metadata
+   - Test Flux2 Klein loads by default
+
+2. **Deploy to all 20 users:**
+   - Rebuild frontend image (extensions removed)
+   - Test batched startup with all containers
+   - Verify workflows visible for all users
+   - Measure full startup time
+
+3. **Test on Verda GPU instance:**
+   - Address Issue #14 (storage full)
+   - Deploy worker container
+   - Test end-to-end workflow execution
+   - Verify queue manager integration
+
+### Lessons Learned
+
+1. **Always check browser console FIRST** - Would have saved time on nginx approach
+2. **ComfyUI version matters** - v0.9.2 is completely different architecture than docs suggest
+3. **Revert fast when broken** - User feedback "nothing loads" meant immediate rollback
+4. **Extensions are version-specific** - Old extensions won't work with new frontend
+5. **User was right** - Nginx change was unnecessary, workflows just needed correct path
 
 ---
 
