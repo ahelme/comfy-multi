@@ -26,17 +26,36 @@
 
 ## 🔥 **ACTIVE SESSION CONTEXT** (MUST READ!)
 
-**📋 [Session 21 Handoff - READY FOR PLAN SYNTHESIS](.claude/SESSION-21-HANDOFF.md)**
+**📋 [Session 21 Handoff](.claude/SESSION-21-HANDOFF.md)** | **[Resume Instructions](.claude/CLAUDE-RESUME-VERDA-INSTANCE.md)**
 
-**Status:** 🟡 IN PROGRESS - Awaiting Verda Plan V1 to synthesize with Mello Plan V1
-**Context:** 75% full (149k/200k tokens used in Session 21)
+**Status:** 🟢 READY - Creating detailed GitHub issues for Mello team rebuild
 **Branch:** `mello-track` (NOT dev!)
+**New Repo:** `comfyume` (https://github.com/ahelme/comfyume) - for v0.11.0 clean rebuild
 
-**What Happened:** 14 AI agents researched ComfyUI v0.8.2→v0.11.1 migration (11,320 lines of analysis!)
-**Key Insight:** Worker API is STABLE (Verda discovery) - only need to rebuild frontend (~30% of code)
-**Deliverable:** Mello Rebuild Plan V1 (Issue #31) - awaiting synthesis with Verda's plan
+**Research Complete:** 14 agents, 11,320 lines, Master Migration Map ✅
+**Key Insight:** Worker API STABLE - only rebuild frontend (~30% of code) ✅
+**Verda Coordination:** Active via Issue #7 - check regularly! ✅
+**Hooks Configured:** SessionStart, PreCompact, Stop reminder ✅
 
-**⚡ NEXT STEP:** Synthesize Mello + Verda plans → Create "Best of Both Worlds" final plan!
+**⚡ NEXT:** Create detailed issues (#8-24) for Mello team tasks in comfyume repo
+
+---
+
+## 📬 **TEAM COORDINATION** (CHECK REGULARLY!)
+
+**Two Teams Working in Parallel:**
+- **Mello Team** (this Claude) - Frontend, extensions, workflows
+- **Verda Team** (other Claude) - Worker, GPU, VRAM monitoring
+
+**📧 COORDINATION CHANNEL:** https://github.com/ahelme/comfyume/issues/7
+- **CHECK THIS LIKE EMAIL** - Regularly throughout session!
+- Post questions, clarifications, decisions here
+- Both teams communicate through this issue
+- Don't proceed with conflicting work without coordination
+
+**New Repo:** `comfyume` (https://github.com/ahelme/comfyume)
+- Master task list: Issue #1
+- Team dialogue: Issue #7 ⚠️ CHECK REGULARLY!
 
 ---
 

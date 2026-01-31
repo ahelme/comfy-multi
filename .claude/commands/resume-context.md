@@ -4,4 +4,4 @@ Please read this file CLAUDE-CONTEXT-ABOUT-US.md
 
 and then read/action steps within: 
 
-CLAUDE-RESUME-VERDA-DEPLOYMENT.md THANK YOU!! 🤗
+CLAUDE-RESUME-VERDA-INSTANCE.md THANK YOU!! 🤗

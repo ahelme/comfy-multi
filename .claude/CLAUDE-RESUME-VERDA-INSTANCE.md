@@ -4,7 +4,7 @@ CLAUDE RESUME - COMFY-MULTI (ASSUMES WELCOME HAS BEEN COMPLETED)
 
 ## TODAY'S GOALS
                                                                               
-  Today we are testing deployment for our web app ComfyMulti - designed to    
+  Today we are developing on our web app ComfyMulti - designed to    
   economically run ComfyUI for a workshop of ~20 professional filmmakers in   
   generating video with AI.                                                   
                                                                               
@@ -116,18 +116,57 @@ CLAUDE RESUME - COMFY-MULTI (ASSUMES WELCOME HAS BEEN COMPLETED)
   • IN WHICH CASE we could explore slightly different Verda disk              
   configurations                                               
 
-## NEXT:
+## NEXT TASKS (Session 22+):
 
-  Please explain to the user the basic deployment workflow as you understand it.
+**Primary Goal:** Create detailed GitHub issues for Mello team rebuild work
 
-  Review issues #28 (our Mello Team task) and #29 (the Verda Team's task
-   in THIS REPO - READ IN FULL
+### Step 1: Create Mello Team Issues in comfyume Repo
 
-  Please print out " ## Next Session Goals " in progress-02.md
+**Foundation Issues (#20-24)** - Mello creates & executes:
+- Copy queue-manager/ from comfy-multi
+- Copy admin/ from comfy-multi
+- Copy nginx/ from comfy-multi (update paths)
+- Copy scripts/ (start.sh, stop.sh, etc.)
+- Create docker-compose.yml (main orchestration)
 
-  Then please add a ToDo - review issue #16 for possible closure
+**Phase 1 - Frontend Issues (#8-14 estimated):**
+- Build frontend Dockerfile (v0.11.0 base)
+- Create docker-entrypoint.sh (version-aware)
+- Rewrite default_workflow_loader extension
+- Rewrite queue_redirect extension
+- Update 5 workflow templates
+- Test single container startup
 
-  Then create & discuss further To Dos together before proceeding.
+**Phase 3 - Integration Issues (#15-19)** - Both teams:
+- End-to-end job submission test
+- WebSocket connection test (frontend ↔ worker)
+- VRAM monitoring integration
+- Multi-user load test (20 users)
+- Workshop readiness checklist
 
-  ASK ANY QUESTIONS RE: UNCLEAR INFO OR STEPS :)
+### Step 2: Update Private Scripts Repo
+
+**Repository:** https://github.com/ahelme/comfymulti-scripts
+- Create issue: "Update paths for comfyume rename"
+- Branch: mello-track
+- Update setup-verda-solo-script.sh:
+  - REPO_URL: comfy-multi → comfyume
+  - PROJECT_DIR: /home/dev/comfy-multi → /home/dev/comfyume
+- Create PR
+
+### Step 3: Coordinate via Issue #7
+
+**Check regularly:** https://github.com/ahelme/comfyume/issues/7
+- Post updates on Mello team progress
+- Answer Verda team questions
+- Coordinate integration testing
+
+### Key Context:
+- Session 21 research COMPLETE (14 agents, 11,320 lines)
+- Mello Plan V1 ready (comfy-multi Issue #31)
+- Verda team ready (Issues #2-6 created)
+- Hooks configured (SessionStart, PreCompact, Stop)
+- Worker API is STABLE (only rebuild frontend!)
+
+**ASK QUESTIONS IF ANYTHING UNCLEAR!**
 

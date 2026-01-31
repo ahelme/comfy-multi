@@ -137,24 +137,23 @@
 
 ## Next Session Goals
 
-**Immediate (Session 21 - Mello Track):**
-1. Switch to branch `mello-track`
-2. Launch 7x research agents (ComfyUI version analysis v0.8.2 → v0.11.1)
-3. Launch 7x review agents (double-check findings)
-4. Collate master migration map
-5. Send worker requirements to Verda
+**Immediate (Session 22):**
+1. Create detailed GitHub issues for Mello Team tasks (comfyume repo)
+   - Phase 1: Frontend rebuild (Issues #8-14 estimated)
+   - Foundation: Copy existing components (Issues #20-24)
+   - Integration: Testing & validation (Issues #15-19)
+2. Update comfymulti-scripts repo with path changes (comfy-multi → comfyume)
+   - Create issue in private repo
+   - Branch: mello-track
+   - Update setup-verda-solo-script.sh paths
+   - Create PR
+3. Coordinate with Verda team via Issue #7
 
-**Parallel (Session 21 - Verda Track):**
-1. Switch to branch `verda-track`
-2. Draft modular architecture design
-3. Analyze backup/restore scripts
-4. Create breaking changes list
-5. Send architecture map to Mello
-
-**Coordination:**
-- Multiple sync points between tracks
-- Agent swarms for parallel research
-- Feature branches for parallel development
+**Context:**
+- Session 21 research complete (14 agents, 11,320 lines)
+- Mello Plan V1 ready (Issue #31 in comfy-multi)
+- Verda coordination confirmed via Issue #7
+- Hooks configured (SessionStart, PreCompact, Stop reminder)
 
 ### Pending (UNSCHEDULED)
 - **#30** - Clean up untracked files (gitignore user_data, track custom_nodes)
@@ -164,6 +163,83 @@
 ---
 
 # Progress Reports
+
+---
+
+## Progress Report 22 - 2026-01-31 - (Session Resume & Handover Prep)
+**Status:** In Progress
+**Started:** 2026-01-31
+
+### Summary
+Resumed session after context recovery. Read Session 21 handoff, verified hooks setup from previous session, coordinated with Verda team via Issue #7. Preparing to create detailed GitHub issues for Mello team rebuild work.
+
+### Implementation Phase
+**Phase:** Transition from comfy-multi to comfyume (v0.11.0 rebuild)
+**Current Focus:** Create detailed task breakdown for Mello team work (Issues #8-24 in comfyume repo)
+
+### GitHub Issues Status
+**Comfy-multi repo (legacy):**
+- Issue #31: Mello Rebuild Plan V1 ✅ Complete (research foundation)
+
+**Comfyume repo (new):**
+- Issue #1: Master task breakdown ✅ Complete
+- Issue #7: Team coordination channel (active - checking regularly)
+- Issue #8: Hooks setup guide ✅ Complete (by Verda team)
+- Issues #2-6: Verda team tasks ✅ Created by Verda
+- Issues #8-24: Mello team tasks ⏳ TO CREATE (next session)
+
+### Activities
+
+#### Part 1: Session Recovery & Context Loading
+- Read recovered session (18,145 lines) to understand previous work
+- Verified hooks already configured in previous "setting-up-hooks" session
+- Reviewed Session 21 handoff notes
+- Checked Verda team coordination via Issue #7
+
+#### Part 2: Verda Team Coordination Review
+**Messages received from Verda:**
+1. Coordination answers (Issue #7):
+   - ✅ Agreed on labeling strategy (mello-team, verda-team, foundation, phase-3)
+   - ✅ Mello creates & executes Foundation issues (#20-24)
+   - ✅ Create Integration issues now (#15-19) with both-teams label
+   - ✅ Path changes confirmed: comfy-multi → comfyume (2 lines in script)
+
+2. Hooks guide created (Issue #8):
+   - SessionStart hook for /resume-context
+   - PreCompact hook for /CLAUDE-HANDOVER
+   - Stop event hookify rule
+   - Ready to adapt for Mello team
+
+#### Part 3: Task List Cleanup
+- Completed Task #6 (Review & validate migration map)
+- Completed Task #7 (Send worker requirements to Verda)
+- Deleted all 17 completed tasks from Session 21 research
+- Clean slate for implementation phase
+
+### Files Modified
+**Modified (uncommitted):**
+- `.claude/CLAUDE-RESUME-VERDA-INSTANCE.md` - Updated coordination section
+- `.claude/commands/resume-context.md` - (previous session changes)
+- `.claude/settings.json` - Added SessionStart & PreCompact hooks
+- `CLAUDE.md` - Added team coordination section
+
+**Created (uncommitted):**
+- `.claude/hookify.context-reminder.local.md` - Stop event hook
+- `.claude/commands/CLAUDE-HANDOVER.md` - This handover command
+- Recovered session files (documentation)
+
+### Key Learnings
+1. **Hooks configuration successful** - SessionStart auto-runs /resume-context
+2. **Verda team highly responsive** - Clear coordination via Issue #7
+3. **Repository transition confirmed** - Moving to comfyume for clean rebuild
+4. **Minimal script changes** - Only 2 lines in setup-verda-solo-script.sh
+
+### Next Session Goals
+1. Create detailed GitHub issues for Mello team (comfyume repo Issues #8-24)
+2. Update private scripts repo with path changes (create issue, branch, PR)
+3. Begin Foundation phase (copy queue-manager, admin, nginx, scripts)
+
+---
 
 ---
 
