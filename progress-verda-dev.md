@@ -404,6 +404,16 @@ Created master issue and all detailed Verda Team issues in new comfyume reposito
 - Only 25% needs updates for v0.11.0 compatibility
 - Critical: Keep GPU config, Redis patterns, queue logic intact
 
+**setup-verda-solo-script.sh Compatibility (CRITICAL!):**
+- comfyume repo MUST match comfy-multi structure EXACTLY
+- Directory: `~/comfyume/comfyui-worker/` (NOT comfyui-worker-v2!)
+- Docker command unchanged: `cd ~/comfyume/comfyui-worker/ && docker compose up -d worker-1`
+- Service name: `worker-1` (unchanged)
+- Image name: `comfyui-worker` (keep same as comfy-multi)
+- Symlinks: data/models, data/outputs, data/inputs (script creates these)
+- Script changes: ONLY path updates (`/home/dev/comfy-multi` → `/home/dev/comfyume`)
+- Added constraint comments to Issue #2 (Dockerfile) and Issue #5 (docker-compose)
+
 **Worker API Stability (Reinforced):**
 - worker.py needs MINIMAL changes (just VRAM monitoring)
 - All ComfyUI endpoints stable: /prompt, /queue, /ws, /history
