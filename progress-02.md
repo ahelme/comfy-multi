@@ -239,6 +239,203 @@ The backend userdata API is working correctly. ComfyUI v0.9.2's frontend should 
 
 **Next Step:** Browser testing to verify frontend properly encodes paths and workflows load/save correctly.
 
+#### Part 6: Browser Testing with Chrome DevTools MCP
+
+**Setup:**
+- Installed Chrome DevTools MCP server for headless browser automation
+- Configured for headless Chromium (ARM64 compatible) on VPS
+- Created guide: `docs/chrome-dev-tools.md`
+
+**Browser Testing Results:**
+- ✅ ComfyUI frontend loads successfully
+- ✅ All 5 template workflows visible in Workflows menu
+- ✅ Workflows served correctly from `/comfyui/user/default/workflows/`
+- ✅ Userdata API list endpoint works
+- ❌ Workflow loading from menu returns 404 (URL encoding issue)
+- ⚠️ Custom nodes directory empty (volume mount gotcha)
+
+**Critical Discovery:**
+- Reading Sessions 18-19 backwards revealed: userdata API file endpoint broken
+- Route `/userdata/{file}` doesn't support nested paths with slashes
+- Only root-level files work: `/userdata/comfy.settings.json` ✅
+- Nested files fail: `/userdata/workflows%2Ffile.json` ❌
+
+**Root Cause:** ComfyUI v0.9.2 API limitation - route doesn't match paths with slashes
+
+#### Part 7: CRITICAL Discovery - ComfyUI v0.11.1!
+
+**Major Finding:** We are on v0.9.2, but ComfyUI is now at **v0.11.1**!
+
+**Impact:**
+- ❌ Latest models (Flux.2 Klein, LTX-2 features) won't run properly on v0.9.2
+- ❌ Missing 2+ months of bug fixes and improvements
+- ❌ Piecemeal migration (Sessions 18-20) created technical debt
+- ❌ Current architecture tightly coupled to v0.9.2 internals
+
+**Strategic Decision:** REBUILD with clean architecture, don't patch!
+
+#### Part 8: Architecture Analysis & Documentation
+
+**Created comprehensive analysis documents:**
+
+1. **`docs/comfyui-0.9.2-app-structure-patterns.md`** (Mini Guide)
+   - Core architecture patterns
+   - Userdata API patterns (with URL encoding!)
+   - Custom extension patterns
+   - Docker volume best practices
+   - Startup sequences & health checks
+   - Common pitfalls & solutions
+
+2. **`docs/comfy-multi-comparison-analysis-report.md`** (Full Analysis)
+   - Migration status: 85% complete
+   - Critical gaps identified (URL encoding, custom nodes)
+   - Architecture grade: B+ (good separation, some coupling)
+   - Key recommendation: "ComfyUI as Dependency" pattern
+   - Detailed fixes prioritized by impact
+   - Refactor recommendations for easy upgrades
+
+**Key Principle Established:** Treat ComfyUI as **upstream dependency** (NEVER modify core)
+
+#### Part 9: Issue Creation - Re-Architecture Strategy
+
+**Created coordinated GitHub issues for v0.11.1 upgrade:**
+
+**Issue #27** - RE-ARCHITECT APP AROUND CLEAR SEPARATION FROM COMFYUI AND WITH v0.11.1
+- Parent issue with architecture vision
+- Strategic approach: Rebuild, don't patch
+- Goal: Make future upgrades 1-line changes
+- Estimated: 12-16 hours total
+- Priority: 🔴 CRITICAL - TOP PRIORITY
+
+**Issue #28** - MELLO TRACK: Migration Analysis & Frontend Re-Architecture
+- 7x agent swarm for version analysis (v0.8.2 → v0.11.1)
+- Frontend container rebuild
+- Extensions update
+- Orchestration updates
+- Branch: `mello-migrate-rearch`
+
+**Issue #29** - VERDA TRACK: Architecture Design & Worker Container Re-Architecture
+- Modular architecture design
+- Backup/restore script analysis
+- Worker container rebuild (GPU)
+- Script updates for new architecture
+- Branch: `verda-rearch-migrate`
+
+**CRITICAL IMPLEMENTATION PRINCIPLE (Added to all issues):**
+- ⚠️ **Backup Existing & Copy Across Pieces with Changes**
+- **DO NOT** write code from scratch!
+- **WHY?** Don't throw baby out with bathwater
+- **APPROACH:** Copy existing → Make targeted improvements → Test incrementally
+- ❌ DO NOT re-invent the wheel
+
+**Coordination Strategy:**
+- Two Claudes: Mello (frontend/orchestration) + Verda (GPU/worker)
+- Agent swarms for parallel research
+- Multiple sync points for alignment
+- Feature branches for parallel development
+
+### Files Created
+
+**Documentation:**
+- `docs/comfyui-0.9.2-app-structure-patterns.md` - Mini reference guide
+- `docs/comfy-multi-comparison-analysis-report.md` - Full analysis
+- `docs/chrome-dev-tools.md` - Browser testing guide
+
+**GitHub Issues:**
+- #27 - Re-Architecture Vision
+- #28 - Mello Track (linked to #27)
+- #29 - Verda Track (linked to #27)
+
+### Commits (comfy-multi repo)
+```
+d01ee76 docs: add Chrome DevTools MCP guide and browser testing confirmation (Session 20)
+[pending] docs: update progress-02.md with Session 20 completion
+```
+
+### Key Technical Learnings
+
+**Reading Backwards Works!**
+- User's suggestion to read Sessions 18-19 backwards was brilliant
+- Found that Sessions 18-19 discovered but never fixed the userdata API issue
+- List endpoint works, but file fetch endpoint broken
+
+**ComfyUI v0.9.2 Limitations:**
+- Route pattern `/userdata/{file}` only matches single path segments
+- Nested paths require URL encoding or route change
+- This is a known limitation, not a bug in our code
+
+**Architecture Maturity:**
+- Current state: 85% migrated, B+ architecture
+- Problem: Tight coupling makes upgrades hard
+- Solution: Treat ComfyUI as clean upstream dependency
+- Result: Future upgrades become 1-line changes
+
+**Agent Swarm Strategy:**
+- 7x agents researching 7 versions in parallel = huge time savings
+- Review agents double-check = higher quality
+- Coordinated tracks (Mello + Verda) = parallel development
+
+### Testing Results
+
+**✅ What's Working:**
+- ComfyUI v0.9.2 running on 5 user containers
+- Health checks passing
+- Workflows visible in menu
+- Queue manager operational
+- Admin dashboard functional
+
+**⚠️ Partial Success:**
+- Browser automation setup (Chrome DevTools MCP)
+- Userdata API partially working (list ✅, fetch ❌)
+- Architecture analysis complete
+
+**❌ Not Working:**
+- Workflow loading from menu (URL encoding + custom nodes empty)
+- Default workflow auto-load (SD v1.5 loads instead)
+- Full v0.9.2 → v0.11.1 migration (major version gap)
+
+### Blockers
+
+**Superseded by Re-Architecture:**
+- ~~Userdata API file fetch~~ → Will fix in v0.11.1 rebuild
+- ~~Custom nodes empty~~ → Will fix with new architecture
+- ~~Default workflow~~ → Will fix with new architecture
+
+**Current Blocker:**
+- 🔴 **Version Gap:** v0.9.2 vs v0.11.1 (2+ months behind)
+- **Impact:** Latest models won't run properly
+- **Resolution:** Issues #27, #28, #29 created (rebuild approach)
+
+### Next Session Goals
+
+**Immediate (Session 21 - Mello Track):**
+1. Switch to branch `mello-migrate-rearch`
+2. Launch 7x research agents (ComfyUI version analysis)
+3. Launch 7x review agents (double-check)
+4. Collate master migration map
+5. Send worker requirements to Verda
+
+**Parallel (Session 21 - Verda Track):**
+1. Switch to branch `verda-rearch-migrate`
+2. Draft modular architecture design
+3. Analyze backup/restore scripts
+4. Create breaking changes list
+5. Send architecture map to Mello
+
+**Coordination:**
+- Multiple sync points between tracks
+- Agent swarms for parallel research
+- Feature branches for parallel development
+
+### Lessons Learned
+
+1. **Reading backwards through session logs** - Brilliant debugging technique
+2. **Chrome DevTools MCP** - Powerful for headless browser automation
+3. **Agent swarms** - Massive time savings for parallel research
+4. **Strategic vs tactical fixes** - Sometimes rebuild is better than patch
+5. **Don't throw baby out with bathwater** - Copy existing, improve incrementally
+6. **Architecture analysis before coding** - Time spent planning saves implementation time
+7. **Coordination between multiple Claudes** - Enables true parallel development
 
 ---
 
