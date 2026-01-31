@@ -137,15 +137,30 @@
 
 ## Next Session Goals
 
-0. **#16** - can we close this now?
-1. **#19 & #21** - Fix userdata API (CRITICAL)
-2. **#13** - If API fixed, test workflows
-3. **#23** - Rebuild containers & deploy to all 20 users
+**Immediate (Session 21 - Mello Track):**
+1. Switch to branch `mello-track`
+2. Launch 7x research agents (ComfyUI version analysis v0.8.2 → v0.11.1)
+3. Launch 7x review agents (double-check findings)
+4. Collate master migration map
+5. Send worker requirements to Verda
+
+**Parallel (Session 21 - Verda Track):**
+1. Switch to branch `verda-track`
+2. Draft modular architecture design
+3. Analyze backup/restore scripts
+4. Create breaking changes list
+5. Send architecture map to Mello
+
+**Coordination:**
+- Multiple sync points between tracks
+- Agent swarms for parallel research
+- Feature branches for parallel development
 
 ### Pending (UNSCHEDULED)
-    - **#21 & #22** - Verda Worker upgrade: (may be completed by claude on Verda)
-    - **#4** - Refactor, simplify, re-org `implementation-backup-restore.md`
-    - **#24** - MINOR ComfyUI v0.9.2 frontend error
+- **#30** - Clean up untracked files (gitignore user_data, track custom_nodes)
+- **#4** - Refactor implementation-backup-restore.md
+- **#24** - MINOR ComfyUI v0.9.2 frontend errors
+
 ---
 
 # Progress Reports
@@ -312,14 +327,14 @@ The backend userdata API is working correctly. ComfyUI v0.9.2's frontend should 
 - Frontend container rebuild
 - Extensions update
 - Orchestration updates
-- Branch: `mello-migrate-rearch`
+- Branch: `mello-track`
 
 **Issue #29** - VERDA TRACK: Architecture Design & Worker Container Re-Architecture
 - Modular architecture design
 - Backup/restore script analysis
 - Worker container rebuild (GPU)
 - Script updates for new architecture
-- Branch: `verda-rearch-migrate`
+- Branch: `verda-track`
 
 **CRITICAL IMPLEMENTATION PRINCIPLE (Added to all issues):**
 - ⚠️ **Backup Existing & Copy Across Pieces with Changes**
@@ -409,14 +424,14 @@ d01ee76 docs: add Chrome DevTools MCP guide and browser testing confirmation (Se
 ### Next Session Goals
 
 **Immediate (Session 21 - Mello Track):**
-1. Switch to branch `mello-migrate-rearch`
+1. Switch to branch `mello-track`
 2. Launch 7x research agents (ComfyUI version analysis)
 3. Launch 7x review agents (double-check)
 4. Collate master migration map
 5. Send worker requirements to Verda
 
 **Parallel (Session 21 - Verda Track):**
-1. Switch to branch `verda-rearch-migrate`
+1. Switch to branch `verda-track`
 2. Draft modular architecture design
 3. Analyze backup/restore scripts
 4. Create breaking changes list
