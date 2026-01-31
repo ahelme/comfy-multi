@@ -320,7 +320,9 @@ admin → [Adapter] → ComfyUI
 - ✅ Detailed Verda Team issues #2-6 created with full implementation details
 - ✅ Labels created in comfyume repo (team, phase, component, priority)
 - ✅ CLAUDE.md updated with critical implementation principle
-- ✅ Ready for Mello Team to create their issues (#2-9 in master plan)
+- ✅ setup-verda-solo-script.sh compatibility constraints added to issues
+- ✅ Mello Team coordination questions answered (Issue #7)
+- ✅ Branches: comfy-multi verda-track + comfyume verda-track
 
 **NEXT (Verda Team Implementation):**
 1. Begin Issue #4 (VRAM monitoring) - can start immediately (no dependencies)
@@ -396,6 +398,15 @@ Created master issue and all detailed Verda Team issues in new comfyume reposito
 - ✅ Emphasizes: Backup & copy, don't rewrite from scratch
 - ✅ Good vs bad examples (preserve working GPU config!)
 - ✅ Updated last modified date to 2026-01-31
+
+**Mello Team Coordination (Issue #7):**
+- ✅ Answered 4 coordination questions from Mello Team
+- ✅ **Issue numbering**: Use labels to distinguish (agreed Option B)
+- ✅ **Foundation issues**: Mello creates & executes (queue-manager, admin, nginx)
+- ✅ **Integration issues**: Create now, mark as phase-3, both-teams
+- ✅ **Project name transition**: comfyume (new repo), setup script needs 2 lines changed
+- ✅ **Structure preservation**: comfyume MUST match comfy-multi structure exactly
+- ✅ Established collaboration protocol (check Issue #7 regularly like email)
 
 ### Key Insights
 
