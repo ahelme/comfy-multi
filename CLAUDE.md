@@ -733,4 +733,39 @@ Before each session ends:
 
 ---
 
-**Last Updated:** 2026-01-19
+## 🎯 CRITICAL IMPLEMENTATION PRINCIPLE
+
+### ⚠️ Backup Existing & Copy Across Pieces with Changes
+
+**DO NOT WRITE CODE FROM SCRATCH!**
+
+**WHY?** Because we would break a lot of little things if we threw "the baby out with the bathwater"!
+
+**APPROACH:**
+
+✅ Backup existing working code (.old. prefix or git branch)
+✅ Copy existing components to new structure
+✅ Make targeted improvements (architecture + v0.11.1 compatibility)
+✅ Test incrementally
+❌ DO NOT re-invent the wheel
+❌ DO NOT throw away working code
+
+**Example:**
+
+```bash
+# GOOD: Rename and preserve
+mv comfyui-worker .old.comfyui-worker
+cp -r .old.comfyui-worker comfyui-worker-v2
+cd comfyui-worker-v2
+# Make targeted changes
+# Keep all the working GPU setup!
+
+# BAD: Delete and start fresh
+rm -rf comfyui-worker  # Don't do this!
+mkdir comfyui-worker
+# Write everything new... (will break GPU config)
+```
+
+---
+
+**Last Updated:** 2026-01-31
