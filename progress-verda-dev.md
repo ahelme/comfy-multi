@@ -253,8 +253,11 @@ admin → [Adapter] → ComfyUI
 ---
 
 ### Commits
-**Repo: comfy-multi (verda-dev branch)**
+**Repo: comfy-multi**
+- Branch: `verda-dev` → `verda-track` (switched for architecture work)
 - `380128c` - docs: add verda-dev context files and progress tracker (Session Verda 01)
+- `add4a47` - docs: Session Verda 01 progress - Translation Layer architecture discovery
+- `2bd56d6` - merge: sync with Mello team cleanup from dev branch
 
 ---
 
