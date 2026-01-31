@@ -128,15 +128,142 @@
 
 ---
 
-## Progress Report Verda 01 - 2026-01-31 - Re-Architect app to suit  migration
+## Progress Report Verda 01 - 2026-01-31 - Re-Architect app to suit migration
 **Status:** In Progress
 **Started:** 2026-01-31
 
 ### Summary
+Successfully loaded context, read critical documentation, and discovered Translation Layer architecture pattern. Analyzed scope options and identified critical constraints from setup-verda-solo-script.sh.
 
 ### Implementation Phase
 **Phase:** Phase 11 - Test Single GPU Instance (Restore & Verify)
 **Current Focus:** Re-architect app to be ComfyUI-migration-friendly
-**Next:** Upgrade worker container to new comfyui version
+**Next:** Brainstorm translation layer architecture, then plan implementation
+
+---
+
+### Activities
+
+**Context Loading & Documentation Review:**
+- ✅ Read CLAUDE.md, README.md, admin guides
+- ✅ Read `docs/comfyui-0.9.2-app-structure-patterns.md` (402 lines - v0.9.2 patterns)
+- ✅ Read `docs/comfy-multi-comparison-analysis-report.md` (754 lines - migration analysis)
+- ✅ Read `setup-verda-solo-script.sh` (1039 lines - CRITICAL restore script)
+- ✅ Reviewed issue #22 (superseded by #29 - targeting v0.11.1 not v0.9.2)
+- ✅ Updated issue #29 with scope and constraints
+
+**Key Learnings from Docs:**
+
+**From Comparison Analysis Report:**
+- Current migration ~85% complete (v0.9.2)
+- What works: Unmodified ComfyUI core, volume mounts, custom_nodes/ extensions
+- What needs improvement: Hardcoded paths, no abstraction layer, no integration tests
+- Golden Pattern: "Treat ComfyUI as Upstream Dependency"
+
+**From setup-verda-solo-script.sh (CRITICAL CONSTRAINTS):**
+```
+MUST PRESERVE:
+- Project location: /home/dev/comfy-multi/
+- Worker location: ~/comfy-multi/comfyui-worker/
+- Docker command: cd ~/comfy-multi/comfyui-worker/ && docker compose up -d worker-1
+- Symlinks: data/models → /mnt/sfs/models
+           data/outputs → /mnt/scratch/outputs
+           data/inputs → /mnt/scratch/inputs
+- Container naming: comfyui-worker (image), worker-1 (service)
+```
+
+**Scope Analysis - Option B vs C:**
+
+**Option B: Re-architect Frontend + Worker** (RECOMMENDED)
+- Pros: Minimal setup script changes, preserves working services, faster, lower risk
+- Cons: Half-measures, future debt, inconsistent patterns
+- Effort: 2-3 days | Risk: Low-Medium
+
+**Option C: Re-architect Entire App**
+- Pros: Complete solution, maximum future-proofing, clean abstractions
+- Cons: Setup script risk, scope creep, harder testing, coordination overhead
+- Effort: 5-7 days | Risk: Medium-High
+
+**BREAKTHROUGH: Translation Layer Concept** 💡
+
+Discovered hybrid solution - adapter/facade pattern between services and ComfyUI:
+
+```
+Current (Tightly Coupled):
+queue-manager → ComfyUI API (hardcoded)
+nginx → ComfyUI endpoints (direct proxy)
+admin → ComfyUI API (direct fetch)
+
+Translation Layer (Decoupled):
+queue-manager → [Adapter] → ComfyUI
+nginx → [Adapter] → ComfyUI
+admin → [Adapter] → ComfyUI
+```
+
+**Benefits:**
+- Services call adapter with generic requests
+- Adapter translates to version-specific ComfyUI calls
+- When ComfyUI upgrades, only update adapter
+- Setup script unchanged (project structure identical)
+- Existing services barely change (just import adapter)
+- Testable in isolation
+
+**Three-Way Balance Principles:**
+1. Setup Script Compatibility (fewest changes to restore workflow)
+2. Existing Code Preservation (NO reinventing! NO writing from scratch!)
+3. Migration-Friendly Architecture (ComfyUI versions drop in gracefully)
+
+**Division of Labor:**
+- **Verda Team (us):** Plan architecture + Implement worker + Deliver plan to Mello
+- **Mello Team:** Plan v0.11.1 migration + Implement mello side + Deliver plan to Verda
+- **Branches:** verda-track (us), mello-track (them)
+
+---
+
+### Decisions Made
+
+1. **Scope:** Hybrid approach with Translation Layer (Option B+)
+   - Re-architect frontend + worker (full implementation)
+   - Create translation/adapter layer for services
+   - Document patterns for future work
+
+2. **Approach:** Brainstorming → Planning → Implementation
+   - Use `superpowers:brainstorming` skill FIRST
+   - Then `superpowers:writing-plans` for architecture doc
+   - Consider `feature-dev:feature-dev` for codebase analysis
+
+3. **Focus:** Pure architecture (division of labor - stick to it!)
+
+---
+
+### Tools Identified
+
+**Available Skills for This Task:**
+1. `superpowers:brainstorming` ⭐ - Explore translation layer concept, requirements, design
+2. `superpowers:writing-plans` - Document architecture, implementation roadmap
+3. `feature-dev:feature-dev` - Analyze existing patterns, design new architecture
+
+---
+
+### Files Modified
+- `progress-verda-dev.md` - Updated with session progress
+- `.claude/CLAUDE-RESUME-VERDA-INSTANCE-VERDA-DEV.md` - Created (committed)
+- `.claude/commands/resume-context-verda.md` - Created (committed)
+
+---
+
+### Commits
+**Repo: comfy-multi (verda-dev branch)**
+- `380128c` - docs: add verda-dev context files and progress tracker (Session Verda 01)
+
+---
+
+### Next Steps
+1. Invoke `superpowers:brainstorming` skill
+2. Explore translation layer architecture deeply
+3. Design adapter interface and patterns
+4. Create architecture document
+5. Plan implementation roadmap
+
 ---
 
