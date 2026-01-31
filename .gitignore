@@ -57,6 +57,8 @@ data/outputs/*
 !data/outputs/.gitkeep
 data/inputs/*
 !data/inputs/.gitkeep
+data/user_data/*
+!data/user_data/.gitkeep
 *.log
 tmp/
 temp/
