@@ -144,7 +144,20 @@ Successfully loaded context, read critical documentation, and discovered Transla
 
 ### Activities
 
-**Context Loading & Documentation Review:**
+**Session Start - Architecture Investigation:**
+- ✅ Created comprehensive information flow map (docs/architecture-information-flow-map.md - 446 lines)
+- ✅ Mapped all API call sequences (job submission, workflow loading)
+- ✅ Identified critical touchpoints for translation layer
+- ✅ Updated issue #29 with architecture map findings
+- ✅ Shared map with Mello Team for coordination
+
+**Mello Team Research Integration:**
+- ✅ Received holistic migration analysis from Mello Team
+- ✅ Read `critique-holistic-v0.8.2-to-v0.11.1.md` (1185 lines)
+- ✅ Analysis covers 7 versions, 350+ commits, 21 days timeline
+- ✅ Updated issue #29 with corrected priorities based on Mello research
+
+**Context Loading & Documentation Review (Previous):**
 - ✅ Read CLAUDE.md, README.md, admin guides
 - ✅ Read `docs/comfyui-0.9.2-app-structure-patterns.md` (402 lines - v0.9.2 patterns)
 - ✅ Read `docs/comfy-multi-comparison-analysis-report.md` (754 lines - migration analysis)
@@ -171,6 +184,36 @@ MUST PRESERVE:
            data/inputs → /mnt/scratch/inputs
 - Container naming: comfyui-worker (image), worker-1 (service)
 ```
+
+**From Mello Team Holistic Analysis (MAJOR DISCOVERIES):**
+
+**🎯 CRITICAL FINDING: Worker API is Actually STABLE!**
+- `/prompt`, `/queue`, `/ws`, `/api/userdata` endpoints: **UNCHANGED** across v0.9.2 → v0.11.1
+- Our worker.py code (lines 84-96, 100-104) that directly calls ComfyUI: **STABLE!**
+- This was our #1 critical touchpoint, but it's NOT breaking ✅
+
+**🔴 THE REAL CRITICAL TOUCHPOINTS (Re-Prioritized):**
+
+1. **Frontend Workflow Storage Paths** (CRITICAL)
+   - v0.8.2: `/comfyui/input/` (static files)
+   - v0.9.0+: `/comfyui/user/default/workflows/` (userdata API + URL encoding)
+   - Impact: Workflows 404 on load (Session 20 discovery confirmed by Mello research)
+
+2. **Frontend JavaScript Module System** (CRITICAL)
+   - v0.8.2: `import { app } from "/scripts/app.js"` worked
+   - v0.9.0: REMOVED, bundled frontend instead
+   - Impact: All JavaScript extensions broken (Session 18-20 discoveries)
+
+3. **Custom Node Volume Mount Trap** (ALL VERSIONS)
+   - Empty host directory overwrites container contents
+   - Impact: Extensions disappear (Session 20 discovery)
+   - Solution: Entrypoint must populate if empty
+
+**Key Insights:**
+- **Silent Breaking Changes:** Changelogs don't document filesystem/API/extension changes
+- **Testing Reveals More Testing:** API tests passed, browser tests revealed bugs
+- **Dependency Omissions:** `requests`, `curl`, `libgomp1` missing from requirements.txt
+- **Staged Migration Recommended:** v0.9.2 → v0.10.0 → v0.11.0 → v0.11.1 (11-13 hours, safer)
 
 **Scope Analysis - Option B vs C:**
 
@@ -234,6 +277,12 @@ admin → [Adapter] → ComfyUI
 
 3. **Focus:** Pure architecture (division of labor - stick to it!)
 
+4. **ARCHITECTURE PIVOT (Based on Mello Research):**
+   - **Original Priority:** Worker API = CRITICAL, Frontend paths = HIGH
+   - **Corrected Priority:** Worker API = STABLE ✅, Frontend patterns = CRITICAL 🔴
+   - **Translation Layer Focus:** Frontend path abstraction, URL encoding, entrypoint population
+   - **NOT Needed:** Worker API translation (endpoints stable across versions)
+
 ---
 
 ### Tools Identified
@@ -246,7 +295,8 @@ admin → [Adapter] → ComfyUI
 ---
 
 ### Files Modified
-- `progress-verda-dev.md` - Updated with session progress
+- `docs/architecture-information-flow-map.md` - Created (446 lines - complete system map)
+- `progress-verda-dev.md` - Updated with session progress + Mello research findings
 - `.claude/CLAUDE-RESUME-VERDA-INSTANCE-VERDA-DEV.md` - Created (committed)
 - `.claude/commands/resume-context-verda.md` - Created (committed)
 
@@ -254,19 +304,25 @@ admin → [Adapter] → ComfyUI
 
 ### Commits
 **Repo: comfy-multi**
-- Branch: `verda-dev` → `verda-track` (switched for architecture work)
-- `380128c` - docs: add verda-dev context files and progress tracker (Session Verda 01)
-- `add4a47` - docs: Session Verda 01 progress - Translation Layer architecture discovery
+- Branch: `verda-track`
+- `336aa79` - docs: add comprehensive information flow map for architecture analysis
+- `685eec5` - docs: note branch switch to verda-track
 - `2bd56d6` - merge: sync with Mello team cleanup from dev branch
+- `add4a47` - docs: Session Verda 01 progress - Translation Layer architecture discovery
+- `380128c` - docs: add verda-dev context files and progress tracker (Session Verda 01)
 
 ---
 
 ### Next Steps
-1. Invoke `superpowers:brainstorming` skill
-2. Explore translation layer architecture deeply
-3. Design adapter interface and patterns
-4. Create architecture document
-5. Plan implementation roadmap
+1. ⏸️ Wait for final Mello report (deeper layer analysis coming)
+2. Update architecture map with corrected priorities (Worker API → Stable, Frontend → Critical)
+3. Redesign translation layer to focus on:
+   - Frontend path abstraction (version-specific workflow paths)
+   - URL encoding helper utilities
+   - Entrypoint directory population logic
+   - Extension compatibility guidelines (avoid JavaScript, use Python backend)
+4. Continue brainstorming session with corrected understanding
+5. Create architecture document incorporating Mello research findings
 
 ---
 
