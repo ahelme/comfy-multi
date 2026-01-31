@@ -157,7 +157,7 @@
 **Started:** 2026-01-31
 
 ### Summary
-Session focused on task organization, issue triage, and establishing clear testing methodology. Closed Issue #16 (version confirmed v0.9.2), created Issue #25 (rename CPU mode), and documented comprehensive testing plan for userdata API fix.
+Session focused on task organization, issue triage, and API investigation. Closed Issue #16 (version confirmed v0.9.2), created Issue #25 (rename CPU/GPU mode terminology), and **discovered userdata API is fully functional** - ready for browser testing.
 
 ### Implementation Phase
 **Phase:** Phase 11 - Test Single GPU Instance (Restore & Verify)
@@ -165,8 +165,8 @@ Session focused on task organization, issue triage, and establishing clear testi
 
 ### GitHub Issues Created/Updated
 - **Issue #16** ✅ CLOSED - Version confirmed as v0.9.2 (verified via API and version file)
-- **Issue #25** 🟡 NEW - Rename "CPU Mode" to "Single Server Mode" (clarity improvement)
-- **Issue #15** 📝 UPDATED - Added comprehensive testing plan (4 phases, verification checklist)
+- **Issue #25** 🟡 NEW - Rename "CPU/GPU Mode" to "Single/Dual Server Mode" (clarity improvement)
+- **Issue #15** 📝 UPDATED - Added testing plan + API investigation findings (API working!)
 - **Issue #24** 🟡 MINOR - ComfyUI v0.9.2 frontend errors (cosmetic)
 - **Issue #19** 🟠 MAJOR - ComfyUI v0.9.2 frontend errors & missing endpoints
 
@@ -209,6 +209,35 @@ Session focused on task organization, issue triage, and establishing clear testi
 4. **Multi-User Verification:** Spot-check user002-005 after user001 works
 
 **Added to Issue #15 as comment** for reference during implementation
+
+#### Part 5: API Investigation - Root Cause Found! 🎉
+
+**Investigation Process:**
+- Checked if userdata routes exist in server code → ✅ Found in `/comfyui/app/user_manager.py`
+- Verified routes are registered → ✅ `UserManager.add_routes()` called in `main.py`
+- Tested API endpoints directly → ✅ API responds!
+
+**Key Findings:**
+
+**Working API Endpoints:**
+```bash
+✅ GET /api/userdata?dir=workflows → 200 OK (returns workflow list)
+✅ POST /api/userdata/test.json → 200 OK (saves workflow successfully)
+✅ GET /api/userdata/workflows%2Fflux2_klein_9b_text_to_image.json → 200 OK (72304 bytes!)
+❌ GET /api/userdata/workflows/flux2_klein_9b_text_to_image.json → 404 (slash not URL-encoded)
+```
+
+**Root Cause Identified:**
+- The `/` in file paths **MUST be URL-encoded as `%2F`**
+- Route definition: `/userdata/{file}` treats `{file}` as single parameter
+- Non-encoded slash interpreted as separate path segment
+- Example: `workflows/file.json` → `workflows%2Ffile.json`
+
+**API Status: FULLY FUNCTIONAL** ✅
+
+The backend userdata API is working correctly. ComfyUI v0.9.2's frontend should be handling URL encoding automatically.
+
+**Next Step:** Browser testing to verify frontend properly encodes paths and workflows load/save correctly.
 
 
 ---
@@ -2099,3 +2128,53 @@ None - Phase 7 complete.
 ---
 
 **Last Updated:** 2026-01-16
+
+### Files Modified (Session 20)
+
+**Documentation:**
+- `CLAUDE.md` - Added task management section (GitHub issues only)
+- `progress-02.md` - Updated Session 20 with all activities
+
+**No code changes** - API already functional, awaiting browser testing
+
+### Technical Learnings
+
+**Userdata API Architecture:**
+- Routes defined in `/comfyui/app/user_manager.py`
+- Registered via `UserManager.add_routes()` in server startup
+- All routes available with `/api` prefix (e.g., `/api/userdata`)
+- File paths in URL parameters MUST be URL-encoded (`%2F` for `/`)
+
+**URL Encoding in REST APIs:**
+- Path parameters cannot contain unencoded slashes
+- Route: `/userdata/{file}` → `{file}` = single parameter
+- Correct: `/api/userdata/workflows%2Ffile.json`
+- Incorrect: `/api/userdata/workflows/file.json` (interpreted as 3 segments)
+
+**ComfyUI v0.9.2 Frontend:**
+- Should handle URL encoding automatically
+- Browser testing required to verify proper integration
+- Frontend may have built-in userdata API client
+
+### Blockers
+
+**RESOLVED:**
+- ~~Userdata API not responding~~ ✅ API is functional!
+- ~~Missing API routes~~ ✅ Routes registered correctly
+- ~~404 errors on workflow requests~~ ✅ URL encoding issue identified
+
+**CURRENT:**
+- ⏳ Browser testing pending (verify frontend integration)
+- ⏳ Workflow load/save functionality (user testing required)
+
+### Next Session Goals (Updated)
+
+**Immediate:**
+1. **Browser Testing** - Verify workflows load/save in ComfyUI interface
+2. **Issue #13** - If browser test passes, complete workflow testing
+3. **Issue #23** - Deploy to all 20 users
+
+**Pending:**
+- **Issue #22** - Worker upgrade to v0.9.2
+- **Issue #25** - Rename CPU/GPU mode terminology
+
