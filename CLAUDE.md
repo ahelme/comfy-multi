@@ -18,9 +18,27 @@
 
 1. **USE LATEST STABLE LIBRARIES AS OF JAN 2026**
 
-2. **ALWAYS CHECK IF CODE HAS BEEN CREATED FIRST** 
+2. **ALWAYS CHECK IF CODE HAS BEEN CREATED FIRST**
    - **NEVER EVER** REWRITE CODE IF IT HAS ALREADY BEEN WRITTEN
    - **ALWAYS CHECK** FOR PREVIOUS SOLUTIONS
+
+---
+
+## 🔥 **ACTIVE SESSION CONTEXT** (MUST READ!)
+
+**📋 [Session 21 Handoff - READY FOR PLAN SYNTHESIS](.claude/SESSION-21-HANDOFF.md)**
+
+**Status:** 🟡 IN PROGRESS - Awaiting Verda Plan V1 to synthesize with Mello Plan V1
+**Context:** 75% full (149k/200k tokens used in Session 21)
+**Branch:** `mello-track` (NOT dev!)
+
+**What Happened:** 14 AI agents researched ComfyUI v0.8.2→v0.11.1 migration (11,320 lines of analysis!)
+**Key Insight:** Worker API is STABLE (Verda discovery) - only need to rebuild frontend (~30% of code)
+**Deliverable:** Mello Rebuild Plan V1 (Issue #31) - awaiting synthesis with Verda's plan
+
+**⚡ NEXT STEP:** Synthesize Mello + Verda plans → Create "Best of Both Worlds" final plan!
+
+---
 
 ## 🎯 Project Quick Reference
 
