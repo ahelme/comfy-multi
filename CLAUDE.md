@@ -130,6 +130,12 @@
 - **ComfyMulti Project**: https://github.com/ahelme/comfy-multi/issues
 - **Private Scripts Repo**: https://github.com/ahelme/comfymulti-scripts/issues
 
+### 📋 Task Management
+- **ALWAYS reference GitHub issue numbers** (e.g., #15, #22, #13)
+- **DO NOT use internal task numbers** (no Task #1, Task #2, etc.)
+- **If no GitHub issue exists**, create one first before tracking work
+- See [progress-02.md](./progress-02.md) top section for comprehensive task formatting instructions
+
 ### 📋 Implementation Plan (Phases)
 
 - [Current Implementation Plan: Deploy/Backup/Restore](./implementation-backup-restore.md)

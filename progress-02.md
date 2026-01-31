@@ -3,26 +3,213 @@
 **Repository:** github.com/ahelme/comfy-multi
 **Domain:** comfy.ahelme.net
 **Doc Created:** 2026-01-04
-**Doc Updated:** 2026-01-30 (Session 19)
+**Doc Updated:** 2026-01-31 (Session 20)
 
 ---
 
 # Project Progress Tracker (Continued from docs/archive/progress.md)
-
 **Target:** Workshop in ~2 weeks (early February 2026)
 
 ---
 
 ## Progress Tracker Structure
 
-1. Progress Reports
+0. Update Instructions
+
+1. Task Management
+   - TASKS SCRATCHPAD - QUICK ADD NEW TASKS HERE
+   - CURRENT TASKS DASHBOARD - REFACTOR SESSION TASKS - END OF SESSION 
+        - IMPORTANT: use gh issue # as reference
+        - FORMAT: [🔴] [PRIORITY] [GH#s] [SHORT DESC.] 
+            - [DATE-CREATED] [DATE-UPDATED]
+            - Key GH Issues:
+                - [GH ISSUE TITLE #1]
+                - [GH ISSUE TITLE #2]
+            - CONCISE NOTES
+            - CONCISE NOTES INC. RELATED [GH#] (IF ANY)
+
+2. Next Session Goals
+    - SESSION GOALS - SET NEXT SESSION GOALS - END OF SESSION
+        - FORMAT: [GH#] [SHORT DESC.]
+            - CONCISE NOTES
+            - CONCISE NOTES INC. RELATED [GH#] (IF ANY)
+
+
+3. Progress Reports
    - post in reverse chronological order (LATEST AT TOP)
-2. Risk Register
-   - at end of file
+   - CRITICAL DETAIL - NO FLUFF/BOASTING
 
 ---
 
+## 0. UPDATE INSTRUCTIONS
+
+ - update Progress Report OFTEN e.g. after RESEARCH, COMMITS, DECISIONS 
+        
+     - update autonomously
+     - concise notes, refer to GH issues
+     - new blockers / tasks / completed tasks
+     - investigations needed
+     - research found
+     - solutions formulated
+     - decisions made
+
+ - update Task Management
+
+    1. When NEW TASKS emerge - add tasks autonomously to "TASKS SCRATCHPAD"
+
+    2. End of session - re-org Task Management carefully
+        
+        - thoughtfully consider and discuss with user
+        - delete fully tested/completed/invalid/non-priority tasks (from this section)
+        - FOR EACH TASK: merge new task notes with existing - in logical order
+        - **BE CONCISE** DETAIL BELONGS IN GH ISSUE! AND IN PROGRESS REPORT BELOW
+        - **USE CORRECT TASK FORMAT** See above
+        - **CRITICAL:** update gh issues associated with each task!
+        - **CRITICAL:** COMMIT changes when Tasks/Goals/Progress updated
+
+     **NEVER UPDATE OR CHANGE PRIORITY AUTONOMOUSLY - ALWAYS DISCUSS FIRST WITH USER**
+
+ - update Next Session Goals - at end of Context/Session
+
+    - delete fully tested/completed/invalid goals
+    - merge new Next Session Goals
+
+## 2. Task Management
+
+📋 **ALWAYS reference issues in our two Github Issue Trackers**
+    GH MAIN COMFY-MULTI REPO:   https://github.com/ahelme/comfy-multi/issues/
+    GH PRIVATE SCRIPTS REPO:    https://github.com/ahelme/comfymulti-scripts/issues/
+
+### TASKS SCRATCHPAD - ADD REGULARLY e.g. on breaks, after commits
+
+**New Tasks**
+- 2026-01-31 - #24 - MINOR ComfyUI v0.9.2 frontend errors #24
+
+### CURRENT TASKS DASHBOARD - (UPDATED, PRIORITISED, REFERENCED) - UPDATE END SESSION
+
+    **ALWAYS CHECK WITH USER BEFORE UPDATING**
+
+ 🔴 **(BLOCKER) - #19 & #21 - ComfyUI v0.9.2 frontend errors & missing endpoints / migration issues**
+    - Created: 2026-01-30 | Updated 2026-01-31 
+    - Key GH Issues:
+	    - `ComfyUI Migration 0.8.2 > 0.9.2 #21`
+	    - `ComfyUI v0.9.2 frontend errors and missing endpoints #19` 
+    - Userdata API not responding 
+    - **CRITICAL: CANNOT LOAD/SAVE WORKFLOWS**
+    - Files exist but API endpoints return 404/405
+    - May require server configuration or v0.9.2 setup
+    - Blocks all workflow testing
+    - **Fix userdata API (CRITICAL)**
+    - Consider migration issues 0.8.x \> 0.9.2 
+    - Research ComfyUI v0.9.2 userdata API documentation
+    - Check if CPU mode disables userdata API
+    - Inspect server.py for route handlers
+    - Test alternative API paths
+    - Enable/configure userdata API in server
+
+🟠 **(MEDIUM) - #13 - Workflows not functioning correctly**
+    - Created: 2026-01-30 | Updated 2026-01-31 
+    - Key GH Issues:
+	    - `Repair Workflows & Configure default workflow and available workflows  #13`
+    - ✅ Correct 5x workflows are now available in menu (but cannot be loaded
+    - ❌ Cannot SAVE a workflow
+    - ❌ Cannot LOAD a workflow
+    - ❌ Wrong default workflow autoloading- should be `Flux.2 Klein` and be named `Flux.2 Klein`
+    - **BLOCKED BY #15** by userdata API issue
+    - Cannot test default workflow until API works
+    - **If API fixed, test workflows again:**
+    - Load workflow from menu into canvas
+    - Save workflow (test POST endpoint)
+    - Verify default workflow loads
+    - Test all 5 template workflows
+
+🟠 **(MEDIUM) - #23 - Rebuild frontend image and deploy to all 20 user containers**
+    - Created: 2026-01-30 | Updated 2026-01-31 
+    -  Key GH Issues:
+	    - `Rebuild ALL user containers - using new docker compose script that batches builds #23`
+    - Only user001 tested (need full 20-user deployment)
+    - Deploy to all 20 users (waiting for API fix)
+        - After API confirmed working
+        - Test batched startup
+        - Verify workflows for multiple users
+
+---
+
+## Next Session Goals
+
+0. **#16** - can we close this now?
+1. **#19 & #21** - Fix userdata API (CRITICAL)
+2. **#13** - If API fixed, test workflows
+3. **#23** - Rebuild containers & deploy to all 20 users
+
+### Pending (UNSCHEDULED)
+    - **#21 & #22** - Verda Worker upgrade: (may be completed by claude on Verda)
+    - **#4** - Refactor, simplify, re-org `implementation-backup-restore.md`
+    - **#24** - MINOR ComfyUI v0.9.2 frontend error
+---
+
 # Progress Reports
+
+---
+
+## Progress Report 20 - 2026-01-31 - (Issue Triage, Testing Plan & Terminology Fix)
+**Status:** In Progress
+**Started:** 2026-01-31
+
+### Summary
+Session focused on task organization, issue triage, and establishing clear testing methodology. Closed Issue #16 (version confirmed v0.9.2), created Issue #25 (rename CPU mode), and documented comprehensive testing plan for userdata API fix.
+
+### Implementation Phase
+**Phase:** Phase 11 - Test Single GPU Instance (Restore & Verify)
+**Current Focus:** Fix userdata API (Issue #15) to enable workflow load/save functionality
+
+### GitHub Issues Created/Updated
+- **Issue #16** ✅ CLOSED - Version confirmed as v0.9.2 (verified via API and version file)
+- **Issue #25** 🟡 NEW - Rename "CPU Mode" to "Single Server Mode" (clarity improvement)
+- **Issue #15** 📝 UPDATED - Added comprehensive testing plan (4 phases, verification checklist)
+- **Issue #24** 🟡 MINOR - ComfyUI v0.9.2 frontend errors (cosmetic)
+- **Issue #19** 🟠 MAJOR - ComfyUI v0.9.2 frontend errors & missing endpoints
+
+### Activities
+
+#### Part 1: Task Management Overhaul
+- Overhauled progress-02.md task tracking format (top 145 lines)
+- Established GitHub-issue-only approach (no internal task numbers)
+- Updated CLAUDE.md with task management guidelines
+- Cleaned up duplicate/obsolete internal tasks
+
+#### Part 2: Issue #16 Investigation & Closure
+**Investigation:**
+- Checked Dockerfile: Correctly pins `--branch v0.9.2`
+- Verified container version file: `__version__ = "0.9.2"`
+- Tested API endpoint: Returns `"comfyui_version": "0.9.2"`
+- Confirmed image build date: 2026-01-30 18:13:50 (after issue creation)
+
+**Resolution:**
+- Version discrepancy resolved by Session 18-19 image rebuilds
+- All 5 running containers (user001-005) report v0.9.2 correctly
+- Issue closed with verification details
+
+#### Part 3: Terminology Clarity - Issue #25 Created
+**Problem Identified:**
+- "CPU mode" terminology confusing (hardware vs architecture)
+- Actual meaning: Single server (all-in-one) vs split architecture
+- Verda CPU instances used in split architecture (not "CPU mode")
+
+**Solution:**
+- Created Issue #25: Rename "CPU mode" → "Single Server Mode"
+- Scope: Codebase flags (`--cpu` → `--single-server`) + all documentation
+- Priority: Medium (clarity improvement, doesn't block current work)
+
+#### Part 4: Testing Plan for Issue #15 (Userdata API)
+**Documented comprehensive 4-phase testing strategy:**
+1. **Investigation:** API endpoint tests, server config checks, v0.9.2 API research
+2. **Implementation Testing:** Container logs, direct API tests, POST endpoints, browser console
+3. **Verification Checklist:** 10-item checklist before declaring fix complete
+4. **Multi-User Verification:** Spot-check user002-005 after user001 works
+
+**Added to Issue #15 as comment** for reference during implementation
+
 
 ---
 
@@ -168,13 +355,13 @@ ac45d8a fix: complete ComfyUI v0.9.2 userdata migration (Issue #21)
 ### Task Management
 
 **Completed Tasks:**
-- ✅ Task #3: Investigate and create comfy.templates.json (completed)
-- ✅ Task #4: Rebuild frontend image without incompatible extensions (completed)
-- ✅ Task #5: Test rebuilt image with user001 (completed)
+- ✅ Investigate and create comfy.templates.json (completed)
+- ✅ Rebuild frontend image without incompatible extensions (completed)
+- ✅ Test rebuilt image with user001 (completed)
 
 **Pending Tasks:**
-- 🟡 Task #1: Set Flux2 Klein 9B as default workflow
-- 🟡 Task #2: Rebuild frontend image and deploy to all 20 users
+- 🟡 Set Flux2 Klein 9B as default workflow
+- 🟡 Rebuild frontend image and deploy to all 20 users
 
 ### Testing Results
 
@@ -196,7 +383,7 @@ ac45d8a fix: complete ComfyUI v0.9.2 userdata migration (Issue #21)
 - Subgraphs 404 (optional feature)
 - Manifest 401 (auth issue)
 
-### Blockers
+### Blockers (added to Task Management at top of file)
 
 **Resolved:**
 - ~~Volume-mounted extensions not removed~~ ✅ Cleaned from host directories
@@ -249,7 +436,7 @@ Created issue to upgrade GPU worker container to v0.9.2:
 - Worker needs same migration as frontend (userdata structure)
 - Blocks full end-to-end testing
 
-### Task Management Updates
+### Task Management Updates (updated at top of file)
 
 **New Tasks Created:**
 - Task #6: Investigate and fix userdata API not responding (Issue #15) - **BLOCKER**
@@ -263,7 +450,7 @@ Created issue to upgrade GPU worker container to v0.9.2:
 - ✅ Completed: Tasks #3, #4, #5
 - 🟡 Pending: Tasks #1 (blocked), #2, #6 (blocker), #7
 
-### Blockers
+### Blockers (updated at top of file)
 
 **Critical (Blocking Workshop):**
 - 🔴 **Task #6 / Issue #15:** Userdata API not responding - CANNOT LOAD/SAVE WORKFLOWS
@@ -276,11 +463,11 @@ Created issue to upgrade GPU worker container to v0.9.2:
   - Version mismatch between frontend and worker
   - Blocks end-to-end GPU job testing
 
-**Low (Quality of Life):**
+**Medium (REQUIRED FEATURES/FUNCTIONS/STEPS):**
 - 🟡 Task #1: Default workflow (blocked by #6)
 - 🟡 Task #2: Deploy to all 20 users (waiting for API fix)
 
-### Next Session Goals
+### Next Session Goals (added to Tracking at top of file)
 
 1. **Fix userdata API (CRITICAL - Task #6):**
    - Research ComfyUI v0.9.2 userdata API documentation
