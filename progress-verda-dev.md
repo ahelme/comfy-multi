@@ -408,6 +408,14 @@ Created master issue and all detailed Verda Team issues in new comfyume reposito
 - ✅ **Structure preservation**: comfyume MUST match comfy-multi structure exactly
 - ✅ Established collaboration protocol (check Issue #7 regularly like email)
 
+**Context Management Automation (Issue #8):**
+- ✅ Created SessionStart hook in `~/.claude/settings.json` (auto-resume context)
+- ✅ Created PreCompact hook in `~/.claude/settings.json` (handover reminder)
+- ✅ Created hookify rule: `.claude/hookify.context-reminder.local.md` (stop event)
+- ✅ Documented complete setup guide in Issue #8
+- ✅ Shared with Mello Team for their adaptation
+- ✅ Benefits: Never forget context resume or handover before compact!
+
 ### Key Insights
 
 **Reuse Over Rewrite:**
