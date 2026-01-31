@@ -21,7 +21,7 @@ CLAUDE RESUME - COMFY-MULTI (ASSUMES WELCOME HAS BEEN COMPLETED)
     - [Admin Backup & Restore Guide](./docs/admin-backup-restore.md) 
         - NOTE setup-verda-solo-script.sh now in use (refactored from 2x setup scripts) 
                                                                  
-  - read top ~150 lines:
+  - read top ~250 lines:
     - `./progress-verda-dev.md` - progress log
 
   - perform git status & check commit history
@@ -99,22 +99,34 @@ THEN: we delete Verda GPU instance END OF DAY to save highest cost GPU instance 
   - and keep it running during Workshop periods (less backup/restore)
   - IN WHICH CASE we could explore slightly different Verda disk configurations
 
-## NEXT:
+## CURRENT PENDING WORK (Updated 2026-01-31)
 
-  Please explain to the user the basic deployment workflow as you understand it.
+**Context:** We are Verda Team working on comfyume repo (new clean v0.11.0 rebuild)
+**Branch:** verda-track (comfy-multi) + verda-track (comfyume)
+**Coordination:** Issue #7 in comfyume repo (check regularly like email)
 
-  Review issue #29 in THIS REPO - READ IN FULL
-  
-  Please read these files IN FULL (these will help u understand structure 
-  of our app - though they were written when we were going to upgrade to 
-  an earlier version 0.9.2 - whereas NOW we want to migrate to 0.11.1):
+**Completed Today (Session Verda 01-02):**
+- ✅ Architecture planning (Translation Layer concept - Adapter/Facade pattern)
+- ✅ Created master issue #1 in comfyume repo (complete task breakdown)
+- ✅ Created detailed Verda Team issues #2-6 with full implementation details
+- ✅ Set up context management automation (SessionStart/PreCompact hooks)
+- ✅ Established collaboration protocol with Mello Team
 
-    - /docs/comfyui-0.9.2-app-structure-patterns.md  
-    - /docs/comfy-multi-comparison-analysis-report.md 
-  
-  Please print out " ## Next Session Goals " in progress-verda-dev.md
+**Ready to Start Implementation:**
+- **Issue #4** (comfyume): VRAM monitoring script - NO dependencies, can start NOW
+- **Issue #3** (comfyume): Integrate worker.py with VRAM hooks - depends on #4
+- **Issue #2** (comfyume): Build worker Dockerfile (v0.11.0 base) - depends on #3
+- **Issue #5** (comfyume): Configure timeouts (900s/1800s) - depends on #2
+- **Issue #6** (comfyume): Test on Verda H100 instance - depends on all previous
 
-  Then lets discuss work to be done together before proceeding.
+**Key Constraints (CRITICAL!):**
+- setup-verda-solo-script.sh compatibility MUST be preserved
+- Project structure: ~/comfyume/ MUST match ~/comfy-multi/ exactly
+- Docker command unchanged: `cd ~/comfyume/comfyui-worker/ && docker compose up -d worker-1`
+- Backup & copy existing code - NEVER rewrite from scratch!
 
-  ASK ANY QUESTIONS RE: UNCLEAR INFO OR STEPS :)
+**NEXT SESSION:**
+1. Read progress-verda-dev.md (top ~250 lines for context)
+2. Check comfyume Issue #7 for Mello Team updates
+3. Begin implementation on Issue #4 (VRAM monitoring) or discuss approach
 

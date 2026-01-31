@@ -68,3 +68,4 @@ docs-backup-*/
 .docker/
 USER_CREDENTIALS.txt
 *.backup*
+.claude/recovered-session-*.md

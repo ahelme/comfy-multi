@@ -1,5 +1,8 @@
 {
   "permissions": {
     "defaultMode": "bypassPermissions"
+  },
+  "enabledPlugins": {
+    "ralph-loop@claude-plugins-official": true
   }
 }

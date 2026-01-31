@@ -3,7 +3,27 @@
 **Repository:** github.com/ahelme/comfy-multi
 **Domain:** comfy.ahelme.net
 **Doc Created:** 2026-01-02
-**Doc Updated:** 2026-01-30 (Session 18: ComfyUI v0.9.2 workflow path fix)
+**Doc Updated:** 2026-01-31 (Session Verda 02: comfyume repo setup & planning complete)
+
+---
+
+# 🔄 HANDOVER (Updated 2026-01-31)
+
+**Current Work:** Verda Team - Worker container rebuild for ComfyUI v0.11.0
+**New Repo:** https://github.com/ahelme/comfyume (clean rebuild, not migration)
+**Branch:** verda-track (both comfy-multi and comfyume repos)
+**Coordination:** comfyume Issue #7 (check for Mello Team updates)
+
+**Status:**
+- Planning phase COMPLETE (Translation Layer architecture documented)
+- Issues created: Master #1, Verda Team #2-6 (ready for implementation)
+- Next: Begin Issue #4 (VRAM monitoring) - no blockers
+
+**Key Context:**
+- Parallel dev: Verda Team (worker), Mello Team (frontend/services)
+- Worker API stable v0.9.2→v0.11.1 (minimal changes needed)
+- MUST preserve setup-verda-solo-script.sh compatibility
+- Principle: Backup & copy existing code, NEVER rewrite from scratch
 
 ---
 
