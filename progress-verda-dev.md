@@ -314,15 +314,23 @@ admin → [Adapter] → ComfyUI
 ---
 
 ### Next Steps
-1. ⏸️ Wait for final Mello report (deeper layer analysis coming)
-2. Update architecture map with corrected priorities (Worker API → Stable, Frontend → Critical)
-3. Redesign translation layer to focus on:
-   - Frontend path abstraction (version-specific workflow paths)
-   - URL encoding helper utilities
-   - Entrypoint directory population logic
-   - Extension compatibility guidelines (avoid JavaScript, use Python backend)
-4. Continue brainstorming session with corrected understanding
-5. Create architecture document incorporating Mello research findings
+
+**IMMEDIATE:**
+1. ⏸️ Received Mello Team's master migration map (691 lines, 14 agents, 11,320 lines total)
+2. ⏸️ Awaiting user discussion on deployment options
+3. ⏸️ Workshop timeline decision needed (blocks all implementation)
+
+**PENDING USER DECISION:**
+- Deployment path selection (options available but not locked in)
+- Workshop timeline confirmation
+- Risk tolerance discussion
+- Implementation priority discussion
+
+**AFTER DECISION:**
+1. Update architecture map with chosen deployment path
+2. Finalize worker requirements based on selected option
+3. Coordinate implementation plan with Mello team
+4. Execute chosen strategy
 
 ---
 
