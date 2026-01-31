@@ -315,22 +315,132 @@ admin → [Adapter] → ComfyUI
 
 ### Next Steps
 
-**IMMEDIATE:**
-1. ⏸️ Received Mello Team's master migration map (691 lines, 14 agents, 11,320 lines total)
-2. ⏸️ Awaiting user discussion on deployment options
-3. ⏸️ Workshop timeline decision needed (blocks all implementation)
+**COMPLETED (2026-01-31):**
+- ✅ Master issue #1 created in comfyume repo (MASTER: Rebuild ComfyUI v0.11.0)
+- ✅ Detailed Verda Team issues #2-6 created with full implementation details
+- ✅ Labels created in comfyume repo (team, phase, component, priority)
+- ✅ CLAUDE.md updated with critical implementation principle
+- ✅ Ready for Mello Team to create their issues (#2-9 in master plan)
 
-**PENDING USER DECISION:**
-- Deployment path selection (options available but not locked in)
-- Workshop timeline confirmation
-- Risk tolerance discussion
-- Implementation priority discussion
+**NEXT (Verda Team Implementation):**
+1. Begin Issue #4 (VRAM monitoring) - can start immediately (no dependencies)
+2. Begin Issue #3 (worker.py copy) - depends on VRAM monitoring
+3. Begin Issue #2 (Dockerfile) - depends on worker.py
+4. Complete Issue #5 (timeouts) - depends on docker-compose patterns
+5. Deploy and test on Verda H100 (Issue #6)
 
-**AFTER DECISION:**
-1. Update architecture map with chosen deployment path
-2. Finalize worker requirements based on selected option
-3. Coordinate implementation plan with Mello team
-4. Execute chosen strategy
+**COORDINATION:**
+- Mello Team creating their issues (#2-9) for frontend/extensions/workflows
+- Both teams working in parallel on comfyume repo
+- Integration testing after both phases complete
+
+---
+
+## Progress Report Verda 02 - 2026-01-31 - comfyume Issue Creation
+
+**Status:** Completed
+**Started:** 2026-01-31
+**Completed:** 2026-01-31
+
+### Summary
+Created master issue and all detailed Verda Team issues in new comfyume repository. Established labels, updated CLAUDE.md with critical implementation principle (backup & copy, don't rewrite). Ready for parallel team execution.
+
+### Activities
+
+**comfyume Repository Setup:**
+- ✅ Cloned comfyume repo to ~/comfyume
+- ✅ Created 17 GitHub labels for issue organization
+- ✅ Created master issue #1: Complete task breakdown (all teams)
+- ✅ Created 5 detailed Verda Team issues (#2-6)
+
+**Issues Created in comfyume:**
+- **Issue #1** (Master): MASTER: Rebuild ComfyUI v0.11.0 - Complete Task Breakdown
+  - Concise breakdown for both teams
+  - Phase 1: Mello Team (3 parallel teams, 6-8h)
+  - Phase 2: Verda Team (1 team, 2-3h)
+  - Phase 3: Integration (both teams, 4-6h)
+  - Foundation: Copy proven components
+
+- **Issue #2**: Verda #1: Build Worker Dockerfile (v0.11.0 base)
+  - Labels: verda-team, phase-2-worker, docker, critical
+  - Copy from comfy-multi, update base image to v0.11.0
+  - Keep working GPU setup, add missing dependencies
+  - Timeline: 1-2 hours
+
+- **Issue #3**: Verda #2: Integrate worker.py (stable API)
+  - Labels: verda-team, phase-2-worker, critical
+  - Copy worker.py (API endpoints UNCHANGED v0.9.2→v0.11.0)
+  - Add VRAM monitoring hooks only
+  - Timeline: 30 minutes
+
+- **Issue #4**: Verda #3: Create VRAM monitoring script
+  - Labels: verda-team, phase-2-worker, monitoring, critical
+  - New requirement for v0.11.0 (prevent OOM crashes)
+  - nvidia-smi wrapper with safety margin
+  - Timeline: 1 hour
+
+- **Issue #5**: Verda #4: Configure timeouts (900s/1800s)
+  - Labels: verda-team, phase-2-worker
+  - Copy timeout patterns from comfy-multi
+  - Update values for longer video jobs (LTX-2 19B)
+  - Timeline: 30 minutes
+
+- **Issue #6**: Verda #5: Test GPU detection and queue connection
+  - Labels: verda-team, phase-2-worker, testing, critical
+  - Test scripts for GPU, queue, end-to-end
+  - MUST run on actual Verda H100 instance
+  - Timeline: 1-2 hours
+
+**CLAUDE.md Update:**
+- ✅ Added critical implementation principle at bottom
+- ✅ Emphasizes: Backup & copy, don't rewrite from scratch
+- ✅ Good vs bad examples (preserve working GPU config!)
+- ✅ Updated last modified date to 2026-01-31
+
+### Key Insights
+
+**Reuse Over Rewrite:**
+- 75% of code can be copied from comfy-multi (proven working!)
+- Only 25% needs updates for v0.11.0 compatibility
+- Critical: Keep GPU config, Redis patterns, queue logic intact
+
+**Worker API Stability (Reinforced):**
+- worker.py needs MINIMAL changes (just VRAM monitoring)
+- All ComfyUI endpoints stable: /prompt, /queue, /ws, /history
+- This significantly reduces Verda Team's work (2-3h total)
+
+**Clear Dependencies:**
+- VRAM monitoring (Issue #4) has no dependencies - can start NOW
+- worker.py (Issue #3) depends on VRAM monitoring
+- Dockerfile (Issue #2) depends on worker.py
+- Testing (Issue #6) depends on all previous issues
+
+### Files Modified
+- `CLAUDE.md` - Added critical implementation principle
+- `progress-verda-dev.md` - Updated with Session Verda 02
+
+### Commits
+**Repo: comfy-multi**
+- Branch: `verda-track`
+- `4229c25` - docs: add critical implementation principle - backup & copy, don't rewrite
+
+### Next Steps
+
+**Verda Team (Us) - Ready to Start:**
+1. Begin Issue #4 (VRAM monitoring) - no blockers
+2. Continue to Issue #3 (worker.py integration)
+3. Continue to Issue #2 (Dockerfile build)
+4. Complete Issue #5 (timeout configuration)
+5. Deploy to Verda H100 and test (Issue #6)
+
+**Mello Team - In Progress:**
+- Creating detailed issues for frontend/extensions/workflows (#2-9)
+- Working in parallel on their track
+
+**Integration - After Both Complete:**
+- Phase 3: Testing issues (#15-19)
+- End-to-end validation
+- Workshop readiness verification
 
 ---
 
