@@ -28,23 +28,21 @@
 
 **📋 [Resume Instructions](.claude/CLAUDE-RESUME-VERDA-INSTANCE.md)** | **[Build Report](.claude/build_reports/2026-01-01_build_report.md)**
 
-**Status:** ⚠️ Issue #17 PAUSED - Architecture Research Complete (Session 23)
+**Status:** ✅ Teams Merged - Ready for Issue #17 (Session 24 Complete)
 **Repository:** `comfyume` (https://github.com/ahelme/comfyume) - v0.11.0 clean rebuild
-**Branches:** `mello-track` (Mello), `verda-track` (Verda - worker ready!)
+**Branches:** `main` (unified), `mello-track-2` (active)
 
-**Session 23 Update (2026-02-01):**
-- ⏸️ Issue #17 (workflows) PAUSED for architecture research
-- ✅ Issue #21 CREATED: Container Orchestration & Flags
-- ✅ Verda worker confirmed on verda-track branch!
-- ✅ Architecture documented: `architecture/orchestration-commands-scenarios.md`
-- ⚠️ Flag nomenclature needs clarity (--cpu → --frontend-testing)
+**Session 24 Complete (2026-02-01):**
+- ✅ Merged mello-track + verda-track → main (teams unified!)
+- ✅ Consolidated .env v0.3.0 (comfymulti-scripts repo)
+- ✅ Issue #22: Updated code for new .env variables
+- ✅ PR #23 created (REDIS_HOST → APP_SERVER/INFERENCE_SERVER split)
+- ⚠️ Phase 3 cleanup assigned to Verda team
 
-**Critical Discovery:** Both single-server AND dual-server modes supported!
-
-**⚡ NEXT (Session 24):**
-1. Pull from main, push mello-track, checkout mello-track-2
-2. Resume Issue #17 with --frontend-testing flag
-3. Coordinate worker merge with Verda team (Issue #7)
+**⚡ NEXT (Session 25):**
+1. Merge PR #23
+2. Resume Issue #17 (workflow validation)
+3. Begin integration testing (Issue #18)
 
 ---
 

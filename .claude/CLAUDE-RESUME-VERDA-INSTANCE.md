@@ -126,6 +126,21 @@ CLAUDE RESUME - COMFY-MULTI (ASSUMES WELCOME HAS BEEN COMPLETED)
 - **verda-track**: Worker v0.11.0 (Verda team) ✅ READY!
 - **Next:** mello-track-2 (Session 24 - pull from main + push)
 
+### Session 24 Completed (2026-02-01):
+
+**Git Operations:**
+- ✅ Merged mello-track + verda-track → main (both teams unified!)
+- ✅ Created mello-track-2 branch
+- ✅ Consolidated .env v0.3.0 in comfymulti-scripts
+
+**Issues:**
+- ✅ #22 Created & implemented (Phases 1 & 2)
+- ✅ PR #23 created (awaiting merge)
+
+**Variable Updates:**
+- REDIS_HOST → APP_SERVER_REDIS_HOST / INFERENCE_SERVER_REDIS_HOST
+- R2 buckets: comfy-multi → comfyume
+
 ### Session 22 Completed (2026-01-31):
 
 **Issues Closed (8/12 total):**
@@ -157,18 +172,18 @@ CLAUDE RESUME - COMFY-MULTI (ASSUMES WELCOME HAS BEEN COMPLETED)
 | **Worker v0.11.0** | **verda-track** | **Verda** | ✅ **Ready!** |
 | Queue Manager | mello-track | Mello | ✅ Copied |
 
-### Session 24 MUST DO FIRST:
+### Session 25 MUST DO FIRST:
 
-**Git Operations (BEFORE continuing work):**
+**Git Operations:**
 ```bash
 cd /home/dev/projects/comfyume
-git fetch origin
+git checkout main
 git pull origin main
-git push origin mello-track
-git checkout -b mello-track-2
+# Merge PR #23 if approved
+git checkout -b mello-track-3  # New branch for Issue #17
 ```
 
-### Remaining Work (5/12 issues):
+### Remaining Work (4/12 issues):
 
 **Phase 1:**
 - Issue #17: Workflow templates (PAUSED - resume with --frontend-testing flag)

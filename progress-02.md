@@ -3,7 +3,7 @@
 **Repository:** github.com/ahelme/comfy-multi
 **Domain:** comfy.ahelme.net
 **Doc Created:** 2026-01-04
-**Doc Updated:** 2026-02-01 (Session 23 - Architecture Research)
+**Doc Updated:** 2026-02-01 (Session 24 - .env Consolidation & Git Merge)
 
 ---
 
@@ -2720,4 +2720,80 @@ None - Phase 7 complete.
 **Pending:**
 - **Issue #22** - Worker upgrade to v0.9.2
 - **Issue #25** - Rename CPU/GPU mode terminology
+
+
+## Progress Report 24 - 2026-02-01 - (.env Consolidation & Git Operations)
+**Status:** ✅ COMPLETE - Merged Teams + .env Updates
+**Started:** 2026-02-01 | **Duration:** ~1 hour
+**Repository:** comfyume (v0.11.0)
+
+### Summary
+Merged mello-track + verda-track branches, consolidated .env file, updated all code for new variable naming, created PR #23.
+
+### Implementation Phase
+**Repository:** comfyume (https://github.com/ahelme/comfyume)
+**Branch:** mello-track-2 (new from merged main)
+**Phase:** Configuration & Integration
+
+### GitHub Issues Status (comfyume)
+**Created:**
+- Issue #22: Update codebase for consolidated .env variables ✅
+
+**Updated:**
+- Issue #7: Team coordination (Verda notified of changes)
+
+### Activities
+
+#### Part 1: Git Operations
+- ✅ Merged mello-track + main (Verda worker integrated!)
+- ✅ Merged to main, pushed
+- ✅ Created mello-track-2 branch from unified main
+- ✅ Created mello-track-2 in comfymulti-scripts repo
+
+#### Part 2: .env Consolidation
+- ✅ User manually consolidated .env v0.3.0 in scripts repo
+- ✅ Analyzed variable changes (REDIS_HOST split, R2 bucket renames)
+- ✅ Created Issue #22 with comprehensive change list
+
+#### Part 3: Code Updates (Phases 1 & 2)
+**Phase 1 - Critical:**
+- docker-compose.yml: REDIS_HOST → APP_SERVER_REDIS_HOST (3 services)
+- comfyui-worker/docker-compose.yml: → INFERENCE_SERVER_REDIS_HOST
+- comfyui-worker/worker.py: Clarifying comment
+- comfyui-worker/test-deployment.sh: → INFERENCE_SERVER_REDIS_HOST
+
+**Phase 2 - Configuration:**
+- .env.example: Complete rewrite for v0.3.0 structure
+
+### Files Created/Modified (comfyume)
+**Modified:**
+- docker-compose.yml (3 REDIS_HOST → APP_SERVER_REDIS_HOST)
+- comfyui-worker/docker-compose.yml
+- comfyui-worker/worker.py
+- comfyui-worker/test-deployment.sh
+- .env.example (complete rewrite, 184 lines)
+
+**Created:**
+- PR #23 (mello-track-2 → main)
+
+### Commit Messages (comfyume)
+```
+e068920 - refactor: update REDIS_HOST to new .env variables (Phase 1)
+da951db - docs: update .env.example to v0.3.0 (Phase 2)
+```
+
+### Key Decisions
+1. Split REDIS_HOST into APP_SERVER_REDIS_HOST and INFERENCE_SERVER_REDIS_HOST
+2. Phase 3 cleanup assigned to Verda team
+3. Production .env lives in comfymulti-scripts repo (secrets)
+
+### Blockers
+**None**
+
+### Next Session Goals (Session 25)
+1. Merge PR #23
+2. Resume Issue #17 (workflow validation)
+3. Begin integration testing
+
+---
 
