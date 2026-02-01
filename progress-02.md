@@ -3,7 +3,7 @@
 **Repository:** github.com/ahelme/comfy-multi
 **Domain:** comfy.ahelme.net
 **Doc Created:** 2026-01-04
-**Doc Updated:** 2026-01-31 (Session 20)
+**Doc Updated:** 2026-02-01 (Session 23 - Architecture Research)
 
 ---
 
@@ -82,8 +82,10 @@
 
 ### TASKS SCRATCHPAD - ADD REGULARLY e.g. on breaks, after commits
 
-**New Tasks**
-- None! Fresh start for Session 23! 🎉
+**New Tasks (Session 23)**
+- comfyume #21 - Container Orchestration & Flag Nomenclature (CREATED)
+- Architecture documentation: orchestration-commands-scenarios.md (CREATED)
+- Flag system clarification needed before workflow testing
 
 ### CURRENT TASKS DASHBOARD - (UPDATED, PRIORITISED, REFERENCED) - UPDATE END SESSION
 
@@ -91,14 +93,25 @@
 
 **NOTE:** Session 22 completed Foundation + Phase 1 Frontend! Moving to comfyume repo for all new work.
 
-🟢 **(ACTIVE) - comfyume #17 - Update workflow templates for v0.11.0**
+🟡 **(PAUSED) - comfyume #17 - Update workflow templates for v0.11.0**
     - Created: 2026-01-31 | Updated 2026-02-01
     - Repository: comfyume (v0.11.0 rebuild)
     - Key GH Issue: `Phase 1: Update 5 workflow templates for v0.11.0 #17`
-    - Validate 5 workflow JSON files for v0.11.0 compatibility
-    - Ensure Flux2 Klein + LTX-2 templates work
-    - Test default workflow auto-load
-    - Final Phase 1 task before integration testing!
+    - Status: Paused for architecture research (Session 23)
+    - All 5 JSON files validated ✅
+    - Test container created (docker-compose.test.yml)
+    - Blocked by flag nomenclature clarity (see #21)
+    - Resume with --frontend-testing flag in Session 24
+
+🟢 **(ACTIVE) - comfyume #21 - Container Orchestration & Flags**
+    - Created: 2026-02-01 | Updated: 2026-02-01
+    - Repository: comfyume (v0.11.0 rebuild)
+    - Key GH Issue: `Container Orchestration & Flag Nomenclature System #21`
+    - Research complete: architecture/orchestration-commands-scenarios.md
+    - Proposes clear flag system (replace misleading --cpu)
+    - Documents single-server + dual-server deployment modes
+    - Critical: Verda team has worker on verda-track branch! ✅
+    - Related: comfy-multi #25 (original flag issue)
 
 🟡 **(NEXT) - comfyume #18-20 - Integration Testing (both teams)**
     - Created: 2026-01-31 | Updated 2026-02-01
@@ -166,6 +179,130 @@ These are archived - comfy-multi is legacy, comfyume is the future!
 ---
 
 # Progress Reports
+
+---
+
+## Progress Report 23 - 2026-02-01 - (Architecture Research & Flag Nomenclature)
+**Status:** ⚠️ PAUSED Issue #17 for Critical Architecture Research
+**Started:** 2026-02-01 | **Duration:** ~3 hours
+**Repository:** comfyume (v0.11.0)
+
+### Summary
+**Architecture deep-dive session!** Started workflow validation (Issue #17) but discovered critical flag nomenclature confusion. Paused to research deployment patterns, confirmed Verda team has worker ready on verda-track branch, documented complete orchestration scenarios, created Issue #21 for flag system redesign.
+
+### Implementation Phase
+**Repository:** comfyume (https://github.com/ahelme/comfyume)
+**Branch:** mello-track (Mello team), verda-track (Verda team - worker!)
+**Phase:** Phase 1 (Issue #17) - Paused for architecture clarity
+
+### GitHub Issues Status (comfyume)
+**Created:**
+- Issue #21: Container Orchestration & Flag Nomenclature System ✅
+
+**Updated:**
+- Issue #17: Workflow templates (PAUSED - waiting on flag clarity)
+- Issue #7: Team coordination (confirmed Verda has worker!)
+
+### Activities
+
+#### Part 1: Workflow Validation Setup (Issue #17)
+- ✅ Listed 5 workflow files (all exist in comfyume)
+- ✅ Validated JSON structure (all 5 files valid!)
+- ✅ Created docker-compose.test.yml for local testing
+- ⚠️ Discovered --cpu flag confusion when trying to start container
+
+#### Part 2: Architecture Investigation (CRITICAL)
+**User Questions Triggered Research:**
+1. What does --cpu flag actually do?
+2. Does single-server vs dual-server pattern persist in comfyume?
+3. Can worker run on CPU or GPU instances?
+
+**Research Performed:**
+- Traced command execution hierarchy (Dockerfile → docker-compose → manual)
+- Analyzed comfy-multi deployment patterns
+- Discovered comfyume docker-compose.yml references missing worker directory
+- **CRITICAL:** User confirmed Verda team has worker on verda-track branch!
+
+#### Part 3: Flag Nomenclature Analysis
+**What --cpu Flag ACTUALLY Does:**
+```python
+# In ComfyUI model_management.py
+if args.cpu:
+    device = torch.device('cpu')  # Forces CPU (no CUDA)
+```
+- ✅ Prevents GPU access
+- ✅ Allows UI without GPU
+- ❌ Name is MISLEADING! (Says "CPU hardware" means "no inference")
+
+**Current Problems:**
+- Frontend: `CMD [..., "--cpu"]` (confusing!)
+- Worker: No flag (GPU-enabled) - but what if on CPU instance?
+- No clear single-server vs dual-server indication
+
+#### Part 4: Architecture Documentation
+**Created:** `architecture/orchestration-commands-scenarios.md`
+
+**Key Findings Documented:**
+1. **Both deployment modes supported:**
+   - Single-Server: All services on one machine (frontends + worker)
+   - Dual-Server: Split (frontends on VPS + worker on GPU cloud)
+
+2. **Component locations:**
+   - Frontend v0.11.0: mello-track (Mello team) ✅
+   - **Worker v0.11.0: verda-track (Verda team)** ✅
+   - Queue Manager: mello-track (copied, stable) ✅
+
+3. **Proposed flag system:**
+   - `--frontend-testing` (current need - no GPU, testing only)
+   - `--dual-server` (default - UI only, expects remote worker)
+   - `--single-server-gpu` (all-in-one with GPU)
+   - `--single-server-cpu` (all-in-one, slow CPU)
+
+4. **Orchestration patterns:**
+   - Manual (current): 2-step SSH to mello + Verda
+   - SSH-based script (option): Automated multi-host
+   - Docker Swarm (option): Full orchestration
+   - Keep manual (simplest): More control
+
+#### Part 5: Issue Creation & Team Coordination
+**Issue #21 Created:** Container Orchestration & Flag Nomenclature System
+- Complete architecture scenarios documented
+- Proposed clear flag system
+- Implementation tasks defined (3 phases)
+- Coordination with Verda team noted
+
+**Issue #7 Updated:** Team coordination
+- Confirmed Verda has worker on verda-track ✅
+- Asked 3 questions (CPU/GPU support, merge timeline, testing)
+- Ready for integration when Verda ready
+
+### Files Created/Modified (comfyume)
+**Created:**
+- `architecture/orchestration-commands-scenarios.md` (211 lines)
+- `docker-compose.test.yml` (test setup)
+- Issue #21 (comprehensive orchestration plan)
+
+**Modified:**
+- Issue #17 comment (paused status + next steps)
+- Issue #7 comment (Verda coordination)
+
+### Key Decisions
+1. **Pause Issue #17** until flag nomenclature clear
+2. **Document architecture** before proceeding (prevent future confusion)
+3. **Propose flag system** for user/Verda approval
+4. **Confirm Verda readiness** before integration testing
+
+### Blockers
+**None - but awaiting decisions:**
+1. Flag system approval (--frontend-testing vs --cpu)
+2. Verda team feedback on worker capabilities
+3. Orchestration approach (manual vs automated)
+
+### Next Session Goals (Session 24)
+1. **Resume Issue #17** with clear flags (--frontend-testing)
+2. **Test workflow validation** in v0.11.0 frontend
+3. **Coordinate with Verda** on worker merge/integration
+4. **Update flag nomenclature** per Issue #21 (if approved)
 
 ---
 

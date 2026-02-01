@@ -116,13 +116,15 @@ CLAUDE RESUME - COMFY-MULTI (ASSUMES WELCOME HAS BEEN COMPLETED)
   • IN WHICH CASE we could explore slightly different Verda disk              
   configurations                                               
 
-## NEXT TASKS (Session 23+):
+## NEXT TASKS (Session 24+):
 
-**Status:** 🎉 FOUNDATION + PHASE 1 FRONTEND COMPLETE!
+**Status:** ⚠️ PAUSED Issue #17 - Architecture Research Complete (Session 23)
 
 **Repository:** comfyume (https://github.com/ahelme/comfyume)
-**Branch:** mello-track
-**Docker Image:** comfyume-frontend:v0.11.0 (1.85GB) ✅ BUILT!
+**Branches:**
+- **mello-track**: Frontend, queue-manager, admin (Mello team)
+- **verda-track**: Worker v0.11.0 (Verda team) ✅ READY!
+- **Next:** mello-track-2 (Session 24 - pull from main + push)
 
 ### Session 22 Completed (2026-01-31):
 
@@ -137,44 +139,52 @@ CLAUDE RESUME - COMFY-MULTI (ASSUMES WELCOME HAS BEEN COMPLETED)
 
 **Time:** ~2 hours (estimated 6-8 hours!) - WAY ahead of schedule! 🚀
 
-### Remaining Work (4/12 issues):
+### 🚨 CRITICAL DISCOVERY (Session 23 - 2026-02-01):
 
-**Phase 1 - Issue #17 (NEXT!):**
-- Update 5 workflow templates for v0.11.0
-- Validate JSON structure
-- Test Flux2 Klein + LTX-2 templates
+**ARCHITECTURE CLARIFICATION:**
+- ✅ Verda team has worker container on **verda-track branch**!
+- ✅ Both single-server AND dual-server modes supported
+- ⚠️ Flag nomenclature needs clarity (--cpu is misleading)
+
+**Issue #21 Created:** Container Orchestration & Flag Nomenclature System
+- Documents: `architecture/orchestration-commands-scenarios.md`
+- Proposes clear flag system (--frontend-testing, --dual-server, etc.)
+
+**Component Locations:**
+| Component | Branch | Owner | Status |
+|-----------|--------|-------|--------|
+| Frontend v0.11.0 | mello-track | Mello | ✅ Complete |
+| **Worker v0.11.0** | **verda-track** | **Verda** | ✅ **Ready!** |
+| Queue Manager | mello-track | Mello | ✅ Copied |
+
+### Session 24 MUST DO FIRST:
+
+**Git Operations (BEFORE continuing work):**
+```bash
+cd /home/dev/projects/comfyume
+git fetch origin
+git pull origin main
+git push origin mello-track
+git checkout -b mello-track-2
+```
+
+### Remaining Work (5/12 issues):
+
+**Phase 1:**
+- Issue #17: Workflow templates (PAUSED - resume with --frontend-testing flag)
+- Issue #21: Flag nomenclature (NEW - awaiting approval)
 
 **Phase 3 - Integration Testing (Issues #18-20):**
-- Issue #18: End-to-end job submission test (coordinate with Verda)
-- Issue #19: Multi-user load test (20 users concurrent)
+- Issue #18: End-to-end job submission test
+- Issue #19: Multi-user load test (20 users)
 - Issue #20: Workshop readiness checklist
 
-### Step 2: Update Private Scripts Repo (VERDA TEAM)
+### Team Coordination (ACTIVE)
 
-**Repository:** https://github.com/ahelme/comfymulti-scripts
-**Issue #13 created:** https://github.com/ahelme/comfymulti-scripts/issues/13
-**Assigned to:** Verda team (deployment/restore scripts)
-
-**Changes needed:**
-- Update setup-verda-solo-script.sh (2 lines):
-  - REPO_URL: comfy-multi → comfyume
-  - PROJECT_DIR: /home/dev/comfy-multi → /home/dev/comfyume
-
-**Note:** Verda team will handle since this relates to their deployment workflow
-
-### Step 3: Coordination (ACTIVE)
-
-**Team Channel:** https://github.com/ahelme/comfyume/issues/7
-- ✅ Updated Verda team (Foundation + Phase 1 complete)
-- ✅ Docker image built (1.85GB)
-- ✅ No conflicts with worker structure
-- Continue coordination for integration testing
-
-### Key Achievements:
-- Foundation: 70% of code copied unchanged (proved "don't throw baby out" principle!)
-- Frontend: v0.11.0 app.registerExtension() API working
-- Docker: Image builds successfully with health checks
-- Structure: Matches comfy-multi exactly (easy coordination with Verda)
+**Channel:** https://github.com/ahelme/comfyume/issues/7
+- ✅ Confirmed Verda has worker on verda-track
+- ❓ Awaiting Verda feedback: CPU/GPU support, merge timeline
+- Ready for integration when Verda ready
 
 **ASK QUESTIONS IF ANYTHING UNCLEAR!**
 

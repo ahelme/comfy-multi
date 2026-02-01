@@ -28,21 +28,23 @@
 
 **📋 [Resume Instructions](.claude/CLAUDE-RESUME-VERDA-INSTANCE.md)** | **[Build Report](.claude/build_reports/2026-01-01_build_report.md)**
 
-**Status:** 🎉 FOUNDATION + PHASE 1 COMPLETE! (Session 22)
+**Status:** ⚠️ Issue #17 PAUSED - Architecture Research Complete (Session 23)
 **Repository:** `comfyume` (https://github.com/ahelme/comfyume) - v0.11.0 clean rebuild
-**Branch:** `mello-track`
+**Branches:** `mello-track` (Mello), `verda-track` (Verda - worker ready!)
 
-**Session 22 Complete (2026-01-31):**
-- Foundation ✅ (Issues #9-12 closed)
-- Phase 1 Frontend ✅ (Issues #13-16 closed)
-- Docker Image Built ✅ (comfyume-frontend:v0.11.0, 1.85GB)
-- 3 commits pushed ✅ (46 files, ~18,500 lines)
-- Time: ~2 hours vs 6-8 hour estimate! 🚀
+**Session 23 Update (2026-02-01):**
+- ⏸️ Issue #17 (workflows) PAUSED for architecture research
+- ✅ Issue #21 CREATED: Container Orchestration & Flags
+- ✅ Verda worker confirmed on verda-track branch!
+- ✅ Architecture documented: `architecture/orchestration-commands-scenarios.md`
+- ⚠️ Flag nomenclature needs clarity (--cpu → --frontend-testing)
 
-**Remaining:** Issue #17 (workflows) + Integration testing (Issues #18-20)
-**Verda Coordination:** Active via Issue #7 ✅
+**Critical Discovery:** Both single-server AND dual-server modes supported!
 
-**⚡ NEXT:** Update 5 workflow templates for v0.11.0 (Issue #17)
+**⚡ NEXT (Session 24):**
+1. Pull from main, push mello-track, checkout mello-track-2
+2. Resume Issue #17 with --frontend-testing flag
+3. Coordinate worker merge with Verda team (Issue #7)
 
 ---
 
