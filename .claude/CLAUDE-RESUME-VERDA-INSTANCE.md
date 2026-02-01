@@ -149,15 +149,18 @@ CLAUDE RESUME - COMFY-MULTI (ASSUMES WELCOME HAS BEEN COMPLETED)
 - Issue #19: Multi-user load test (20 users concurrent)
 - Issue #20: Workshop readiness checklist
 
-### Step 2: Update Private Scripts Repo (PENDING)
+### Step 2: Update Private Scripts Repo (VERDA TEAM)
 
 **Repository:** https://github.com/ahelme/comfymulti-scripts
-- Create issue: "Update paths for comfyume rename"
-- Branch: mello-track
+**Issue #13 created:** https://github.com/ahelme/comfymulti-scripts/issues/13
+**Assigned to:** Verda team (deployment/restore scripts)
+
+**Changes needed:**
 - Update setup-verda-solo-script.sh (2 lines):
   - REPO_URL: comfy-multi → comfyume
   - PROJECT_DIR: /home/dev/comfy-multi → /home/dev/comfyume
-- Create PR
+
+**Note:** Verda team will handle since this relates to their deployment workflow
 
 ### Step 3: Coordination (ACTIVE)
 
